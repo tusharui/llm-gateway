@@ -1,10 +1,11 @@
 from fastapi import Request, HTTPException
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.responses import Response
+from starlette.middleware.base import BaseHTTPMiddleware
+from sqlalchemy import select, update
 import hashlib
 import time
 from app.config import settings
-from app.database import db_fetchone, db_fetchall, db_execute
+from app.database import get_session
+from app.models import ApiKey
 
 
 rate_limit_store: dict[str, dict] = {}
@@ -41,23 +42,33 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         key_hash = hash_string(token)
-        row = await db_fetchone(
-            "SELECT id, is_active FROM api_keys WHERE key_hash = $1", (key_hash,)
-        )
-        if row is None:
-            from app.database import _db_ok
-            if not _db_ok:
-                request.state.api_key_id = "db_unavailable"
-                return await call_next(request)
-            raise HTTPException(status_code=401, detail="Invalid API key")
-        if not row["is_active"]:
-            raise HTTPException(status_code=401, detail="API key is disabled")
 
-        await db_execute(
-            "UPDATE api_keys SET last_used_at = NOW() WHERE id = $1", (row["id"],)
-        )
-        request.state.api_key_id = row["id"]
+        session = await get_session()
+        if session is None:
+            request.state.api_key_id = "db_unavailable"
+            return await call_next(request)
+
+        try:
+            result = await session.execute(
+                select(ApiKey).where(ApiKey.key_hash == key_hash)
+            )
+            api_key = result.scalar_one_or_none()
+
+            if not api_key:
+                raise HTTPException(status_code=401, detail="Invalid API key")
+            if not api_key.is_active:
+                raise HTTPException(status_code=401, detail="API key is disabled")
+
+            api_key.last_used_at = datetime.now(timezone.utc)
+            await session.commit()
+            request.state.api_key_id = api_key.id
+        finally:
+            await session.close()
+
         return await call_next(request)
+
+
+from datetime import datetime, timezone
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):

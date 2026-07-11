@@ -4,7 +4,8 @@ from app.schemas import ChatRequest
 from app.engine.router import route_chat, route_chat_stream
 from app.engine.failover import route_with_failover
 from app.cache.cache import make_cache_key, get_cached, set_cache
-from app.database import db_execute
+from app.database import get_session
+from app.models import UsageRecord
 from datetime import datetime, timezone
 import json
 
@@ -27,23 +28,27 @@ async def track_usage(api_key_id: str, data: dict):
         cost = calculate_cost(
             data["provider"], data["prompt_tokens"], data["completion_tokens"]
         )
-        await db_execute(
-            """INSERT INTO usage_records (id, api_key_id, provider, model, prompt_tokens, completion_tokens, total_tokens, cost_usd, latency_ms, success, cached)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)""",
-            (
-                str(__import__("uuid").uuid4()),
-                api_key_id,
-                data["provider"],
-                data["model"],
-                data["prompt_tokens"],
-                data["completion_tokens"],
-                data["total_tokens"],
-                cost,
-                data["latency_ms"],
-                data["success"],
-                data["cached"],
-            ),
-        )
+        session = await get_session()
+        if not session:
+            return
+        try:
+            record = UsageRecord(
+                id=str(__import__("uuid").uuid4()),
+                api_key_id=api_key_id,
+                provider=data["provider"],
+                model=data["model"],
+                prompt_tokens=data["prompt_tokens"],
+                completion_tokens=data["completion_tokens"],
+                total_tokens=data["total_tokens"],
+                cost_usd=cost,
+                latency_ms=data["latency_ms"],
+                success=data["success"],
+                cached=data["cached"],
+            )
+            session.add(record)
+            await session.commit()
+        finally:
+            await session.close()
     except Exception:
         pass
 
