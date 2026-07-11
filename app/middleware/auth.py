@@ -1,8 +1,9 @@
+import hashlib
+import time
+from datetime import datetime, timezone
 from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import select, update
-import hashlib
-import time
 from app.config import settings
 from app.database import get_session
 from app.models import ApiKey
@@ -66,9 +67,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
             await session.close()
 
         return await call_next(request)
-
-
-from datetime import datetime, timezone
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):

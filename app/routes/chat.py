@@ -1,11 +1,16 @@
+import time
+import uuid
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
-from app.schemas import ChatRequest
+from fastapi.responses import JSONResponse, StreamingResponse
+from starlette.responses import Response
+from app.schemas import ChatRequest, EmbeddingRequest
 from app.engine.router import route_chat, route_chat_stream
 from app.engine.failover import route_with_failover
 from app.cache.cache import make_cache_key, get_cached, set_cache
 from app.database import get_session
 from app.models import UsageRecord
+from app.providers.registry import get_available_providers, get_provider
+from app.config import settings
 from datetime import datetime, timezone
 import json
 
@@ -33,7 +38,7 @@ async def track_usage(api_key_id: str, data: dict):
             return
         try:
             record = UsageRecord(
-                id=str(__import__("uuid").uuid4()),
+                id=str(uuid.uuid4()),
                 api_key_id=api_key_id,
                 provider=data["provider"],
                 model=data["model"],
@@ -56,11 +61,9 @@ async def track_usage(api_key_id: str, data: dict):
 @router.post("/chat")
 async def chat_endpoint(req: ChatRequest, request: Request):
     api_key_id = getattr(request.state, "api_key_id", "anonymous")
-    start = __import__("time").perf_counter()
+    start = time.perf_counter()
 
     if req.stream:
-        from starlette.responses import StreamingResponse
-
         async def event_stream():
             try:
                 async for chunk in route_chat_stream(req):
@@ -76,7 +79,7 @@ async def chat_endpoint(req: ChatRequest, request: Request):
     except Exception:
         result, provider_used = await route_with_failover(req)
 
-    duration = int((__import__("time").perf_counter() - start) * 1000)
+    duration = int((time.perf_counter() - start) * 1000)
 
     await track_usage(
         api_key_id,
@@ -101,9 +104,6 @@ async def chat_endpoint(req: ChatRequest, request: Request):
 
 @router.get("/health")
 async def health_endpoint():
-    from app.providers.registry import get_available_providers
-    import asyncio
-
     providers = get_available_providers()
     checks = []
     for p in providers:
@@ -127,8 +127,6 @@ async def health_endpoint():
 
 @router.get("/models")
 async def models_endpoint():
-    from app.providers.registry import get_available_providers
-
     providers = get_available_providers()
     all_models = []
     for p in providers:
@@ -154,8 +152,6 @@ async def models_endpoint():
 
 @router.get("/models/{provider_name}")
 async def models_by_provider_endpoint(provider_name: str):
-    from app.config import settings
-
     cfg = settings.get_providers().get(provider_name)
     if not cfg:
         return JSONResponse(status_code=404, content={"error": "Unknown provider"})
@@ -168,9 +164,6 @@ async def models_by_provider_endpoint(provider_name: str):
 
 @router.post("/embeddings")
 async def embeddings_endpoint(req: dict):
-    from app.providers.registry import get_provider
-    from app.schemas import EmbeddingRequest
-
     embedding_req = EmbeddingRequest(**req)
     provider = get_provider("gemini")
     if not provider or not provider.embeddings:

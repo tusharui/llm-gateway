@@ -1,3 +1,4 @@
+import asyncio
 import time
 from typing import Dict
 
@@ -21,8 +22,6 @@ def record_success(provider: str):
 
 
 def record_failure(provider: str, threshold: int, cooldown_ms: int):
-    import asyncio
-
     b = get_breaker_state(provider)
     b["failures"] += 1
     b["last_failure_time"] = time.time() * 1000
