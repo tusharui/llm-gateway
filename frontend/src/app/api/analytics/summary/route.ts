@@ -1,11 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const days = searchParams.get("days") || "7";
+const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
 
+export async function GET(req: NextRequest) {
+  const days = req.nextUrl.searchParams.get("days") || "7";
   try {
-    const res = await fetch(`http://localhost:8000/analytics/summary?days=${days}`);
+    const res = await fetch(`${BACKEND}/analytics/summary?days=${days}`);
+    if (!res.ok) {
+      return NextResponse.json({ error: "Backend unreachable" }, { status: 502 });
+    }
     const data = await res.json();
     return NextResponse.json(data);
   } catch {
