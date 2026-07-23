@@ -47,6 +47,9 @@ class ChatResponse(BaseModel):
     choices: List[Choice]
     usage: Usage
     latency_ms: Optional[int] = None
+    routing_decision: Optional[str] = None
+    cache_hit: Optional[bool] = None
+    cache_similarity: Optional[float] = None
 
 
 class StreamDelta(BaseModel):
@@ -65,6 +68,7 @@ class StreamChunk(BaseModel):
     model: str
     provider: str
     choices: List[StreamChoice]
+    token_count: Optional[int] = None
 
 
 class EmbeddingData(BaseModel):

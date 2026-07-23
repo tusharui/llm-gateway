@@ -12,7 +12,6 @@ from contextlib import asynccontextmanager
 from app.config import settings
 from app.database import init_db, close_db
 from app.providers.registry import initialize_providers
-from app.middleware.auth import AuthMiddleware, RateLimitMiddleware
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.error_handler import ErrorHandlerMiddleware
 from app.routes.chat import router as chat_router
@@ -20,6 +19,7 @@ from app.routes.batch import router as batch_router
 from app.routes.api_keys import router as api_keys_router
 from app.routes.analytics import router as analytics_router
 from app.routes.websocket import router as ws_router
+from app.routes.chat_history import router as chat_history_router
 
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
@@ -46,8 +46,6 @@ app = FastAPI(
 
 app.add_middleware(ErrorHandlerMiddleware)
 app.add_middleware(LoggingMiddleware)
-app.add_middleware(RateLimitMiddleware)
-app.add_middleware(AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -78,6 +76,7 @@ app.include_router(batch_router)
 app.include_router(api_keys_router)
 app.include_router(analytics_router)
 app.include_router(ws_router)
+app.include_router(chat_history_router)
 
 
 if __name__ == "__main__":

@@ -56,3 +56,45 @@ class CachedResponse(Base):
     )
     ttl_ms: Mapped[int] = mapped_column(Integer)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), default="New chat")
+    provider: Mapped[str] = mapped_column(String(50), default="groq")
+    model: Mapped[str] = mapped_column(String(100), default="llama-3.3-70b-versatile")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    session_id: Mapped[str] = mapped_column(String(36), index=True)
+    role: Mapped[str] = mapped_column(String(20))
+    content: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class SemanticCacheEntry(Base):
+    __tablename__ = "semantic_cache"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    query_text: Mapped[str] = mapped_column(Text)
+    embedding_json: Mapped[str] = mapped_column(Text)
+    response_json: Mapped[str] = mapped_column(Text)
+    provider: Mapped[str] = mapped_column(Text, default="cache")
+    model: Mapped[str] = mapped_column(Text, default="unknown")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

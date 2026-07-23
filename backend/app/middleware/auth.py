@@ -22,7 +22,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         path = request.url.path
-        needs_auth = any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"])
+        needs_auth = any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"]) and not path.startswith("/chat-history")
         if not needs_auth:
             return await call_next(request)
 
@@ -72,7 +72,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        needs_limit = any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"])
+        needs_limit = any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"]) and not path.startswith("/chat-history")
         if not needs_limit:
             return await call_next(request)
 
