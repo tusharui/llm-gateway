@@ -38,9 +38,18 @@ export default function Dashboard() {
   const [summary, setSummary] = useState<Summary | null>(null);
 
   useEffect(() => {
-    fetch("/api/gateway").then((r) => r.json()).then(setStatus).catch(() => {});
-    fetch("/api/health").then((r) => r.json()).then(setHealth).catch(() => {});
-    fetch("/api/analytics/summary").then((r) => r.json()).then(setSummary).catch(() => {});
+    fetch("/api/gateway")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setStatus(d))
+      .catch(() => {});
+    fetch("/api/health")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setHealth(d))
+      .catch(() => {});
+    fetch("/api/analytics/summary")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setSummary(d))
+      .catch(() => {});
   }, []);
 
   return (
@@ -82,7 +91,7 @@ export default function Dashboard() {
       >
         <div className="border border-white/10 p-4 sm:p-6">
           <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Gateway Status</h2>
-          {status ? (
+          {status && typeof status.endpoints === "object" ? (
             <div className="space-y-3">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -114,7 +123,7 @@ export default function Dashboard() {
 
         <div className="border border-white/10 p-4 sm:p-6">
           <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Provider Health</h2>
-          {health && health.providers.length > 0 ? (
+          {health && Array.isArray(health.providers) && health.providers.length > 0 ? (
             <div className="space-y-3">
               {health.providers.map((p) => (
                 <div key={p.provider} className="flex items-center justify-between py-2 border-b border-white/5">
