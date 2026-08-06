@@ -4,7 +4,7 @@ const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function GET() {
   try {
-    const res = await fetch(`${BACKEND}/chat-history`);
+    const res = await fetch(`${BACKEND}/chat-history/sessions`);
     if (!res.ok) {
       return NextResponse.json({ error: "Backend unreachable" }, { status: 502 });
     }
@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const res = await fetch(`${BACKEND}/chat-history`, {
+    const res = await fetch(`${BACKEND}/chat-history/sessions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

@@ -9,7 +9,7 @@ export async function POST(
   const { id } = await params;
   try {
     const body = await req.json();
-    const res = await fetch(`${BACKEND}/chat-history/${id}/messages`, {
+    const res = await fetch(`${BACKEND}/chat-history/sessions/${id}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

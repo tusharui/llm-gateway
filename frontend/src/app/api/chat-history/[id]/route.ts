@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const res = await fetch(`${BACKEND}/chat-history/${id}`);
+    const res = await fetch(`${BACKEND}/chat-history/sessions/${id}`);
     if (!res.ok) {
       return NextResponse.json({ error: "Backend unreachable" }, { status: 502 });
     }
@@ -25,7 +25,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   try {
-    const res = await fetch(`${BACKEND}/chat-history/${id}`, { method: "DELETE" });
+    const res = await fetch(`${BACKEND}/chat-history/sessions/${id}`, { method: "DELETE" });
     if (!res.ok) {
       return NextResponse.json({ error: "Backend unreachable" }, { status: 502 });
     }
@@ -42,7 +42,7 @@ export async function PATCH(
   const { id } = await params;
   try {
     const body = await req.json();
-    const res = await fetch(`${BACKEND}/chat-history/${id}`, {
+    const res = await fetch(`${BACKEND}/chat-history/sessions/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
