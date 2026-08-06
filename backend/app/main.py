@@ -6,9 +6,26 @@ if sys.platform == "win32":
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import json
 import logging
 import time
 from contextlib import asynccontextmanager
+
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        payload = {
+            "ts": self.formatTime(record, "%Y-%m-%dT%H:%M:%S%z"),
+            "level": record.levelname.lower(),
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+        for key in ("method", "path", "status", "duration_ms", "api_key_id", "request_id", "error_type"):
+            if hasattr(record, key):
+                payload[key] = getattr(record, key)
+        if record.exc_info:
+            payload["exc_info"] = self.formatException(record.exc_info)
+        return json.dumps(payload, ensure_ascii=False)
 from app.config import settings
 from app.database import init_db, close_db
 from app.providers.registry import initialize_providers
@@ -23,9 +40,11 @@ from app.routes.chat_history import router as chat_history_router
 
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
-    format="%(asctime)s %(levelname)s %(message)s",
+    format="%(message)s",
 )
 logger = logging.getLogger("gateway")
+for _handler in logging.getLogger().handlers:
+    _handler.setFormatter(JsonFormatter())
 
 
 @asynccontextmanager

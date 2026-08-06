@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { newRequestId, proxyHeaders, responseHeaders, errorHeaders } from "../_proxy";
 
 const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
+  const requestId = newRequestId();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     const res = await fetch(`${BACKEND}/chat`, {
       method: "POST",
-      headers,
+      headers: proxyHeaders(headers),
       body: JSON.stringify(body),
     });
 
@@ -32,16 +34,17 @@ export async function POST(request: NextRequest) {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache, no-transform",
           "X-Accel-Buffering": "no",
+          ...responseHeaders(res, requestId),
         },
       });
     }
 
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data, { status: res.status, headers: responseHeaders(res, requestId) });
   } catch {
     return NextResponse.json(
       { error: "Backend unreachable" },
-      { status: 502 }
+      { status: 502, headers: errorHeaders(requestId) }
     );
   }
 }
