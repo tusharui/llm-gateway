@@ -21,6 +21,21 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
+    const isStream =
+      body.stream === true ||
+      (res.headers.get("content-type") || "").includes("text/event-stream");
+
+    if (isStream) {
+      return new Response(res.body, {
+        status: res.status,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          "X-Accel-Buffering": "no",
+        },
+      });
+    }
+
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch {
