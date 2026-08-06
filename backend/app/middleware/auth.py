@@ -16,13 +16,20 @@ def hash_string(input_str: str) -> str:
     return hashlib.sha256(input_str.encode()).hexdigest()
 
 
+def requires_auth(path: str) -> bool:
+    return (
+        any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"])
+        and not path.startswith("/chat-history")
+    )
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if request.method == "OPTIONS":
             return await call_next(request)
 
         path = request.url.path
-        needs_auth = any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"]) and not path.startswith("/chat-history")
+        needs_auth = requires_auth(path)
         if not needs_auth:
             return await call_next(request)
 
@@ -72,7 +79,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        needs_limit = any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"]) and not path.startswith("/chat-history")
+        needs_limit = requires_auth(path)
         if not needs_limit:
             return await call_next(request)
 

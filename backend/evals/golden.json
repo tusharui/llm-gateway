@@ -1,0 +1,92 @@
+[
+  {
+    "id": "greeting",
+    "prompt": "Hi",
+    "expected_tier": "fast"
+  },
+  {
+    "id": "thanks",
+    "prompt": "Thanks a lot!",
+    "expected_tier": "fast"
+  },
+  {
+    "id": "capital",
+    "prompt": "What is the capital of France?",
+    "expected_tier": "fast"
+  },
+  {
+    "id": "define",
+    "prompt": "Define gravity.",
+    "expected_tier": "fast"
+  },
+  {
+    "id": "number",
+    "prompt": "7",
+    "expected_tier": "fast"
+  },
+  {
+    "id": "weather",
+    "prompt": "What is the weather like today?",
+    "expected_tier": "fast"
+  },
+  {
+    "id": "water-cycle",
+    "prompt": "Explain the water cycle in simple terms.",
+    "expected_tier": "balanced"
+  },
+  {
+    "id": "compare-frameworks",
+    "prompt": "Compare React and Vue for a small project.",
+    "expected_tier": "balanced"
+  },
+  {
+    "id": "pros-cons-remote",
+    "prompt": "What are the pros and cons of remote work?",
+    "expected_tier": "balanced"
+  },
+  {
+    "id": "distributed-caching",
+    "prompt": "How does caching work in distributed systems?",
+    "expected_tier": "balanced"
+  },
+  {
+    "id": "bst",
+    "prompt": "Explain how a binary search tree works.",
+    "expected_tier": "balanced"
+  },
+  {
+    "id": "resume-tips",
+    "prompt": "Give me 3 tips to improve my resume.",
+    "expected_tier": "balanced"
+  },
+  {
+    "id": "quicksort",
+    "prompt": "Write a Python function to implement quicksort and analyze its time complexity.",
+    "expected_tier": "powerful"
+  },
+  {
+    "id": "system-design-chat",
+    "prompt": "Design a system architecture for a real-time chat application and discuss trade-offs.",
+    "expected_tier": "powerful"
+  },
+  {
+    "id": "microservices",
+    "prompt": "Analyze the pros and cons of microservices vs monoliths and recommend a strategy for a startup.",
+    "expected_tier": "powerful"
+  },
+  {
+    "id": "irrational-proof",
+    "prompt": "Prove that the square root of 2 is irrational using a step-by-step proof.",
+    "expected_tier": "powerful"
+  },
+  {
+    "id": "ml-roadmap",
+    "prompt": "Create a detailed 6-month learning roadmap for machine learning with a weekly plan.",
+    "expected_tier": "powerful"
+  },
+  {
+    "id": "sql-debug",
+    "prompt": "Debug this SQL query and optimize it for large datasets.",
+    "expected_tier": "powerful"
+  }
+]

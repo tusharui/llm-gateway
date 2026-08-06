@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
@@ -45,7 +45,7 @@ export default function ChatPage() {
   const modelDropdownRef = useRef<HTMLDivElement>(null);
 
   const activeSession = sessions.find((s) => s.id === activeId);
-  const messages = activeSession?.messages ?? [];
+  const messages = useMemo(() => activeSession?.messages ?? [], [activeSession]);
 
   const filteredModels = modelSearch
     ? allModels.filter(
@@ -55,8 +55,41 @@ export default function ChatPage() {
       )
     : allModels;
 
+  const loadSessionDetail = useCallback(async (id: string) => {
+    setLoadingSession(true);
+    try {
+      const res = await fetch(`/api/chat-history/${id}`);
+      const data = await res.json();
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === id ? { ...s, messages: data.messages || [], provider: data.provider, model: data.model } : s
+        )
+      );
+    } catch {}
+    setLoadingSession(false);
+  }, []);
+
   useEffect(() => {
-    fetchSessions();
+    fetch("/api/chat-history")
+      .then((r) => r.json())
+      .then((data) => {
+        const list: ChatSession[] = (data.sessions || []).map((s: Record<string, unknown>) => ({
+          id: s.id as string,
+          title: s.title as string,
+          provider: (s.provider as string) || "groq",
+          model: (s.model as string) || "llama-3.3-70b-versatile",
+          messages: [],
+          created_at: s.created_at as string | null,
+          updated_at: s.updated_at as string | null,
+        }));
+        setSessions(list);
+        if (list.length > 0) {
+          const firstId = list[0].id;
+          setActiveId(firstId);
+          loadSessionDetail(firstId);
+        }
+      })
+      .catch(() => {});
     fetch("/api/models")
       .then((r) => r.json())
       .then((data) => {
@@ -77,7 +110,7 @@ export default function ChatPage() {
         setAllModels(models);
       })
       .catch(() => {});
-  }, []);
+  }, [loadSessionDetail]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -93,40 +126,33 @@ export default function ChatPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const fetchSessions = async () => {
-    try {
-      const res = await fetch("/api/chat-history");
-      const data = await res.json();
-      const list: ChatSession[] = (data.sessions || []).map((s: Record<string, unknown>) => ({
-        id: s.id as string,
-        title: s.title as string,
-        provider: (s.provider as string) || "groq",
-        model: (s.model as string) || "llama-3.3-70b-versatile",
-        messages: [],
-        created_at: s.created_at as string | null,
-        updated_at: s.updated_at as string | null,
-      }));
-      setSessions(list);
-      if (list.length > 0) {
-        const firstId = list[0].id;
-        setActiveId(firstId);
-        loadSessionDetail(firstId);
-      }
-    } catch {}
-  };
-
-  const loadSessionDetail = async (id: string) => {
-    setLoadingSession(true);
-    try {
-      const res = await fetch(`/api/chat-history/${id}`);
-      const data = await res.json();
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === id ? { ...s, messages: data.messages || [], provider: data.provider, model: data.model } : s
-        )
-      );
-    } catch {}
-    setLoadingSession(false);
+  const exportSession = () => {
+    if (!activeSession || activeSession.messages.length === 0) return;
+    const date = activeSession.updated_at
+      ? new Date(activeSession.updated_at).toLocaleString()
+      : "";
+    const lines: string[] = [
+      `# ${activeSession.title}`,
+      "",
+      `Model: \`${activeSession.provider}/${activeSession.model}\``,
+      date ? `Date: ${date}` : "",
+      "",
+    ];
+    for (const m of activeSession.messages) {
+      lines.push(`## ${m.role === "user" ? "User" : "Assistant"}`);
+      lines.push("");
+      lines.push(m.content);
+      lines.push("");
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(activeSession.title || "chat").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "chat"}.md`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   const switchSession = (id: string) => {
@@ -461,6 +487,14 @@ export default function ChatPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <button
+                onClick={exportSession}
+                disabled={!activeSession || activeSession.messages.length === 0}
+                title="Export chat as Markdown"
+                className="text-[10px] sm:text-xs px-2 py-1 border border-white/10 text-zinc-500 hover:text-white hover:border-white/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                EXPORT
+              </button>
               <button
                 onClick={() => setAutoRoute(!autoRoute)}
                 className={`text-[10px] sm:text-xs px-2 py-1 border transition-colors ${

@@ -71,17 +71,33 @@ def classify_complexity(messages: list) -> str:
     elif word_count > 15:
         score += 1
 
-    complex_patterns = [
-        r"\b(explain|analyze|compare|evaluate|critique|review|design|architect)\b",
-        r"\b(code|implement|debug|refactor|optimize|write a program)\b",
-        r"\b(step.by.step|reasoning|think|logic|proof|derivation)\b",
-        r"\b(essay|article|story|creative|narrative|poem)\b",
-        r"\b(trade.?offs?|pros and cons|alternatives|recommend)\b",
-        r"\b(math|equation|formula|calculate|solve)\b",
-        r"\b(strategy|plan|roadmap|architecture|system design)\b",
-        r"\b(how does .+ work|why does|what are the implications)\b",
+    complex_keywords = [
+        r"\bexplain\b", r"\banalyz\w*\b", r"\bcompar\w*\b", r"\bevaluate\b",
+        r"\bcritique\b", r"\breview\b", r"\bdesign\w*\b", r"\barchitect\w*\b",
+        r"\bcode\b", r"\bimplement\w*\b", r"\bdebug\w*\b", r"\brefactor\w*\b",
+        r"\boptimiz\w*\b", r"\bstep.by.step\b", r"\breason\w*\b", r"\blogic\b",
+        r"\bproof\b", r"\bprove\b", r"\bderiv\w*\b", r"\bessay\b", r"\barticle\b",
+        r"\bstory\b", r"\bcreativ\w*\b", r"\bnarrativ\w*\b", r"\bpoem\b",
+        r"\brecommend\w*\b", r"\bmath\w*\b", r"\bequation\b", r"\bformula\w*\b",
+        r"\bcalculat\w*\b", r"\bsolve\b", r"\bstrateg\w*\b", r"\broadmap\b",
+        r"\bplan\w*\b", r"\btips?\b", r"\badvice\b", r"\bimprove\w*\b",
+        r"\bsuggest\w*\b",
     ]
-    for pattern in complex_patterns:
+    for pattern in complex_keywords:
+        if re.search(pattern, last_user_msg, re.IGNORECASE):
+            score += 2
+
+    complex_phrases = [
+        r"\btrade.?offs?\b",
+        r"\bpros and cons\b",
+        r"\balternatives\b",
+        r"\bsystem design\b",
+        r"\bhow does .+ work\b",
+        r"\bwhy does\b",
+        r"\bwhat are the implications\b",
+        r"\bwrite a program\b",
+    ]
+    for pattern in complex_phrases:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
             score += 2
 
@@ -102,7 +118,7 @@ def classify_complexity(messages: list) -> str:
         score += 1
 
     has_system = any(
-        (m.role == "system" if hasattr(m, "role") else m.get("role") == "user" if isinstance(m, dict) else False)
+        (m.role == "system" if hasattr(m, "role") else m.get("role") == "system")
         for m in messages
     )
     if has_system:

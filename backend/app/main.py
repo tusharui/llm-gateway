@@ -31,6 +31,7 @@ from app.database import init_db, close_db
 from app.providers.registry import initialize_providers
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.error_handler import ErrorHandlerMiddleware
+from app.middleware.auth import AuthMiddleware, RateLimitMiddleware
 from app.routes.chat import router as chat_router
 from app.routes.batch import router as batch_router
 from app.routes.api_keys import router as api_keys_router
@@ -63,6 +64,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(AuthMiddleware)
 app.add_middleware(ErrorHandlerMiddleware)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(

@@ -1,134 +1,140 @@
 # AI Inference Gateway
 
-Multi-provider LLM gateway that routes requests across Groq, Gemini, and OpenRouter. Handles authentication, rate limiting, streaming, caching, circuit breaker failover, usage tracking, and background job processing through a single API.
+A production-style multi-provider LLM gateway with auto-routing, semantic caching, failover, cost analytics, and a Next.js dashboard. Routes every request across Groq, Gemini, and OpenRouter through a single OpenAI-style API.
 
-## Tech Stack
+Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) · [API docs](https://llm-gateway-2not.onrender.com/docs)
+
+## What it does
+
+- **Auto-routing** — classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`) that scores routing accuracy in CI.
+- **Multi-provider failover** — circuit breakers + per-request failover chain, so a dead provider never breaks a request.
+- **Semantic + exact caching** — similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
+- **Auth + rate limiting** — per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware.
+- **Cost analytics** — per-model / per-provider usage, spend, cache savings, latency, and request history.
+- **Observability** — every request carries a correlatable `X-Request-ID` and structured JSON logs.
+- **Next.js dashboard** — chat UI with streaming, session history, model picker, Markdown export, and an analytics page.
+
+## Tech stack
 
 | Layer | Choice |
 |---|---|
-| Runtime | **Python 3.11+** |
-| Web framework | **FastAPI + Uvicorn** |
-| Database | **Neon PostgreSQL (raw psycopg)** |
-| Frontend | **Streamlit** |
-| HTTP client | **httpx (async)** |
-| Cache | **In-memory dict + Neon persisted** |
-| Queue | **In-process asyncio** |
+| Backend | Python 3.12 · FastAPI · Uvicorn |
+| Frontend | Next.js 16 (App Router) · React 19 · Tailwind v4 · framer-motion |
+| Database | Neon PostgreSQL (SQLAlchemy async + asyncpg) |
+| HTTP client | httpx (async) |
+| Cache | In-memory + persisted semantic cache (embedding similarity) |
+| Quality | pytest (25 tests) · routing eval harness · GitHub Actions CI · typed contract |
 
-## Routes
+## Repository layout
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/` | No | Service info |
-| GET | `/health` | No | Per-provider health status |
-| GET | `/models` | No | All models across providers |
-| GET | `/models/{provider}` | No | Models for a specific provider |
-| POST | `/chat` | Yes | Chat completions (streaming via SSE) |
-| POST | `/embeddings` | Yes | Text embeddings (Gemini) |
-| POST | `/batch/chat` | Yes | Enqueue chat job, returns job ID |
-| GET | `/batch/jobs/{id}` | Yes | Poll job result |
-| GET | `/batch/queue/status` | Yes | Queue depth and state |
-
-## Setup
-
-```bash
-# Clone and enter directory
-git clone <repo>
-cd ai-inference-gateway
-
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # Linux/Mac
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure .env
-# DATABASE_URL, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY are pre-set
-
-# Run API server (port 8000)
-python -m app.main
-
-# Run Streamlit frontend (separate terminal, port 8501)
-streamlit run streamlit_app.py
+```
+backend/
+  app/
+    middleware/   auth, rate limit, request-ID logging, error handler
+    engine/       auto-router, failover, circuit breaker, retry
+    cache/        exact + semantic caching
+    providers/    Groq, Gemini, OpenRouter adapters
+    routes/       chat, embeddings, batch, analytics, chat history
+  evals/          golden prompts + routing accuracy scorer
+  tests/          pytest suite
+  scripts/        OpenAPI contract export
+frontend/
+  src/app/        dashboard, chat, models, analytics pages
+  src/app/api/    backend proxies (request-ID aware, SSE streaming)
+  src/types/      typed contract (backend.d.ts) mirroring openapi.json
 ```
 
-## Environment Variables
+## Run locally
+
+```bash
+# Backend (port 8000)
+cd backend
+python -m venv .venv && .venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+copy .env.example .env                            # fill in provider keys + DATABASE_URL
+python -m uvicorn app.main:app --reload --port 8000
+
+# Frontend (port 3000)
+cd frontend
+npm install
+copy .env.example .env.local                      # NEXT_PUBLIC_BACKEND_URL, GATEWAY_API_KEY
+npm run dev
+```
+
+Tables auto-create on startup. The default dev gateway key is `sk-gateway-dev-key` — set a real `GATEWAY_API_KEY` in production.
+
+## Environment variables
+
+### Backend (`backend/.env`)
 
 | Variable | Default | Description |
 |---|---|---|
-| `DATABASE_URL` | — | Neon PostgreSQL connection string |
-| `GATEWAY_API_KEY` | `sk-gateway-dev-key` | Admin bypass key |
+| `DATABASE_URL` | — | Neon/PostgreSQL async connection string |
+| `GATEWAY_API_KEY` | `sk-gateway-dev-key` | Admin bypass key (`sk-gateway-*` format) |
 | `GROQ_API_KEY` | — | Groq API key |
 | `GEMINI_API_KEY` | — | Google Gemini API key |
 | `OPENROUTER_API_KEY` | — | OpenRouter API key |
 | `PORT` | `8000` | API server port |
 | `LOG_LEVEL` | `info` | Logging level |
 
-## API Examples
+### Frontend (`frontend/.env.local`)
 
-### Chat
+| Variable | Default | Description |
+|---|---|---|
+| `BACKEND_URL` | `http://localhost:8000` | Backend base URL (server-side proxy target) |
+| `GATEWAY_API_KEY` | `sk-gateway-dev-key` | Key injected by the proxy for authenticated routes |
+
+## API examples
+
+### Chat (streaming via SSE)
 
 ```bash
-curl -X POST http://localhost:8000/chat \
+curl -N -X POST http://localhost:8000/chat \
   -H "Authorization: Bearer sk-gateway-dev-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gemini-2.0-flash",
-    "messages": [{"role": "user", "content": "Hello"}],
-    "stream": false,
-    "temperature": 0.7
+    "model": "auto",
+    "messages": [{"role": "user", "content": "Explain quicksort"}],
+    "stream": true
   }'
 ```
 
-### Embeddings
+`"model": "auto"` triggers the complexity router — try it with `"Hi"` (fast tier) vs `"Prove that the square root of 2 is irrational"` (powerful tier).
+
+### Inspect routing decision
 
 ```bash
-curl -X POST http://localhost:8000/embeddings \
+curl -X POST http://localhost:8000/routing/classify \
   -H "Authorization: Bearer sk-gateway-dev-key" \
   -H "Content-Type: application/json" \
-  -d '{"input": "text to embed", "model": "text-embedding-004"}'
+  -d '{"messages": [{"role": "user", "content": "Write a Python quicksort"}]}'
 ```
 
-## Database Schema
+### Analytics
 
-Tables are auto-created on startup:
-
-```sql
-CREATE TABLE api_keys (
-    id TEXT PRIMARY KEY,
-    key_prefix TEXT NOT NULL,
-    key_hash TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    rate_limit_max INTEGER DEFAULT 60,
-    rate_limit_window_ms INTEGER DEFAULT 60000,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    last_used_at TIMESTAMPTZ
-);
-
-CREATE TABLE usage_records (
-    id TEXT PRIMARY KEY,
-    api_key_id TEXT NOT NULL,
-    provider TEXT NOT NULL,
-    model TEXT NOT NULL,
-    prompt_tokens INTEGER DEFAULT 0,
-    completion_tokens INTEGER DEFAULT 0,
-    total_tokens INTEGER DEFAULT 0,
-    cost_usd DOUBLE PRECISION DEFAULT 0,
-    latency_ms INTEGER DEFAULT 0,
-    success BOOLEAN DEFAULT TRUE,
-    cached BOOLEAN DEFAULT FALSE,
-    timestamp TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE cached_responses (
-    cache_key TEXT PRIMARY KEY,
-    response TEXT NOT NULL,
-    provider TEXT NOT NULL,
-    model TEXT NOT NULL,
-    cached_at TIMESTAMPTZ DEFAULT NOW(),
-    ttl_ms INTEGER NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL
-);
+```bash
+curl -H "Authorization: Bearer sk-gateway-dev-key" "http://localhost:8000/analytics/summary"
+curl -H "Authorization: Bearer sk-gateway-dev-key" "http://localhost:8000/analytics/by-model"
+curl -H "Authorization: Bearer sk-gateway-dev-key" "http://localhost:8000/analytics/recent?limit=20"
 ```
+
+Full interactive docs at `http://localhost:8000/docs`.
+
+## Testing & quality
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+python -m pytest -q                       # 25 unit/integration tests
+python -m evals.run --report              # routing accuracy vs golden set
+python -m scripts.export_openapi          # regenerate backend/openapi.json
+cd ../frontend
+npm run lint && npm run build
+```
+
+CI (`.github/workflows/ci.yml`) runs the backend tests + routing eval (with a 90% accuracy floor) and frontend lint + build on every push to `main`.
+
+## Deploy
+
+- **Backend** — Render web service (see `render.yaml`). Uses a managed PostgreSQL database.
+- **Frontend** — Vercel; pushes to `main` auto-deploy.

@@ -2,47 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import type {
+  AnalyticsSummary,
+  ModelUsageResponse,
+  ProviderUsageResponse,
+  RecentRequestRow,
+  RecentRequestsResponse,
+} from "../../types/backend";
 
-interface Summary {
-  total_requests: number;
-  total_tokens: number;
-  total_cost: number;
-  cache_savings_usd: number;
-  cache_hit_rate: number;
-  avg_latency: number;
-  successful: number;
-  failed: number;
-  cached: number;
-}
-
-interface ModelUsage {
-  model: string;
-  provider: string;
-  requests: number;
-  tokens: number;
-  cost: number;
-  saved_cost: number;
-  avg_latency: number;
-}
-
-interface ProviderBreakdown {
-  provider: string;
-  requests: number;
-  tokens: number;
-  cost: number;
-  saved_cost: number;
-  avg_latency: number;
-}
-
-interface RecentRequest {
-  timestamp: string;
-  model: string;
-  provider: string;
-  tokens: number;
-  cost_usd: number;
-  latency_ms: number;
+interface RecentRequest extends RecentRequestRow {
   status: string;
 }
+
+type ModelUsage = ModelUsageResponse["models"][number];
+type ProviderBreakdown = ProviderUsageResponse["providers"][number];
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -60,16 +33,16 @@ function fmtUsd(n: number): string {
 }
 
 export default function Analytics() {
-  const [summary, setSummary] = useState<Summary | null>(null);
+  const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [byModel, setByModel] = useState<ModelUsage[]>([]);
   const [byProvider, setByProvider] = useState<ProviderBreakdown[]>([]);
   const [recent, setRecent] = useState<RecentRequest[]>([]);
 
   useEffect(() => {
-    fetch("/api/analytics/summary").then((r) => r.json()).then(setSummary).catch(() => {});
-    fetch("/api/analytics/by-model").then((r) => r.json()).then((d) => setByModel(d.models ?? [])).catch(() => {});
-    fetch("/api/analytics/by-provider").then((r) => r.json()).then((d) => setByProvider(d.providers ?? [])).catch(() => {});
-    fetch("/api/analytics/recent").then((r) => r.json()).then((d) => setRecent(d.requests ?? [])).catch(() => {});
+    fetch("/api/analytics/summary").then((r) => r.json()).then((d: AnalyticsSummary) => setSummary(d)).catch(() => {});
+    fetch("/api/analytics/by-model").then((r) => r.json()).then((d: ModelUsageResponse) => setByModel(d.models ?? [])).catch(() => {});
+    fetch("/api/analytics/by-provider").then((r) => r.json()).then((d: ProviderUsageResponse) => setByProvider(d.providers ?? [])).catch(() => {});
+    fetch("/api/analytics/recent").then((r) => r.json()).then((d: RecentRequestsResponse) => setRecent(d.requests.map((r) => ({ ...r, status: r.success ? "success" : "failed" })))).catch(() => {});
   }, []);
 
   return (
@@ -217,11 +190,11 @@ export default function Analytics() {
                     className="border-b border-white/5"
                   >
                     <td className="px-3 py-2 text-zinc-400 font-mono text-xs whitespace-nowrap">
-                      {new Date(r.timestamp).toLocaleTimeString()}
+                      {r.timestamp ? new Date(r.timestamp).toLocaleTimeString() : "—"}
                     </td>
                     <td className="px-3 py-2 font-mono text-xs truncate max-w-[140px]">{r.model}</td>
                     <td className="px-3 py-2 capitalize text-xs">{r.provider}</td>
-                    <td className="px-3 py-2 text-zinc-400 text-xs">{r.tokens.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-zinc-400 text-xs">{r.total_tokens.toLocaleString()}</td>
                     <td className="px-3 py-2 text-zinc-300 text-xs whitespace-nowrap">{fmtUsd(r.cost_usd)}</td>
                     <td className="px-3 py-2 text-zinc-400 text-xs whitespace-nowrap">{r.latency_ms}ms</td>
                     <td className="px-3 py-2">

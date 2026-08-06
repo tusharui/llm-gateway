@@ -1,0 +1,153 @@
+{
+  "summary": {
+    "total_cases": 18,
+    "correct": 18,
+    "accuracy": 1.0,
+    "per_tier": {
+      "fast": {
+        "total": 6,
+        "correct": 6,
+        "accuracy": 1.0
+      },
+      "balanced": {
+        "total": 6,
+        "correct": 6,
+        "accuracy": 1.0
+      },
+      "powerful": {
+        "total": 6,
+        "correct": 6,
+        "accuracy": 1.0
+      }
+    },
+    "generated_at": "2026-08-06T11:40:23.152342+00:00"
+  },
+  "cases": [
+    {
+      "id": "greeting",
+      "prompt": "Hi",
+      "expected": "fast",
+      "predicted": "fast",
+      "correct": true
+    },
+    {
+      "id": "thanks",
+      "prompt": "Thanks a lot!",
+      "expected": "fast",
+      "predicted": "fast",
+      "correct": true
+    },
+    {
+      "id": "capital",
+      "prompt": "What is the capital of France?",
+      "expected": "fast",
+      "predicted": "fast",
+      "correct": true
+    },
+    {
+      "id": "define",
+      "prompt": "Define gravity.",
+      "expected": "fast",
+      "predicted": "fast",
+      "correct": true
+    },
+    {
+      "id": "number",
+      "prompt": "7",
+      "expected": "fast",
+      "predicted": "fast",
+      "correct": true
+    },
+    {
+      "id": "weather",
+      "prompt": "What is the weather like today?",
+      "expected": "fast",
+      "predicted": "fast",
+      "correct": true
+    },
+    {
+      "id": "water-cycle",
+      "prompt": "Explain the water cycle in simple terms.",
+      "expected": "balanced",
+      "predicted": "balanced",
+      "correct": true
+    },
+    {
+      "id": "compare-frameworks",
+      "prompt": "Compare React and Vue for a small project.",
+      "expected": "balanced",
+      "predicted": "balanced",
+      "correct": true
+    },
+    {
+      "id": "pros-cons-remote",
+      "prompt": "What are the pros and cons of remote work?",
+      "expected": "balanced",
+      "predicted": "balanced",
+      "correct": true
+    },
+    {
+      "id": "distributed-caching",
+      "prompt": "How does caching work in distributed systems?",
+      "expected": "balanced",
+      "predicted": "balanced",
+      "correct": true
+    },
+    {
+      "id": "bst",
+      "prompt": "Explain how a binary search tree works.",
+      "expected": "balanced",
+      "predicted": "balanced",
+      "correct": true
+    },
+    {
+      "id": "resume-tips",
+      "prompt": "Give me 3 tips to improve my resume.",
+      "expected": "balanced",
+      "predicted": "balanced",
+      "correct": true
+    },
+    {
+      "id": "quicksort",
+      "prompt": "Write a Python function to implement quicksort and analyze its time complexity.",
+      "expected": "powerful",
+      "predicted": "powerful",
+      "correct": true
+    },
+    {
+      "id": "system-design-chat",
+      "prompt": "Design a system architecture for a real-time chat application and discuss trade-offs.",
+      "expected": "powerful",
+      "predicted": "powerful",
+      "correct": true
+    },
+    {
+      "id": "microservices",
+      "prompt": "Analyze the pros and cons of microservices vs monoliths and recommend a strategy for a startup.",
+      "expected": "powerful",
+      "predicted": "powerful",
+      "correct": true
+    },
+    {
+      "id": "irrational-proof",
+      "prompt": "Prove that the square root of 2 is irrational using a step-by-step proof.",
+      "expected": "powerful",
+      "predicted": "powerful",
+      "correct": true
+    },
+    {
+      "id": "ml-roadmap",
+      "prompt": "Create a detailed 6-month learning roadmap for machine learning with a weekly plan.",
+      "expected": "powerful",
+      "predicted": "powerful",
+      "correct": true
+    },
+    {
+      "id": "sql-debug",
+      "prompt": "Debug this SQL query and optimize it for large datasets.",
+      "expected": "powerful",
+      "predicted": "powerful",
+      "correct": true
+    }
+  ]
+}

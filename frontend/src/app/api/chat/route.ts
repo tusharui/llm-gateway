@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { newRequestId, proxyHeaders, responseHeaders, errorHeaders } from "../_proxy";
 
 const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
+const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || "sk-gateway-dev-key";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -9,6 +10,7 @@ export async function POST(request: NextRequest) {
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${GATEWAY_API_KEY}`,
   };
 
   const auth = request.headers.get("authorization");
