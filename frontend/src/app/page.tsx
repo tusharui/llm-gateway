@@ -20,6 +20,7 @@ interface Summary {
   avg_latency: number;
   successful: number;
   failed: number;
+  total_cost: number;
 }
 
 const container = {
@@ -80,6 +81,9 @@ export default function Dashboard() {
         </motion.div>
         <motion.div variants={item} whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
           <StatCard label="Avg Latency" value={summary?.avg_latency ? `${summary.avg_latency}ms` : "0ms"} />
+        </motion.div>
+        <motion.div variants={item} whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+          <StatCard label="Total Cost" value={summary ? fmtUsd(summary.total_cost) : "$0"} />
         </motion.div>
       </motion.div>
 
@@ -183,4 +187,10 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="text-lg sm:text-2xl font-bold mt-1 truncate">{value}</p>
     </div>
   );
+}
+
+function fmtUsd(n: number): string {
+  if (n >= 1) return `$${n.toFixed(2)}`;
+  if (n >= 0.01) return `$${n.toFixed(4)}`;
+  return `$${n.toFixed(6)}`;
 }

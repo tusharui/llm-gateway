@@ -34,17 +34,27 @@ async def usage_summary(days: int = Query(default=7, ge=1, le=90)):
                 func.coalesce(
                     func.sum(case((UsageRecord.cached == True, 1), else_=0)), 0
                 ).label("cached"),
+                func.coalesce(
+                    func.sum(case((UsageRecord.cached == True, UsageRecord.cost_usd), else_=0)), 0.0
+                ).label("cache_savings_usd"),
+                func.coalesce(
+                    func.sum(case((UsageRecord.cached == False, UsageRecord.cost_usd), else_=0)), 0.0
+                ).label("actual_cost_usd"),
             ).where(UsageRecord.timestamp > since)
         )
         row = result.one()
+        total_requests = int(row.total_requests)
+        cached = int(row.cached)
         return {
-            "total_requests": row.total_requests,
+            "total_requests": total_requests,
             "total_tokens": int(row.total_tokens),
-            "total_cost": float(row.total_cost),
+            "total_cost": float(row.actual_cost_usd),
+            "cache_savings_usd": float(row.cache_savings_usd),
+            "cache_hit_rate": round(cached / total_requests, 4) if total_requests else 0.0,
             "avg_latency": int(row.avg_latency),
             "successful": int(row.successful),
             "failed": int(row.failed),
-            "cached": int(row.cached),
+            "cached": cached,
         }
     finally:
         await session.close()
@@ -64,6 +74,12 @@ async def usage_by_provider(days: int = Query(default=7, ge=1, le=90)):
                 func.count(UsageRecord.id).label("requests"),
                 func.coalesce(func.sum(UsageRecord.total_tokens), 0).label("tokens"),
                 func.coalesce(func.sum(UsageRecord.cost_usd), 0.0).label("cost"),
+                func.coalesce(
+                    func.sum(case((UsageRecord.cached == False, UsageRecord.cost_usd), else_=0)), 0.0
+                ).label("actual_cost"),
+                func.coalesce(
+                    func.sum(case((UsageRecord.cached == True, UsageRecord.cost_usd), else_=0)), 0.0
+                ).label("saved_cost"),
                 func.coalesce(func.avg(UsageRecord.latency_ms), 0).label("avg_latency"),
                 func.coalesce(
                     func.sum(case((UsageRecord.success == True, 1), else_=0)), 0
@@ -80,7 +96,8 @@ async def usage_by_provider(days: int = Query(default=7, ge=1, le=90)):
                     "provider": r.provider,
                     "requests": r.requests,
                     "tokens": int(r.tokens),
-                    "cost": float(r.cost),
+                    "cost": float(r.actual_cost),
+                    "saved_cost": float(r.saved_cost),
                     "avg_latency": int(r.avg_latency),
                     "successful": int(r.successful),
                 }
@@ -105,7 +122,12 @@ async def usage_by_model(days: int = Query(default=7, ge=1, le=90)):
                 UsageRecord.provider,
                 func.count(UsageRecord.id).label("requests"),
                 func.coalesce(func.sum(UsageRecord.total_tokens), 0).label("tokens"),
-                func.coalesce(func.sum(UsageRecord.cost_usd), 0.0).label("cost"),
+                func.coalesce(
+                    func.sum(case((UsageRecord.cached == False, UsageRecord.cost_usd), else_=0)), 0.0
+                ).label("actual_cost"),
+                func.coalesce(
+                    func.sum(case((UsageRecord.cached == True, UsageRecord.cost_usd), else_=0)), 0.0
+                ).label("saved_cost"),
                 func.coalesce(func.avg(UsageRecord.latency_ms), 0).label("avg_latency"),
             )
             .where(UsageRecord.timestamp > since)
@@ -120,7 +142,8 @@ async def usage_by_model(days: int = Query(default=7, ge=1, le=90)):
                     "provider": r.provider,
                     "requests": r.requests,
                     "tokens": int(r.tokens),
-                    "cost": float(r.cost),
+                    "cost": float(r.actual_cost),
+                    "saved_cost": float(r.saved_cost),
                     "avg_latency": int(r.avg_latency),
                 }
                 for r in rows

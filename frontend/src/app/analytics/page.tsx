@@ -6,21 +6,31 @@ import { motion } from "framer-motion";
 interface Summary {
   total_requests: number;
   total_tokens: number;
+  total_cost: number;
+  cache_savings_usd: number;
+  cache_hit_rate: number;
   avg_latency: number;
   successful: number;
   failed: number;
+  cached: number;
 }
 
 interface ModelUsage {
   model: string;
-  count: number;
+  provider: string;
+  requests: number;
   tokens: number;
+  cost: number;
+  saved_cost: number;
+  avg_latency: number;
 }
 
 interface ProviderBreakdown {
   provider: string;
   requests: number;
   tokens: number;
+  cost: number;
+  saved_cost: number;
   avg_latency: number;
 }
 
@@ -29,6 +39,7 @@ interface RecentRequest {
   model: string;
   provider: string;
   tokens: number;
+  cost_usd: number;
   latency_ms: number;
   status: string;
 }
@@ -42,6 +53,12 @@ const fadeUp = {
   show: { opacity: 1, y: 0 },
 };
 
+function fmtUsd(n: number): string {
+  if (n >= 1) return `$${n.toFixed(2)}`;
+  if (n >= 0.01) return `$${n.toFixed(4)}`;
+  return `$${n.toFixed(6)}`;
+}
+
 export default function Analytics() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [byModel, setByModel] = useState<ModelUsage[]>([]);
@@ -50,9 +67,9 @@ export default function Analytics() {
 
   useEffect(() => {
     fetch("/api/analytics/summary").then((r) => r.json()).then(setSummary).catch(() => {});
-    fetch("/api/analytics/by-model").then((r) => r.json()).then(setByModel).catch(() => {});
-    fetch("/api/analytics/by-provider").then((r) => r.json()).then(setByProvider).catch(() => {});
-    fetch("/api/analytics/recent").then((r) => r.json()).then(setRecent).catch(() => {});
+    fetch("/api/analytics/by-model").then((r) => r.json()).then((d) => setByModel(d.models ?? [])).catch(() => {});
+    fetch("/api/analytics/by-provider").then((r) => r.json()).then((d) => setByProvider(d.providers ?? [])).catch(() => {});
+    fetch("/api/analytics/recent").then((r) => r.json()).then((d) => setRecent(d.requests ?? [])).catch(() => {});
   }, []);
 
   return (
@@ -63,14 +80,14 @@ export default function Analytics() {
         className="mb-6 md:mb-8"
       >
         <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
-        <p className="text-zinc-500 mt-1 text-sm">Usage metrics and provider breakdown</p>
+        <p className="text-zinc-500 mt-1 text-sm">Usage, cost and cache savings</p>
       </motion.div>
 
       <motion.div
         variants={stagger}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 md:mb-8"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 md:mb-8"
       >
         <motion.div variants={fadeUp}>
           <StatCard label="Total Requests" value={summary?.total_requests?.toString() ?? "0"} />
@@ -80,6 +97,18 @@ export default function Analytics() {
         </motion.div>
         <motion.div variants={fadeUp}>
           <StatCard label="Avg Latency" value={summary?.avg_latency ? `${summary.avg_latency}ms` : "0ms"} />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard label="Total Cost" value={summary ? fmtUsd(summary.total_cost) : "$0"} highlight />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard label="Cache Savings" value={summary ? fmtUsd(summary.cache_savings_usd) : "$0"} highlight />
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <StatCard
+            label="Cache Hit Rate"
+            value={summary ? `${(summary.cache_hit_rate * 100).toFixed(1)}%` : "0%"}
+          />
         </motion.div>
       </motion.div>
 
@@ -95,18 +124,27 @@ export default function Analytics() {
             <div className="space-y-3">
               {byModel.slice(0, 10).map((m, i) => (
                 <motion.div
-                  key={m.model}
+                  key={`${m.provider}/${m.model}`}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + i * 0.04 }}
                   className="flex items-center justify-between py-2 border-b border-white/5"
                 >
-                  <span className="font-mono text-xs text-zinc-300 truncate max-w-[150px] sm:max-w-[200px]">
-                    {m.model}
-                  </span>
+                  <div className="min-w-0">
+                    <span className="font-mono text-xs text-zinc-300 truncate block max-w-[150px] sm:max-w-[200px]">
+                      {m.model}
+                    </span>
+                    <span className="text-[10px] text-zinc-600 capitalize">{m.provider}</span>
+                  </div>
                   <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-zinc-400 shrink-0">
-                    <span>{m.count} reqs</span>
+                    <span>{m.requests} reqs</span>
                     <span>{m.tokens.toLocaleString()} tok</span>
+                    <span className="text-zinc-300">{fmtUsd(m.cost)}</span>
+                    {m.saved_cost > 0 && (
+                      <span className="text-zinc-500" title="Saved by cache">
+                        +{fmtUsd(m.saved_cost)}
+                      </span>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -137,6 +175,7 @@ export default function Analytics() {
                   <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-zinc-400">
                     <span>{p.requests} reqs</span>
                     <span>{p.avg_latency}ms</span>
+                    <span className="text-zinc-300">{fmtUsd(p.cost)}</span>
                   </div>
                 </motion.div>
               ))}
@@ -156,13 +195,14 @@ export default function Analytics() {
         <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Recent Requests</h2>
         {recent.length > 0 ? (
           <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <table className="w-full text-sm min-w-[500px] sm:min-w-0">
+            <table className="w-full text-sm min-w-[600px] sm:min-w-0">
               <thead>
                 <tr className="border-b border-white/10 text-zinc-500 text-left">
                   <th className="px-3 py-2 font-medium">Time</th>
                   <th className="px-3 py-2 font-medium">Model</th>
                   <th className="px-3 py-2 font-medium">Provider</th>
                   <th className="px-3 py-2 font-medium">Tokens</th>
+                  <th className="px-3 py-2 font-medium">Cost</th>
                   <th className="px-3 py-2 font-medium">Latency</th>
                   <th className="px-3 py-2 font-medium">Status</th>
                 </tr>
@@ -182,6 +222,7 @@ export default function Analytics() {
                     <td className="px-3 py-2 font-mono text-xs truncate max-w-[140px]">{r.model}</td>
                     <td className="px-3 py-2 capitalize text-xs">{r.provider}</td>
                     <td className="px-3 py-2 text-zinc-400 text-xs">{r.tokens.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-zinc-300 text-xs whitespace-nowrap">{fmtUsd(r.cost_usd)}</td>
                     <td className="px-3 py-2 text-zinc-400 text-xs whitespace-nowrap">{r.latency_ms}ms</td>
                     <td className="px-3 py-2">
                       <span className={r.status === "success" ? "text-white text-xs" : "text-zinc-500 text-xs"}>
@@ -201,12 +242,12 @@ export default function Analytics() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400 }}
-      className="border border-white/10 p-3 sm:p-4"
+      className={`border p-3 sm:p-4 ${highlight ? "border-white/30 bg-white/5" : "border-white/10"}`}
     >
       <p className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-wider">{label}</p>
       <p className="text-lg sm:text-2xl font-bold mt-1 truncate">{value}</p>
