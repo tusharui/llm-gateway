@@ -1,3 +1,4 @@
+import asyncio
 import time
 import uuid
 from fastapi import APIRouter, Request
@@ -29,6 +30,21 @@ COST_RATES = {
 def calculate_cost(provider: str, prompt_tokens: int, completion_tokens: int) -> float:
     rate = COST_RATES.get(provider, {"input": 0.0000005, "output": 0.0000015})
     return prompt_tokens * rate["input"] + completion_tokens * rate["output"]
+
+
+_pending_writes: set = set()
+
+
+def _record_usage_async(api_key_id: str, data: dict) -> None:
+    """Persist usage without blocking the SSE stream.
+
+    Awaiting the write here would stall the terminal `done` event, and the
+    Neon round-trip is far slower than the response itself. The task reference is
+    held so it is not garbage collected mid-flight.
+    """
+    task = asyncio.create_task(track_usage(api_key_id, data))
+    _pending_writes.add(task)
+    task.add_done_callback(_pending_writes.discard)
 
 
 def resolve_route(req: ChatRequest, available: list) -> tuple[str, str, str]:
@@ -152,16 +168,47 @@ async def chat_endpoint(req: ChatRequest, request: Request):
 
         async def event_stream():
             nonlocal token_counter
+            stream_usage = None
+            provider_used = effective_provider_name
+            model_used = effective_model
             try:
                 async for chunk in route_chat_stream(
                     req, preferred_provider=effective_provider_name
                 ):
                     token_counter += 1
+                    provider_used = chunk.provider
+                    model_used = chunk.model
+                    if chunk.usage:
+                        stream_usage = chunk.usage
                     chunk_data = chunk.model_dump()
                     chunk_data["token_count"] = token_counter
                     yield f"event: chunk\ndata: {json.dumps(chunk_data, default=str)}\n\n"
-                yield f"event: done\ndata: {json.dumps({'token_count': token_counter, 'routing_decision': routing_reasoning})}\n\n"
+
+                # Providers report token counts only on the final streamed frame.
+                # Without this the whole streaming path is invisible to analytics.
+                _record_usage_async(api_key_id, {
+                    "provider": provider_used,
+                    "model": model_used,
+                    "prompt_tokens": stream_usage.prompt_tokens if stream_usage else 0,
+                    "completion_tokens": stream_usage.completion_tokens if stream_usage else 0,
+                    "total_tokens": stream_usage.total_tokens if stream_usage else 0,
+                    "latency_ms": int((time.perf_counter() - start) * 1000),
+                    "success": True,
+                    "cached": False,
+                })
+
+                yield f"event: done\ndata: {json.dumps({'token_count': token_counter, 'routing_decision': routing_reasoning, 'provider': provider_used, 'model': model_used})}\n\n"
             except Exception as e:
+                _record_usage_async(api_key_id, {
+                    "provider": provider_used,
+                    "model": model_used,
+                    "prompt_tokens": stream_usage.prompt_tokens if stream_usage else 0,
+                    "completion_tokens": stream_usage.completion_tokens if stream_usage else 0,
+                    "total_tokens": stream_usage.total_tokens if stream_usage else 0,
+                    "latency_ms": int((time.perf_counter() - start) * 1000),
+                    "success": False,
+                    "cached": False,
+                })
                 yield f"event: error\ndata: {json.dumps({'error': redact_error(e), 'routing_decision': routing_reasoning})}\n\n"
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")

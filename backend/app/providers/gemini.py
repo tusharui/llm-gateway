@@ -4,7 +4,7 @@ import uuid
 import asyncio
 from typing import AsyncGenerator, List
 from app.providers.interface import AIProvider
-from app.schemas import ChatRequest, ChatResponse, StreamChunk, EmbeddingRequest, EmbeddingResponse, ModelInfo
+from app.schemas import ChatRequest, ChatResponse, StreamChunk, EmbeddingRequest, EmbeddingResponse, ModelInfo, Usage
 from app.config import settings
 
 
@@ -123,6 +123,7 @@ class GeminiProvider(AIProvider):
                                 .get("text", "")
                             )
                             finish = candidate.get("finishReason")
+                            usage_meta = data.get("usageMetadata")
                             yield StreamChunk(
                                 id=data.get("id", str(uuid.uuid4())),
                                 model=req.model,
@@ -134,6 +135,11 @@ class GeminiProvider(AIProvider):
                                         "finish_reason": finish,
                                     }
                                 ],
+                                usage=Usage(
+                                    prompt_tokens=usage_meta.get("promptTokenCount", 0),
+                                    completion_tokens=usage_meta.get("candidatesTokenCount", 0),
+                                    total_tokens=usage_meta.get("totalTokenCount", 0),
+                                ) if usage_meta else None,
                             )
                         except json.JSONDecodeError:
                             continue

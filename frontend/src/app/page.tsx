@@ -37,20 +37,40 @@ export default function Dashboard() {
   const [status, setStatus] = useState<GatewayStatus | null>(null);
   const [health, setHealth] = useState<HealthCheck | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
+  const [online, setOnline] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch("/api/gateway")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setStatus(d))
-      .catch(() => {});
-    fetch("/api/health")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setHealth(d))
-      .catch(() => {});
-    fetch("/api/analytics/summary")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setSummary(d))
-      .catch(() => {});
+    let cancelled = false;
+
+    const loadStatus = async () => {
+      const [g, h] = await Promise.all([
+        fetch("/api/gateway").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetch("/api/health").then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      ]);
+      if (cancelled) return;
+      if (g) setStatus(g);
+      setHealth(h);
+      setOnline(Boolean(h));
+    };
+
+    const loadSummary = async () => {
+      const s = await fetch("/api/analytics/summary?days=7")
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+      if (!cancelled && s && !s.error) setSummary(s);
+    };
+
+    void loadStatus();
+    void loadSummary();
+
+    // Provider health changes independently of usage, so poll it on a slower beat.
+    const healthId = setInterval(loadStatus, 15000);
+    const statsId = setInterval(loadSummary, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(healthId);
+      clearInterval(statsId);
+    };
   }, []);
 
   return (
@@ -62,6 +82,11 @@ export default function Dashboard() {
       >
         <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
         <p className="text-zinc-500 mt-1 text-sm">AI Inference Gateway overview</p>
+        {online === false && (
+          <p className="mt-2 text-xs text-red-400 border border-red-500/30 bg-red-500/10 px-2 py-1 inline-block">
+            Backend unreachable — start it with: python -m uvicorn app.main:app --port 8000
+          </p>
+        )}
       </motion.div>
 
       <motion.div

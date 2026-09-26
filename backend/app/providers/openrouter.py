@@ -3,7 +3,7 @@ import json
 import asyncio
 from typing import AsyncGenerator, List
 from app.providers.interface import AIProvider
-from app.schemas import ChatRequest, ChatResponse, StreamChunk, ModelInfo
+from app.schemas import ChatRequest, ChatResponse, StreamChunk, ModelInfo, Usage
 from app.config import settings
 
 
@@ -64,6 +64,8 @@ class OpenRouterProvider(AIProvider):
             "model": req.model,
             "messages": [m.model_dump() for m in req.messages],
             "stream": True,
+            # OpenRouter only reports token counts on a streamed request when asked.
+            "stream_options": {"include_usage": True},
         }
         if req.temperature is not None:
             body["temperature"] = req.temperature
@@ -99,21 +101,27 @@ class OpenRouterProvider(AIProvider):
                             return
                         try:
                             data = json.loads(data_str)
+                            usage = data.get("usage")
                             yield StreamChunk(
-                                id=data["id"],
-                                model=data["model"],
+                                id=data.get("id", ""),
+                                model=data.get("model", req.model),
                                 provider=self.name,
                                 choices=[
                                     {
-                                        "index": c["index"],
+                                        "index": c.get("index", 0),
                                         "delta": {
                                             "role": "assistant",
-                                            "content": c.get("delta", {}).get("content", ""),
+                                            "content": c.get("delta", {}).get("content", "") or "",
                                         },
                                         "finish_reason": c.get("finish_reason"),
                                     }
                                     for c in data.get("choices", [])
                                 ],
+                                usage=Usage(
+                                    prompt_tokens=usage.get("prompt_tokens", 0),
+                                    completion_tokens=usage.get("completion_tokens", 0),
+                                    total_tokens=usage.get("total_tokens", 0),
+                                ) if usage else None,
                             )
                         except json.JSONDecodeError:
                             continue

@@ -69,6 +69,7 @@ class StreamChunk(BaseModel):
     provider: str
     choices: List[StreamChoice]
     token_count: Optional[int] = None
+    usage: Optional[Usage] = None
 
 
 class EmbeddingData(BaseModel):

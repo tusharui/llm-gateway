@@ -7,7 +7,6 @@ import type {
   ModelUsageResponse,
   ProviderUsageResponse,
   RecentRequestRow,
-  RecentRequestsResponse,
 } from "../../types/backend";
 
 interface RecentRequest extends RecentRequestRow {
@@ -37,23 +36,86 @@ export default function Analytics() {
   const [byModel, setByModel] = useState<ModelUsage[]>([]);
   const [byProvider, setByProvider] = useState<ProviderBreakdown[]>([]);
   const [recent, setRecent] = useState<RecentRequest[]>([]);
+  const [live, setLive] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [days, setDays] = useState("7");
 
   useEffect(() => {
-    fetch("/api/analytics/summary").then((r) => r.json()).then((d: AnalyticsSummary) => setSummary(d)).catch(() => {});
-    fetch("/api/analytics/by-model").then((r) => r.json()).then((d: ModelUsageResponse) => setByModel(d.models ?? [])).catch(() => {});
-    fetch("/api/analytics/by-provider").then((r) => r.json()).then((d: ProviderUsageResponse) => setByProvider(d.providers ?? [])).catch(() => {});
-    fetch("/api/analytics/recent").then((r) => r.json()).then((d: RecentRequestsResponse) => setRecent(d.requests.map((r) => ({ ...r, status: r.success ? "success" : "failed" })))).catch(() => {});
-  }, []);
+    let cancelled = false;
+
+    const load = async () => {
+      const q = `?days=${days}`;
+      const [s, m, p, r] = await Promise.all([
+        fetch(`/api/analytics/summary${q}`).then((x) => x.json()).catch(() => null),
+        fetch(`/api/analytics/by-model${q}`).then((x) => x.json()).catch(() => null),
+        fetch(`/api/analytics/by-provider${q}`).then((x) => x.json()).catch(() => null),
+        fetch("/api/analytics/recent?limit=50").then((x) => x.json()).catch(() => null),
+      ]);
+      if (cancelled) return;
+      if (s && !s.error) {
+        setSummary(s);
+        setLastUpdated(new Date());
+      }
+      if (m?.models) setByModel(m.models);
+      if (p?.providers) setByProvider(p.providers);
+      if (r?.requests) {
+        setRecent(r.requests.map((x: RecentRequestRow) => ({ ...x, status: x.success ? "success" : "failed" })));
+        setLastUpdated(new Date());
+      }
+    };
+
+    void load();
+    if (!live) return () => { cancelled = true; };
+
+    const id = setInterval(load, 5000);
+    // Refresh immediately when the tab regains focus so numbers are never stale.
+    const onFocus = () => void load();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [live, days]);
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6 md:mb-8"
+        className="mb-6 md:mb-8 flex flex-wrap items-end justify-between gap-3"
       >
-        <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
-        <p className="text-zinc-500 mt-1 text-sm">Usage, cost and cache savings</p>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Analytics</h1>
+          <p className="text-zinc-500 mt-1 text-sm">Usage, cost and cache savings</p>
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <select
+            value={days}
+            onChange={(e) => setDays(e.target.value)}
+            className="bg-black border border-white/20 px-2 sm:px-3 py-1.5 text-xs sm:text-sm focus:outline-none focus:border-white/50"
+            aria-label="Time range"
+          >
+            <option value="1">Last 24h</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+          <button
+            onClick={() => setLive((v) => !v)}
+            className={`flex items-center gap-1.5 border px-2 sm:px-3 py-1.5 text-xs sm:text-sm transition-colors ${
+              live ? "border-white/40 text-white bg-white/10" : "border-white/10 text-zinc-500"
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${live ? "bg-green-400 animate-pulse" : "bg-zinc-600"}`} />
+            {live ? "LIVE" : "PAUSED"}
+          </button>
+          {lastUpdated && (
+            <span className="text-[10px] sm:text-xs text-zinc-600 font-mono hidden sm:inline">
+              {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
       </motion.div>
 
       <motion.div

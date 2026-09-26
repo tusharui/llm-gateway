@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from app.config import settings
 from app.models import Base
+from app.redact import redact
 
 
 _engine = None
@@ -33,7 +34,7 @@ async def init_db():
     global _engine, _session_factory, _db_ok
     try:
         db_url = build_db_url(settings.database_url)
-        print(f"[DB] Connecting to: {db_url[:50]}...")
+        print(f"[DB] Connecting to: {redact(db_url)}...")
 
         ssl_ctx = ssl.create_default_context()
 
@@ -58,7 +59,7 @@ async def init_db():
         _db_ok = False
         _engine = None
         _session_factory = None
-        print(f"[DB] WARNING: Database unavailable ({e}). Server running without DB.")
+        print(f"[DB] WARNING: Database unavailable ({redact(str(e))}). Server running without DB.")
 
 
 async def get_session() -> AsyncSession | None:
