@@ -61,7 +61,7 @@ def test_pydantic_style_messages_are_supported():
     from app.schemas import ChatRequest
 
     req = ChatRequest(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         messages=[{"role": "user", "content": "Explain caching in detail"}],
     )
     assert classify_complexity(req.messages) == "balanced"
@@ -70,9 +70,9 @@ def test_pydantic_style_messages_are_supported():
 def test_select_model_prefers_tier_model_when_provider_available():
     provider, model = select_model_for_tier("fast", [SimpleNamespace(name="groq")])
     assert provider == "groq"
-    assert model == "llama-3.1-8b-instant"
+    assert model == "openai/gpt-oss-20b"
 
 
 def test_select_model_falls_back_when_no_provider_available():
     provider, model = select_model_for_tier("powerful", [])
-    assert (provider, model) == ("groq", "llama-3.3-70b-versatile")
+    assert (provider, model) == ("groq", "openai/gpt-oss-120b")

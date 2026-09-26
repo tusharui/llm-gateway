@@ -13,6 +13,7 @@ from app.database import get_session
 from app.models import UsageRecord
 from app.providers.registry import get_available_providers, get_provider
 from app.config import settings
+from app.redact import redact_error
 from datetime import datetime, timezone
 import json
 
@@ -28,6 +29,25 @@ COST_RATES = {
 def calculate_cost(provider: str, prompt_tokens: int, completion_tokens: int) -> float:
     rate = COST_RATES.get(provider, {"input": 0.0000005, "output": 0.0000015})
     return prompt_tokens * rate["input"] + completion_tokens * rate["output"]
+
+
+def resolve_route(req: ChatRequest, available: list) -> tuple[str, str, str]:
+    cfg = settings.get_providers()
+    requested = (req.model or "").strip()
+
+    if requested.lower() not in ("auto", ""):
+        for provider_name, provider_cfg in cfg.items():
+            if requested in provider_cfg.models:
+                return (
+                    provider_name,
+                    requested,
+                    f"Explicit model={requested} | provider={provider_name}",
+                )
+
+    provider_name, model_id, reasoning = auto_route(req, available)
+    if requested.lower() not in ("auto", ""):
+        reasoning = f"Unknown model '{requested}' -> {reasoning}"
+    return provider_name, model_id, reasoning
 
 
 async def track_usage(api_key_id: str, data: dict):
@@ -67,10 +87,14 @@ async def chat_endpoint(req: ChatRequest, request: Request):
 
     # --- Auto-route: classify complexity and pick optimal model ---
     available = get_available_providers()
-    chosen_provider, chosen_model, routing_reasoning = auto_route(req, available)
+    chosen_provider, chosen_model, routing_reasoning = resolve_route(req, available)
 
     effective_model = chosen_model
     effective_provider_name = chosen_provider
+
+    # The provider adapters send req.model verbatim, so the routed model must be
+    # written back onto the request. Otherwise "auto" reaches the provider and 404s.
+    req.model = effective_model
 
     # --- Semantic Cache Lookup ---
     semantic_result, semantic_sim = await semantic_get(
@@ -129,22 +153,28 @@ async def chat_endpoint(req: ChatRequest, request: Request):
         async def event_stream():
             nonlocal token_counter
             try:
-                async for chunk in route_chat_stream(req):
+                async for chunk in route_chat_stream(
+                    req, preferred_provider=effective_provider_name
+                ):
                     token_counter += 1
                     chunk_data = chunk.model_dump()
                     chunk_data["token_count"] = token_counter
                     yield f"event: chunk\ndata: {json.dumps(chunk_data, default=str)}\n\n"
                 yield f"event: done\ndata: {json.dumps({'token_count': token_counter, 'routing_decision': routing_reasoning})}\n\n"
             except Exception as e:
-                yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+                yield f"event: error\ndata: {json.dumps({'error': redact_error(e), 'routing_decision': routing_reasoning})}\n\n"
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
 
     # --- Non-Streaming Response ---
     try:
-        result, provider_used = await route_chat(req)
+        result, provider_used = await route_chat(
+            req, preferred_provider=effective_provider_name
+        )
     except Exception:
-        result, provider_used = await route_with_failover(req)
+        result, provider_used = await route_with_failover(
+            req, preferred_provider=effective_provider_name
+        )
 
     duration = int((time.perf_counter() - start) * 1000)
 

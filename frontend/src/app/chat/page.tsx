@@ -33,7 +33,7 @@ export default function ChatPage() {
   const [loadingSession, setLoadingSession] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [model, setModel] = useState("llama-3.3-70b-versatile");
+  const [model, setModel] = useState("openai/gpt-oss-120b");
   const [provider, setProvider] = useState("groq");
   const [showHistory, setShowHistory] = useState(false);
   const [allModels, setAllModels] = useState<ModelItem[]>([]);
@@ -46,6 +46,14 @@ export default function ChatPage() {
 
   const activeSession = sessions.find((s) => s.id === activeId);
   const messages = useMemo(() => activeSession?.messages ?? [], [activeSession]);
+
+  // sendMessage is a useCallback keyed on `sessions`, but it must read the history
+  // as of the send, not the render that scheduled it â€” otherwise follow-up turns
+  // drop the earlier turns and the model answers out of context.
+  const sessionsRef = useRef<ChatSession[]>(sessions);
+  useEffect(() => {
+    sessionsRef.current = sessions;
+  }, [sessions]);
 
   const filteredModels = modelSearch
     ? allModels.filter(
@@ -77,7 +85,7 @@ export default function ChatPage() {
           id: s.id as string,
           title: s.title as string,
           provider: (s.provider as string) || "groq",
-          model: (s.model as string) || "llama-3.3-70b-versatile",
+          model: (s.model as string) || "openai/gpt-oss-120b",
           messages: [],
           created_at: s.created_at as string | null,
           updated_at: s.updated_at as string | null,
@@ -164,7 +172,7 @@ export default function ChatPage() {
     }
     if (session) {
       setProvider(session.provider || "groq");
-      setModel(session.model || "llama-3.3-70b-versatile");
+      setModel(session.model || "openai/gpt-oss-120b");
     }
   };
 
@@ -263,13 +271,15 @@ export default function ChatPage() {
     setLiveTokenCount(0);
 
     try {
-      await fetch(`/api/chat-history/${currentId}/messages`, {
+      // Fire-and-forget: this Neon round-trip took ~3s locally and was delaying
+      // the actual completion request.
+      void fetch(`/api/chat-history/${currentId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: "user", content: userMessage }),
       });
 
-      const currentMessages = sessions.find((s) => s.id === currentId)?.messages ?? [];
+      const currentMessages = sessionsRef.current.find((s) => s.id === currentId)?.messages ?? [];
       const allMessages = [...currentMessages, userMsg];
 
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -297,7 +307,8 @@ export default function ChatPage() {
 
       if (reader) {
         let buffer = "";
-        while (true) {
+        let streamError = "";
+        outer: while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
@@ -306,14 +317,15 @@ export default function ChatPage() {
           buffer = lines.pop() || "";
 
           for (const line of lines) {
-            if (line.startsWith("event: chunk")) {
-              continue;
-            }
             if (line.startsWith("data: ")) {
               const jsonStr = line.slice(6);
               if (!jsonStr || jsonStr === "{}") continue;
               try {
                 const parsed = JSON.parse(jsonStr);
+                if (parsed.error) {
+                  streamError = parsed.error;
+                  break outer;
+                }
                 if (parsed.token_count) {
                   finalTokenCount = parsed.token_count;
                   setLiveTokenCount(parsed.token_count);
@@ -340,13 +352,11 @@ export default function ChatPage() {
                 }
               } catch {}
             }
-            if (line.startsWith("event: done")) {
-              continue;
-            }
-            if (line.startsWith("event: error")) {
-              continue;
-            }
           }
+        }
+
+        if (streamError) {
+          throw new Error(streamError);
         }
       }
 
@@ -387,7 +397,7 @@ export default function ChatPage() {
       setLoading(false);
       setLiveTokenCount(0);
     }
-  }, [input, loading, activeId, model, provider, sessions, autoRoute]);
+  }, [input, loading, activeId, model, provider, autoRoute]);
 
   const formatDate = (iso: string | null) => {
     if (!iso) return "";
@@ -454,7 +464,7 @@ export default function ChatPage() {
                           onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }}
                           className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-white text-xs ml-2 transition-opacity"
                         >
-                          ×
+                          Ã—
                         </button>
                       </motion.div>
                     ))
@@ -514,7 +524,7 @@ export default function ChatPage() {
                   <span className="truncate font-mono text-xs">
                     <span className="text-zinc-500">{provider}/</span>{model}
                   </span>
-                  <span className="text-zinc-600 text-xs">▼</span>
+                  <span className="text-zinc-600 text-xs">â–¼</span>
                 </button>
                 <AnimatePresence>
                   {showModelDropdown && !autoRoute && (

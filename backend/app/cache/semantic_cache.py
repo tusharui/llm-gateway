@@ -33,7 +33,7 @@ async def embed_query(text: str) -> Optional[list[float]]:
         return None
     try:
         from app.schemas import EmbeddingRequest
-        req = EmbeddingRequest(model="text-embedding-004", input=text)
+        req = EmbeddingRequest(model="gemini-embedding-001", input=text)
         result = await provider.embeddings(req)
         if result.data and len(result.data) > 0:
             return result.data[0].embedding

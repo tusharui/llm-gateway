@@ -4,6 +4,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 
+from app.redact import redact, redact_error
+
 logger = logging.getLogger("gateway")
 
 
@@ -20,11 +22,12 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
             )
         except Exception as e:
             request_id = getattr(request.state, "request_id", None)
+            message = redact_error(e)
             logger.error(
                 "unhandled_error",
                 extra={
                     "error_type": type(e).__name__,
-                    "error_message": str(e),
+                    "error_message": message,
                     "request_id": request_id,
                     "path": request.url.path,
                 },
@@ -35,7 +38,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": {
                         "type": "INTERNAL_ERROR",
-                        "message": str(e),
+                        "message": message,
                         "request_id": request_id,
                     }
                 },

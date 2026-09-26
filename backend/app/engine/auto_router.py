@@ -7,30 +7,28 @@ MODEL_TIERS = {
     "fast": {
         "description": "Simple, factual, or short queries",
         "models": [
-            ("groq", "llama-3.1-8b-instant"),
-            ("groq", "gemma2-9b-it"),
-            ("gemini", "gemini-2.0-flash-lite"),
-            ("gemini", "gemini-2.0-flash"),
+            ("groq", "openai/gpt-oss-20b"),
+            ("gemini", "gemini-2.5-flash-lite"),
+            ("openrouter", "openai/gpt-4o-mini"),
         ],
         "cost_per_1k": 0.0001,
     },
     "balanced": {
         "description": "Moderate complexity, general purpose",
         "models": [
-            ("groq", "llama-3.3-70b-versatile"),
-            ("groq", "mixtral-8x7b-32768"),
-            ("gemini", "gemini-1.5-flash"),
+            ("groq", "qwen/qwen3.8-27b"),
             ("openrouter", "openai/gpt-4o-mini"),
-            ("openrouter", "anthropic/claude-3.5-haiku"),
+            ("gemini", "gemini-2.5-flash"),
+            ("openrouter", "mistralai/mistral-small-3.2-24b-instruct"),
         ],
         "cost_per_1k": 0.0005,
     },
     "powerful": {
         "description": "Complex reasoning, analysis, code, creative writing",
         "models": [
-            ("gemini", "gemini-1.5-pro"),
+            ("groq", "openai/gpt-oss-120b"),
+            ("gemini", "gemini-2.5-flash"),
             ("openrouter", "meta-llama/llama-3.3-70b-instruct"),
-            ("openrouter", "google/gemini-2.0-flash-001"),
         ],
         "cost_per_1k": 0.002,
     },
@@ -140,7 +138,7 @@ def select_model_for_tier(tier: str, available_providers: list) -> tuple[str, st
         if provider_name in available_names:
             return provider_name, model_id
 
-    return "groq", "llama-3.3-70b-versatile"
+    return "groq", "openai/gpt-oss-120b"
 
 
 def auto_route(req: ChatRequest, available_providers: list) -> tuple[str, str, str]:
@@ -167,3 +165,30 @@ def get_tier_info() -> dict:
             "powerful": "Complex reasoning, code generation, analysis, creative writing, system design (> 200 chars or contains analytical keywords)",
         },
     }
+
+
+def tier_for_model(model: str) -> str | None:
+    for name, cfg in MODEL_TIERS.items():
+        if any(m == model for _, m in cfg["models"]):
+            return name
+    return None
+
+
+def alternate_model(model: str, exclude_provider: str) -> str | None:
+    """Same-tier model on a provider other than `exclude_provider`.
+
+    Model ids are provider-specific, so failing over to another provider with the
+    same id always 404s. Pick an equivalent model from the same tier instead.
+    """
+    tier = tier_for_model(model)
+    if tier is None:
+        return None
+
+    cfg = settings.get_providers()
+    for provider_name, model_id in MODEL_TIERS[tier]["models"]:
+        if provider_name == exclude_provider:
+            continue
+        provider_cfg = cfg.get(provider_name)
+        if provider_cfg and model_id in provider_cfg.models:
+            return model_id
+    return None

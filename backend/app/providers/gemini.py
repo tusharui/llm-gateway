@@ -139,8 +139,8 @@ class GeminiProvider(AIProvider):
                             continue
 
     async def embeddings(self, req: EmbeddingRequest) -> EmbeddingResponse:
-        model = "models/text-embedding-004"
-        url = f"{self.cfg.base_url}/{model}:embedContent?key={self.cfg.api_key}"
+        model_path = self._gemini_model(req.model)
+        url = f"{self.cfg.base_url}/{model_path}:embedContent?key={self.cfg.api_key}"
         texts = [req.input] if isinstance(req.input, str) else req.input
 
         results = []
@@ -151,11 +151,12 @@ class GeminiProvider(AIProvider):
                     headers={"Content-Type": "application/json"},
                     json={"content": {"parts": [{"text": text}]}},
                 )
+                res.raise_for_status()
                 data = res.json()
                 results.append(data.get("embedding", {}).get("values", []))
 
         return EmbeddingResponse(
-            model="text-embedding-004",
+            model=req.model,
             provider=self.name,
             data=[{"index": i, "embedding": emb} for i, emb in enumerate(results)],
             usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},

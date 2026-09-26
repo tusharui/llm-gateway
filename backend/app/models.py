@@ -64,7 +64,7 @@ class ChatSession(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     title: Mapped[str] = mapped_column(String(255), default="New chat")
     provider: Mapped[str] = mapped_column(String(50), default="groq")
-    model: Mapped[str] = mapped_column(String(100), default="llama-3.3-70b-versatile")
+    model: Mapped[str] = mapped_column(String(100), default="openai/gpt-oss-120b")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

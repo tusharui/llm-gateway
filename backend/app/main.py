@@ -47,6 +47,11 @@ logger = logging.getLogger("gateway")
 for _handler in logging.getLogger().handlers:
     _handler.setFormatter(JsonFormatter())
 
+# httpx logs the full request URL at INFO, and Gemini authenticates via an
+# ?key=... query param — that writes provider API keys into logs. Keep it quiet.
+for _noisy in ("httpx", "httpcore", "hpack"):
+    logging.getLogger(_noisy).setLevel(logging.WARNING)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

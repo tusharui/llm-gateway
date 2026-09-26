@@ -12,7 +12,7 @@ router = APIRouter(prefix="/chat-history")
 class CreateSessionRequest(BaseModel):
     title: str = "New chat"
     provider: str = "groq"
-    model: str = "llama-3.3-70b-versatile"
+    model: str = "openai/gpt-oss-120b"
 
 
 class AddMessageRequest(BaseModel):

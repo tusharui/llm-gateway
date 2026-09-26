@@ -1,2 +1,5 @@
 .vercel
 *.log
+*.err
+.env
+.env.local
