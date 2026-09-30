@@ -272,29 +272,6 @@ async def classify_endpoint(req: ChatRequest):
     }
 
 
-@router.get("/health")
-async def health_endpoint():
-    providers = get_available_providers()
-    checks = []
-    for p in providers:
-        result = await p.health_check()
-        checks.append(
-            {
-                "provider": p.name,
-                "status": "healthy" if result["ok"] else "degraded",
-                "latency_ms": result["latency_ms"],
-                "last_checked": datetime.now(timezone.utc).isoformat(),
-            }
-        )
-
-    all_healthy = all(c["status"] == "healthy" for c in checks)
-    return {
-        "status": "healthy" if all_healthy else "degraded",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "providers": checks,
-    }
-
-
 @router.get("/models")
 async def models_endpoint():
     providers = get_available_providers()

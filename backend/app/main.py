@@ -38,6 +38,7 @@ from app.routes.api_keys import router as api_keys_router
 from app.routes.analytics import router as analytics_router
 from app.routes.websocket import router as ws_router
 from app.routes.chat_history import router as chat_history_router
+from app.routes.health import router as health_router
 
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
@@ -94,6 +95,7 @@ async def root():
             "batch": "/batch/chat",
             "queue": "/batch/queue/status",
             "health": "/health",
+            "ready": "/ready",
         },
     }
 
@@ -104,6 +106,7 @@ app.include_router(api_keys_router)
 app.include_router(analytics_router)
 app.include_router(ws_router)
 app.include_router(chat_history_router)
+app.include_router(health_router)
 
 
 if __name__ == "__main__":

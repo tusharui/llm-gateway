@@ -6,7 +6,7 @@ engine without a second database URL to keep in sync.
 """
 
 import asyncio
-import ssl
+import sys
 from logging.config import fileConfig
 from pathlib import Path
 
@@ -19,12 +19,11 @@ from alembic import context
 # Importing the app package is what pulls every mapped class into
 # ``Base.metadata``. Without it autogenerate compares against an empty schema
 # and proposes dropping every table.
-import sys
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.config import settings  # noqa: E402
-from app.database import build_db_url  # noqa: E402
+from app.database import build_db_url, build_engine_kwargs  # noqa: E402
+from app.migration_safety import guard_destructive  # noqa: E402
 from app.models import Base  # noqa: E402
 
 config = context.config
@@ -33,6 +32,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+# Arbitrary but fixed. Every migration run in every environment contends for
+# this one lock, which is the point: it serialises concurrent upgrades.
+ADVISORY_LOCK_ID = 728_441_903_517
 
 
 def _database_url() -> str:
@@ -52,6 +55,8 @@ def _database_url() -> str:
 
 def run_migrations_offline() -> None:
     """Emit SQL to stdout without connecting to a database (``alembic upgrade --sql``)."""
+    guard_destructive(settings.database_url, getattr(config, "cmd_opts", None))
+
     context.configure(
         url=_database_url(),
         target_metadata=target_metadata,
@@ -66,6 +71,8 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
+    guard_destructive(settings.database_url, getattr(config, "cmd_opts", None))
+
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
@@ -74,38 +81,32 @@ def do_run_migrations(connection: Connection) -> None:
     )
 
     with context.begin_transaction():
+        # Serialise migrations across instances. Two replicas starting at the
+        # same time both run `upgrade head` and race on DDL locks.
+        #
+        # The lock must be taken INSIDE Alembic's transaction. Executing any
+        # statement on the connection first opens an implicit transaction of
+        # its own; Alembic then sees a transaction already in progress and
+        # never commits it. The result is the worst possible failure mode:
+        # Alembic logs "Running upgrade" and the schema silently does not
+        # change. A transaction-scoped lock also releases itself on commit or
+        # rollback, so there is no unlock path to forget.
+        connection.execute(
+            text("SELECT pg_advisory_xact_lock(:k)"), {"k": ADVISORY_LOCK_ID}
+        )
         context.run_migrations()
 
 
-async def _server_requires_tls() -> bool:
-    """Probe whether the target accepts a plaintext connection.
-
-    ``app.database.build_db_url`` strips ``sslmode`` from the URL and the app
-    passes TLS through ``connect_args`` instead, so a migration cannot rely on
-    the URL alone. Managed Postgres (Neon, Supabase, RDS) refuses plaintext; a
-    local dev server usually has no certificate at all. Probing beats making
-    every operator remember a per-environment flag.
-    """
-    probe = create_async_engine(_database_url(), poolclass=pool.NullPool)
-    try:
-        async with probe.connect() as connection:
-            await connection.execute(text("SELECT 1"))
-        return False
-    except Exception:
-        return True
-    finally:
-        await probe.dispose()
-
-
 async def run_async_migrations() -> None:
-    connect_args = {}
-    if await _server_requires_tls():
-        connect_args["connect_args"] = {"ssl": ssl.create_default_context()}
+    # Before anything touches the database. A destructive command should be
+    # refused without opening a connection, so the refusal cannot be confused
+    # with a connection failure.
+    guard_destructive(settings.database_url, getattr(config, "cmd_opts", None))
 
     connectable = create_async_engine(
         _database_url(),
         poolclass=pool.NullPool,
-        **connect_args,
+        **build_engine_kwargs(),
     )
 
     async with connectable.connect() as connection:

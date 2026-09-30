@@ -40,6 +40,16 @@ class Settings(BaseSettings):
     cache_ttl_ms: int = Field(default=300000)
     cache_max_size: int = Field(default=1000)
     database_url: str = Field(default="")
+    # TLS to Postgres. "require" verifies the server certificate, "disable"
+    # sends traffic in cleartext.
+    #
+    # There is deliberately no "auto": deciding this by probing would mean
+    # opening an unencrypted connection first, which transmits the database
+    # password in cleartext to whatever host DATABASE_URL happens to name --
+    # including a typo'd one. Production runs Neon and must stay on "require";
+    # only a local dev container with a self-signed certificate needs
+    # "disable", and that has to be an explicit choice.
+    database_ssl: str = Field(default="require")
     groq_api_key: str = Field(default="")
     gemini_api_key: str = Field(default="")
     openrouter_api_key: str = Field(default="")
