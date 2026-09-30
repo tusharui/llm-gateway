@@ -1,0 +1,78 @@
+name: Schema drift vs production
+
+# The pull-request check in ci.yml compares models.py against a database built
+# from our own migrations. That is circular: it proves the ORM agrees with the
+# migrations, and cannot detect the migrations disagreeing with production.
+#
+# Two real bugs slipped through exactly that gap during the baseline audit --
+# a UNIQUE constraint recorded as a bare unique index, and three columns with
+# the wrong nullability. Both were invisible to `alembic check` and only
+# surfaced when a revision was diffed against the live database.
+#
+# This job builds a database from the migrations and diffs it against
+# production. Read-only with respect to production: SELECTs against
+# information_schema, pg_indexes and pg_constraint. No DDL, no writes.
+#
+# It runs on a schedule rather than per-push because it needs a production
+# credential, which pull requests from forks do not have.
+
+on:
+  schedule:
+    # 06:17 UTC daily. Off the hour on purpose: scheduled jobs that everyone
+    # runs at :00 pile onto the same runners.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  drift:
+    name: Diff migrations against production schema
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # Same major version as production.
+        image: pgvector/pgvector:pg18
+        env:
+          POSTGRES_USER: gwuser
+          POSTGRES_PASSWORD: gwpass
+          POSTGRES_DB: migrated
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build a database from the migrations
+        env:
+          DATABASE_URL: postgresql://gwuser:gwpass@localhost:5432/migrated
+          # The CI container has a self-signed certificate. Production TLS is
+          # separately asserted in the next step.
+          DATABASE_SSL: disable
+        run: alembic upgrade head
+
+      - name: Diff against production
+        env:
+          MIGRATED_URL: postgresql://gwuser:gwpass@localhost:5432/migrated
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL: require
+        run: |
+          python -m scripts.diff_schema \
+            --a "$MIGRATED_URL" --a-ssl disable \
+            --b "$DATABASE_URL" --b-ssl require \
+            --label-a migrations \
+            --label-b production

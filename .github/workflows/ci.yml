@@ -33,6 +33,8 @@ jobs:
         working-directory: backend
     env:
       TEST_DATABASE_URL: postgresql://gwuser:gwpass@localhost:5432/gateway_test
+      # The CI service container presents a self-signed certificate.
+      DATABASE_SSL: disable
 
     steps:
       - uses: actions/checkout@v4

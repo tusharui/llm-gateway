@@ -16,7 +16,7 @@ Two consequences worth knowing:
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import String, Boolean, Integer, Float, DateTime, Text, text
+from sqlalchemy import String, Boolean, Integer, Float, DateTime, Text, Index, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -61,6 +61,11 @@ class ApiKey(Base):
 
 class UsageRecord(Base):
     __tablename__ = "usage_records"
+    # Indexed in 0002_analytics_indexes; declared here so autogenerate agrees.
+    __table_args__ = (
+        Index("ix_usage_records_api_key_id", "api_key_id"),
+        Index("ix_usage_records_timestamp", "timestamp"),
+    )
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
     api_key_id: Mapped[str] = mapped_column(Text)
@@ -141,6 +146,7 @@ class ChatMessage(Base):
 
 class SemanticCacheEntry(Base):
     __tablename__ = "semantic_cache"
+    __table_args__ = (Index("ix_semantic_cache_expires_at", "expires_at"),)
 
     id: Mapped[str] = mapped_column(Text, primary_key=True)
     query_text: Mapped[str] = mapped_column(Text)

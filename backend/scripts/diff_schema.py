@@ -9,6 +9,7 @@ Usage:
 
 import argparse
 import asyncio
+import ssl
 import sys
 from pathlib import Path
 
@@ -78,8 +79,14 @@ def normalize_type(row: dict) -> str:
     return f"{data_type}({length})" if length else data_type
 
 
-async def snapshot(url: str) -> dict:
-    engine = create_async_engine(build_db_url(url), poolclass=None)
+async def snapshot(url: str, ssl_mode: str = "require") -> dict:
+    connect_args = {}
+    if ssl_mode == "require":
+        connect_args["connect_args"] = {"ssl": ssl.create_default_context()}
+    elif ssl_mode != "disable":
+        raise ValueError(f"ssl mode must be 'require' or 'disable', got {ssl_mode!r}")
+
+    engine = create_async_engine(build_db_url(url), poolclass=None, **connect_args)
     async with engine.connect() as conn:
         columns = [dict(r) for r in (await conn.execute(text(COLUMNS_SQL))).mappings()]
         indexes = [dict(r) for r in (await conn.execute(text(INDEXES_SQL))).mappings()]
@@ -172,10 +179,17 @@ async def main() -> int:
     parser.add_argument("--b", required=True, help="URL for schema B (usually prod)")
     parser.add_argument("--label-a", default="A")
     parser.add_argument("--label-b", default="B")
+    # Explicit per target, because the usual comparison is a local container
+    # with a self-signed certificate against production with a valid one, and
+    # a single global setting cannot express both. Defaults to requiring TLS
+    # so a typo fails loudly instead of quietly sending the production
+    # password in cleartext.
+    parser.add_argument("--a-ssl", choices=["require", "disable"], default="require")
+    parser.add_argument("--b-ssl", choices=["require", "disable"], default="require")
     args = parser.parse_args()
 
-    snap_a = await snapshot(args.a)
-    snap_b = await snapshot(args.b)
+    snap_a = await snapshot(args.a, args.a_ssl)
+    snap_b = await snapshot(args.b, args.b_ssl)
 
     problems = diff(snap_a, snap_b, args.label_a, args.label_b)
 
