@@ -9,9 +9,28 @@ jobs:
   backend:
     name: Backend (tests + routing eval)
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: gwuser
+          POSTGRES_PASSWORD: gwpass
+          POSTGRES_DB: gateway_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     defaults:
       run:
         working-directory: backend
+    env:
+      TEST_DATABASE_URL: postgresql://gwuser:gwpass@localhost:5432/gateway_test
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,6 +41,10 @@ jobs:
           pip install -r requirements.txt -r requirements-dev.txt
       - name: Run tests
         run: python -m pytest -q
+      - name: Check migrations match models
+        run: |
+          DATABASE_URL="$TEST_DATABASE_URL" python -m alembic upgrade head
+          DATABASE_URL="$TEST_DATABASE_URL" python -m alembic check
       - name: Run routing quality eval
         run: python -m evals.run --min-accuracy 0.9
 
