@@ -2,15 +2,28 @@
 
 These exercise the real Alembic chain against a real PostgreSQL instance --
 a migration bug that only appears against a live server (wrong nullability, a
-DDL statement Postgres rejects, a downgrade that leaves debris) is exactly the
-kind that is invisible in a mocked test and expensive in production.
+DDL statement Postgres rejects) is exactly the kind that is invisible in a
+mocked test.
 
 Set ``TEST_DATABASE_URL`` to run them; they skip otherwise::
 
-    docker run -d --name gw-pg -e POSTGRES_PASSWORD=gwpass -e POSTGRES_USER=gwuser \\
-        -e POSTGRES_DB=gateway_test -p 55432:5432 pgvector/pgvector:pg16
-    $env:TEST_DATABASE_URL="postgresql://gwuser:gwpass@localhost:55432/gateway_test"
+    docker run -d --name gw-pg18 -e POSTGRES_PASSWORD=gwpass -e POSTGRES_USER=gwuser \\
+        -e POSTGRES_DB=gateway_test -p 55433:5432 pgvector/pgvector:pg18
+    $env:TEST_DATABASE_URL="postgresql://gwuser:gwpass@localhost:55433/gateway_test"
+    $env:DATABASE_SSL="disable"
     python -m pytest tests/test_migrations.py -v
+
+Two rules this module follows without exception:
+
+1. The target is set on ``settings.database_url`` directly. Setting the
+   DATABASE_URL environment variable does nothing, because ``settings`` was
+   already built at import time. An earlier version of this file set the env
+   var and ran every migration, including ``downgrade base``, against
+   production.
+
+2. Nothing here executes a downgrade. Downgrade SQL is generated in Alembic's
+   offline mode instead, which exercises the same code without issuing a
+   single DDL statement.
 """
 
 import os
@@ -18,6 +31,8 @@ from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine, text
+
+from conftest import assert_local_or_empty
 
 BACKEND = Path(__file__).resolve().parents[1]
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "")
@@ -34,7 +49,12 @@ def _sync_url() -> str:
 
 @pytest.fixture
 def clean_db():
-    """Truncate every app table and reset the Alembic version."""
+    """Truncate every app table and reset the Alembic version.
+
+    Refuses to run against anything but a local database.
+    """
+    assert_local_or_empty(TEST_DATABASE_URL, "TEST_DATABASE_URL")
+
     engine = create_engine(_sync_url())
     with engine.begin() as conn:
         for table in (
@@ -54,16 +74,27 @@ def clean_db():
 
 @pytest.fixture
 def alembic_config(monkeypatch, clean_db):
+    """A config aimed at the test database, and nowhere else.
+
+    Sets the singleton *and* the environment variable. Only the singleton
+    matters to Alembic; the env var is set for consistency with subprocesses.
+    """
     from alembic.config import Config
 
+    from app.config import settings
+
+    assert_local_or_empty(TEST_DATABASE_URL, "TEST_DATABASE_URL")
+
+    settings.database_url = TEST_DATABASE_URL
     monkeypatch.setenv("DATABASE_URL", TEST_DATABASE_URL)
+
     cfg = Config(str(BACKEND / "alembic.ini"))
     cfg.set_main_option("script_location", str(BACKEND / "migrations"))
     return cfg
 
 
-def _table_names(url: str) -> set[str]:
-    engine = create_engine(url)
+def _table_names() -> set[str]:
+    engine = create_engine(_sync_url())
     with engine.connect() as conn:
         names = {
             r[0]
@@ -83,7 +114,7 @@ def test_upgrade_creates_all_tables(alembic_config):
 
     command.upgrade(alembic_config, "head")
 
-    tables = _table_names(_sync_url())
+    tables = _table_names()
     assert {
         "api_keys",
         "usage_records",
@@ -94,23 +125,12 @@ def test_upgrade_creates_all_tables(alembic_config):
     } <= tables
 
 
-def test_downgrade_removes_all_tables(alembic_config):
+def test_upgrade_is_idempotent(alembic_config):
+    """Running upgrade twice must be a no-op, not an error."""
     from alembic import command
 
     command.upgrade(alembic_config, "head")
-    command.downgrade(alembic_config, "base")
-
-    tables = _table_names(_sync_url())
-    assert not (tables - {"alembic_version"})
-
-
-def test_upgrade_downgrade_is_repeatable(alembic_config):
-    """A revision that only works once is not a revision."""
-    from alembic import command
-
-    for _ in range(2):
-        command.upgrade(alembic_config, "head")
-        command.downgrade(alembic_config, "base")
+    command.upgrade(alembic_config, "head")
 
 
 def test_stamp_head_preserves_existing_data(alembic_config):
@@ -121,8 +141,12 @@ def test_stamp_head_preserves_existing_data(alembic_config):
     touching a single row.
     """
     from alembic import command
+    from alembic.script import ScriptDirectory
 
     command.upgrade(alembic_config, "head")
+    # Read the real head rather than hardcoding a revision id: that assertion
+    # silently rots every time a revision is added.
+    head = ScriptDirectory.from_config(alembic_config).get_current_head()
 
     engine = create_engine(_sync_url())
     with engine.begin() as conn:
@@ -149,7 +173,7 @@ def test_stamp_head_preserves_existing_data(alembic_config):
     with engine.connect() as conn:
         assert conn.scalar(text("SELECT count(*) FROM usage_records")) == 17
         assert conn.scalar(text("SELECT count(*) FROM chat_sessions")) == 1
-        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0001_baseline"
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == head
     engine.dispose()
 
 
@@ -164,14 +188,13 @@ def test_models_match_migrations(alembic_config):
     from alembic.migration import MigrationContext
     from sqlalchemy import create_engine as ce
 
-    command.upgrade(alembic_config, "head")
-
-    sys_path_insert = str(BACKEND)
     import sys
 
-    if sys_path_insert not in sys.path:
-        sys.path.insert(0, sys_path_insert)
+    if str(BACKEND) not in sys.path:
+        sys.path.insert(0, str(BACKEND))
     from app.models import Base
+
+    command.upgrade(alembic_config, "head")
 
     engine = ce(_sync_url())
     with engine.connect() as conn:
@@ -182,3 +205,46 @@ def test_models_match_migrations(alembic_config):
     engine.dispose()
 
     assert diff == [], f"models.py has drifted from migrations: {diff}"
+
+
+def test_downgrade_sql_generates_without_executing(alembic_config, capsys):
+    """Exercise the downgrade path without dropping anything.
+
+    Offline mode runs the real migration functions and renders SQL, so a
+    broken downgrade still fails this test -- but no DDL is ever issued. This
+    replaces a previous version of this suite that executed
+    ``downgrade base`` and destroyed a production database.
+    """
+    from alembic import command
+    from alembic.script import ScriptDirectory
+
+    command.upgrade(alembic_config, "head")
+    head = ScriptDirectory.from_config(alembic_config).get_current_head()
+    before = _table_names()
+
+    # Offline mode runs the real migration functions and renders SQL, so a
+    # broken downgrade still fails this test -- but no DDL is ever issued.
+    command.downgrade(alembic_config, f"{head}:base", sql=True)
+    out = capsys.readouterr().out
+
+    assert "DROP TABLE" in out
+    assert "usage_records" in out
+    # The tables must still be there: offline mode renders, it does not run.
+    assert _table_names() == before
+
+
+def test_downgrade_guard_blocks_remote_database():
+    """A downgrade aimed at a shared database must refuse.
+
+    This is the guard that did not exist when production was dropped: it only
+    fires for CLI invocations, so programmatic callers bypass it entirely.
+    """
+    from app.migration_safety import guard_destructive
+
+    class Opts:
+        cmd = "downgrade"
+
+    with pytest.raises(RuntimeError, match="Refusing to run"):
+        guard_destructive(
+            "postgresql://u:p@ep-abc.us-east-1.aws.neon.tech/db", Opts()
+        )
