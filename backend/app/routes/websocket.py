@@ -21,7 +21,7 @@ async def websocket_chat(websocket: WebSocket):
                     continue
 
                 req = ChatRequest(
-                    model=data.get("model", "llama-3.3-70b-versatile"),
+                    model=data.get("model", "auto"),
                     messages=messages,
                     stream=True,
                     temperature=data.get("temperature", 0.7),
