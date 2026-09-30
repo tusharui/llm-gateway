@@ -16,7 +16,7 @@ Two consequences worth knowing:
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import String, Boolean, Integer, Float, DateTime, Text, Index, text
+from sqlalchemy import String, Boolean, Integer, Float, DateTime, Text, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -31,15 +31,13 @@ def _utcnow() -> datetime:
 class ApiKey(Base):
     __tablename__ = "api_keys"
 
-    # Named explicitly because PostgreSQL stores a UNIQUE constraint as a
-    # unique index, and autogenerate compares by index name. Letting
-    # ``unique=True`` generate a name produces a spurious
-    # drop/create diff on every ``alembic check``.
-    __table_args__ = (Index("api_keys_key_hash_key", "key_hash", unique=True),)
-
     id: Mapped[str] = mapped_column(Text, primary_key=True)
     key_prefix: Mapped[str] = mapped_column(Text)
-    key_hash: Mapped[str] = mapped_column(Text)
+    # Declared as a UNIQUE constraint to match the live table. PostgreSQL
+    # backs it with an index named api_keys_key_hash_key, so the default
+    # naming already agrees -- but the catalog object has to match too, or
+    # `alembic check` reports a drop/create pair on every run.
+    key_hash: Mapped[str] = mapped_column(Text, unique=True)
     name: Mapped[str] = mapped_column(Text)
     is_active: Mapped[bool | None] = mapped_column(
         Boolean, default=True, server_default=text("true"), nullable=True

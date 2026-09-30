@@ -12,7 +12,10 @@ jobs:
 
     services:
       postgres:
-        image: pgvector/pgvector:pg16
+        # Matches the production Postgres major version. NOT NULL became a
+        # catalog constraint in PG17, so running migrations on PG16 and
+        # deploying to PG18 leaves a real gap in what CI can catch.
+        image: pgvector/pgvector:pg18
         env:
           POSTGRES_USER: gwuser
           POSTGRES_PASSWORD: gwpass

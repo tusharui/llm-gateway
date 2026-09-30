@@ -45,6 +45,32 @@ INDEXES_SQL = """
     ORDER BY indexname
 """
 
+# Constraints are compared separately from indexes on purpose. PostgreSQL
+# implements a UNIQUE constraint as an index, so information_schema and
+# pg_indexes look identical whether the original DDL said CONSTRAINT or
+# CREATE UNIQUE INDEX -- but the two are different catalog objects, and
+# autogenerate treats them differently. A schema check that only looked at
+# indexes would call a UNIQUE constraint and a unique index equivalent.
+#
+# contype 'n' is excluded: PostgreSQL 17 made NOT NULL a catalog constraint,
+# so on a PG17+ server every NOT NULL column gets a pg_constraint row and on
+# PG16 none do. That is a version artifact, not schema drift -- NOT NULL is
+# already compared through information_schema.columns.is_nullable, which means
+# the same thing on both.
+CONSTRAINTS_SQL = """
+    SELECT conrelid::regclass::text AS table_name,
+           conname,
+           contype,
+           pg_get_constraintdef(oid) AS definition
+    FROM pg_constraint
+    WHERE connamespace = 'public'::regnamespace
+      AND contype <> 'n'
+      AND conrelid::regclass::text <> 'alembic_version'
+    ORDER BY conname
+"""
+
+VERSION_SQL = "SHOW server_version"
+
 
 def normalize_type(row: dict) -> str:
     data_type = row["data_type"]
@@ -57,7 +83,11 @@ async def snapshot(url: str) -> dict:
     async with engine.connect() as conn:
         columns = [dict(r) for r in (await conn.execute(text(COLUMNS_SQL))).mappings()]
         indexes = [dict(r) for r in (await conn.execute(text(INDEXES_SQL))).mappings()]
+        constraints = [
+            dict(r) for r in (await conn.execute(text(CONSTRAINTS_SQL))).mappings()
+        ]
         tables = [r[0] for r in (await conn.execute(text(TABLES_SQL))).all()]
+        version = await conn.scalar(text(VERSION_SQL))
     await engine.dispose()
 
     cols = {
@@ -69,7 +99,14 @@ async def snapshot(url: str) -> dict:
         for c in columns
     }
     idx = {i["indexname"]: i["indexdef"] for i in indexes}
-    return {"tables": sorted(tables), "columns": cols, "indexes": idx}
+    con = {c["conname"]: (c["contype"], c["definition"]) for c in constraints}
+    return {
+        "tables": sorted(tables),
+        "columns": cols,
+        "indexes": idx,
+        "constraints": con,
+        "version": version,
+    }
 
 
 def diff(a: dict, b: dict, label_a: str, label_b: str) -> int:
@@ -112,6 +149,20 @@ def diff(a: dict, b: dict, label_a: str, label_b: str) -> int:
             print(f"      {label_b}: {b['indexes'][name]}")
             problems += 1
 
+    for name in sorted(set(a["constraints"]) | set(b["constraints"])):
+        in_a, in_b = name in a["constraints"], name in b["constraints"]
+        if in_a and not in_b:
+            print(f"  CONSTRAINT only in {label_a}: {name} {a['constraints'][name]}")
+            problems += 1
+        elif in_b and not in_a:
+            print(f"  CONSTRAINT only in {label_b}: {name} {b['constraints'][name]}")
+            problems += 1
+        elif a["constraints"][name] != b["constraints"][name]:
+            print(f"  CONSTRAINT differs: {name}")
+            print(f"      {label_a}: {a['constraints'][name]}")
+            print(f"      {label_b}: {b['constraints'][name]}")
+            problems += 1
+
     return problems
 
 
@@ -129,12 +180,16 @@ async def main() -> int:
     problems = diff(snap_a, snap_b, args.label_a, args.label_b)
 
     print(
-        f"\n{args.label_a}: {len(snap_a['tables'])} tables, "
-        f"{len(snap_a['columns'])} columns, {len(snap_a['indexes'])} indexes"
+        f"\n{args.label_a}: pg{snap_a['version']} | "
+        f"{len(snap_a['tables'])} tables, "
+        f"{len(snap_a['columns'])} columns, {len(snap_a['indexes'])} indexes, "
+        f"{len(snap_a['constraints'])} constraints"
     )
     print(
-        f"{args.label_b}: {len(snap_b['tables'])} tables, "
-        f"{len(snap_b['columns'])} columns, {len(snap_b['indexes'])} indexes"
+        f"{args.label_b}: pg{snap_b['version']} | "
+        f"{len(snap_b['tables'])} tables, "
+        f"{len(snap_b['columns'])} columns, {len(snap_b['indexes'])} indexes, "
+        f"{len(snap_b['constraints'])} constraints"
     )
 
     if problems:

@@ -45,8 +45,13 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
         sa.Column("last_used_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id", name="api_keys_pkey"),
+        # A UNIQUE constraint, not a bare unique index. PostgreSQL implements
+        # the constraint as an index, so both produce an index named
+        # api_keys_key_hash_key and look identical to information_schema --
+        # but they are different catalog objects and autogenerate models them
+        # differently. The live table has the constraint.
+        sa.UniqueConstraint("key_hash", name="api_keys_key_hash_key"),
     )
-    op.create_index("api_keys_key_hash_key", "api_keys", ["key_hash"], unique=True)
 
     op.create_table(
         "cached_responses",
