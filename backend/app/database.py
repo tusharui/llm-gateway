@@ -30,6 +30,27 @@ def build_db_url(raw_url: str) -> str:
     return url
 
 
+def _assert_schema_present(connection) -> None:
+    """Fail loudly if Alembic has not been run.
+
+    This used to call ``Base.metadata.create_all``, which silently invented
+    whatever tables the ORM happened to describe at boot. That made schema
+    drift invisible: the app would happily create a half-correct schema on a
+    fresh database and nobody would notice production had drifted. Alembic now
+    owns the schema (``alembic upgrade head``).
+    """
+    from sqlalchemy import inspect
+
+    expected = set(Base.metadata.tables)
+    present = set(inspect(connection).get_table_names())
+    missing = expected - present
+    if missing:
+        raise RuntimeError(
+            f"Missing tables: {sorted(missing)}. Run `alembic upgrade head` "
+            f"before starting the server."
+        )
+
+
 async def init_db():
     global _engine, _session_factory, _db_ok
     try:
@@ -51,7 +72,7 @@ async def init_db():
         )
 
         async with _engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+            await conn.run_sync(_assert_schema_present)
 
         _db_ok = True
         print("[DB] Connected to PostgreSQL via SQLAlchemy ORM")
