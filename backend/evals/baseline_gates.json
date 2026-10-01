@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
   "gate_mode": "observed",
-  "note": "Committed CI quality gates for the routing eval. Every threshold was derived from a measurement on this dataset, not chosen aspirationally. Regenerate the measurements with 'python -m evals.run --write-baseline' and re-review this file whenever evals/golden changes.",
-  "threshold_policy": "threshold = floor(observed - 1.3 * standard_error), rounded down to two places. One standard error of a 379-case proportion is about 2.6 points, so a gate that sits exactly at the measurement fails on the next case anyone relabels. 1.3 standard errors catches a real regression while tolerating the noise a set this size actually has. A threshold above the measurement is a permanent red build, which trains people to ignore the gate.",
+  "note": "Committed CI quality gates for the routing eval. Every threshold was derived from a measurement on this dataset, not chosen aspirationally. Regenerate the measurements with 'python -m evals.run --write-baseline' and re-review this file whenever evals/golden changes. Regeneration preserves the human-written sections below; it refreshes only `measurements` and `thresholds`, and re-marks a threshold `auto` if its value moved.",
+  "threshold_policy": "threshold = floor(observed - 1.3 * standard_error), rounded down to two places. One standard error of a 379-case proportion is about 2.6 points, so a gate that sits exactly at the measurement fails the next case anyone relabels. 1.3 standard errors catches a real regression while tolerating the noise a set this size actually has. A threshold above the measurement is a permanent red build, which trains people to ignore the gate.",
   "why_the_gate_is_low": "The heuristic scores 0.533 on this dataset. The previous CI floor was 0.90 against an 18-case golden set the heuristic scored 18/18 on. That 100% was a property of the test set, not of the router: six of the eighteen cases are near-copies of the router's own regexes, and none of them exercised multi-turn input. The honest baseline is what is gated here. Raising the floor back to 0.90 would require either weakening the dataset or rewriting the router, and doing the first to pass the second is how an eval becomes theatre.",
   "dataset": {
     "path": "backend/evals/golden",
@@ -24,15 +24,16 @@
       }
     },
     "tfidf_logistic_regression": {
-      "overall": { "correct": 271, "n": 379, "value": 0.715040, "wilson_95": [0.667614, 0.758150] },
-      "clear": { "correct": 199, "n": 266, "value": 0.748120, "wilson_95": [0.692674, 0.796502] },
-      "ambiguous": { "correct": 72, "n": 113, "value": 0.637168, "wilson_95": [0.545359, 0.719957] },
-      "adversarial": { "correct": 63, "n": 97, "value": 0.649485, "wilson_95": [0.550491, 0.737089] },
+      "overall": { "correct": 261, "n": 379, "value": 0.688654, "wilson_95": [0.640278, 0.733155] },
+      "clear": { "correct": 198, "n": 266, "value": 0.744361, "wilson_95": [0.688659, 0.793026] },
+      "ambiguous": { "correct": 63, "n": 113, "value": 0.557522, "wilson_95": [0.465643, 0.645686] },
+      "adversarial": { "correct": 64, "n": 97, "value": 0.659794, "wilson_95": [0.561048, 0.746364] },
       "by_tier": {
-        "fast": { "correct": 110, "n": 144, "value": 0.763889 },
-        "balanced": { "correct": 120, "n": 146, "value": 0.821918 },
-        "powerful": { "correct": 41, "n": 89, "value": 0.460674 }
-      }
+        "fast": { "correct": 108, "n": 144, "value": 0.75 },
+        "balanced": { "correct": 115, "n": 146, "value": 0.787671 },
+        "powerful": { "correct": 38, "n": 89, "value": 0.426966 }
+      },
+      "note": "Measured with stratified group k-fold: near-duplicate cases are kept in one fold, so the out-of-fold score is not inflated by a twin of the test case sitting in training. Before that fix the same model scored 0.715 and the gate was 0.68. The lower number is the honest one."
     }
   },
   "thresholds": [
@@ -42,6 +43,8 @@
       "selector": "accuracy",
       "threshold": 0.49,
       "observed_at_write_time": 0.532982,
+      "n_at_write_time": 379,
+      "auto": false,
       "rationale": "Overall routing accuracy. 0.533 observed minus 1.3 SE (0.0256) is 0.500; rounded down to 0.49 for margin. Catches any change that costs more than about four percentage points."
     },
     {
@@ -50,6 +53,8 @@
       "selector": "clear-accuracy",
       "threshold": 0.52,
       "observed_at_write_time": 0.560150,
+      "n_at_write_time": 266,
+      "auto": false,
       "rationale": "Clear cases are where a transparent rule should work. 0.560 observed minus 1.3 SE (0.0304) is 0.521. If this stops being the strongest subset, the keyword scoring is no longer doing what it was written to do."
     },
     {
@@ -58,6 +63,8 @@
       "selector": "ambiguous-accuracy",
       "threshold": 0.40,
       "observed_at_write_time": 0.469027,
+      "n_at_write_time": 113,
+      "auto": false,
       "rationale": "Ambiguous cases carry a wide interval (0.380-0.561) because there are only 113 of them. 0.469 minus 1.3 SE (0.0469) is 0.408. Gated separately so a change that only hurts borderline input is caught even if the overall number moves little."
     },
     {
@@ -66,39 +73,49 @@
       "selector": "adversarial-accuracy",
       "threshold": 0.40,
       "observed_at_write_time": 0.474227,
+      "n_at_write_time": 97,
+      "auto": false,
       "rationale": "Adversarially tagged cases are the ones a real user could plausibly send. 0.474 minus 1.3 SE (0.0507) is 0.408. Smallest subset at 97 cases, so the floor is correspondingly loose; it exists to catch a collapse, not a two-point drift."
     },
     {
       "name": "min-accuracy",
       "system": "tfidf_logistic_regression",
       "selector": "accuracy",
-      "threshold": 0.68,
-      "observed_at_write_time": 0.715040,
-      "rationale": "Same policy applied to the learned baseline. 0.715 minus 1.3 SE (0.0232) is 0.685. Gated because the learned model is the reference implementation: if the heuristic is ever replaced by it, this floor has to hold too."
+      "threshold": 0.65,
+      "observed_at_write_time": 0.688654,
+      "n_at_write_time": 379,
+      "auto": false,
+      "rationale": "Same policy applied to the learned baseline. 0.689 minus 1.3 SE (0.0232) is 0.659. Gated because the learned model is the reference implementation: if the heuristic is ever replaced by it, this floor has to hold too."
     },
     {
       "name": "min-clear-accuracy",
       "system": "tfidf_logistic_regression",
       "selector": "clear-accuracy",
-      "threshold": 0.71,
-      "observed_at_write_time": 0.748120,
-      "rationale": "0.748 minus 1.3 SE (0.0266) is 0.713."
+      "threshold": 0.70,
+      "observed_at_write_time": 0.744361,
+      "n_at_write_time": 266,
+      "auto": false,
+      "rationale": "0.744 minus 1.3 SE (0.0266) is 0.709."
     },
     {
       "name": "min-ambiguous-accuracy",
       "system": "tfidf_logistic_regression",
       "selector": "ambiguous-accuracy",
-      "threshold": 0.57,
-      "observed_at_write_time": 0.637168,
-      "rationale": "0.637 minus 1.3 SE (0.0452) is 0.578. Note the learned baseline also drops on ambiguous cases, by 11 points against its own clear score. That is a property of the dataset, not evidence that either model handles ambiguity."
+      "threshold": 0.49,
+      "observed_at_write_time": 0.557522,
+      "n_at_write_time": 113,
+      "auto": false,
+      "rationale": "0.558 minus 1.3 SE (0.0452) is 0.499. This is the gate that moved when grouped folds were introduced: the old 0.57 was derived from an out-of-fold score of 0.637 that included a near-duplicate of a test case in its training fold. The learned baseline still drops 18.7 points from clear to ambiguous, which is a dataset property rather than evidence that either model handles ambiguity."
     },
     {
       "name": "min-adversarial-accuracy",
       "system": "tfidf_logistic_regression",
       "selector": "adversarial-accuracy",
-      "threshold": 0.58,
-      "observed_at_write_time": 0.649485,
-      "rationale": "0.649 minus 1.3 SE (0.0484) is 0.586."
+      "threshold": 0.59,
+      "observed_at_write_time": 0.659794,
+      "n_at_write_time": 97,
+      "auto": false,
+      "rationale": "0.660 minus 1.3 SE (0.0484) is 0.597."
     }
   ],
   "deliberately_not_gated": [
@@ -113,6 +130,10 @@
     {
       "selector": "by_tier",
       "reason": "The powerful tier sits at 0.247 for the heuristic with an interval of 0.169-0.346. A gate there would be inside its own noise. Per-tier numbers are reported on every run and the per-tier gate is available as --min-tier-accuracy for anyone who wants to raise one deliberately."
+    },
+    {
+      "selector": "multi_turn",
+      "reason": "The dataset has 14 multi-turn cases, 10 of which the heuristic gets wrong. That is a real finding and not enough cases to gate: one case is 7 points. Multi-turn accuracy is reported per case and --min-tier-accuracy-style gating should wait until there are about 60 of them."
     }
   ]
 }

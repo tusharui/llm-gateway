@@ -64,7 +64,7 @@ def require_sklearn() -> dict[str, Any]:
         import sklearn
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.linear_model import LogisticRegression
-        from sklearn.model_selection import StratifiedKFold, train_test_split
+        from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold, train_test_split
         from sklearn.pipeline import Pipeline
     except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
         raise DependencyError(
@@ -77,6 +77,7 @@ def require_sklearn() -> dict[str, Any]:
         "TfidfVectorizer": TfidfVectorizer,
         "LogisticRegression": LogisticRegression,
         "StratifiedKFold": StratifiedKFold,
+        "StratifiedGroupKFold": StratifiedGroupKFold,
         "train_test_split": train_test_split,
         "Pipeline": Pipeline,
     }
@@ -95,6 +96,17 @@ def _jaccard(a: frozenset[str], b: frozenset[str]) -> float:
     return len(a & b) / len(union)
 
 
+# A pairwise near-duplicate scan is O(n^2). Past this size the report is
+# truncated to a bounded number of pairs rather than materialising millions of
+# dicts, and the truncation is stated in the payload so nobody reads a capped
+# list as a complete one.
+NEAR_DUPLICATE_PAIR_CAP = 500
+LEAKAGE_SCAN_MAX_CASES = 8000
+# A cheap length filter: token sets too far apart in size cannot reach the
+# similarity threshold, so they are skipped before the set intersection.
+_NEAR_DUP_LENGTH_SLACK = 0.5
+
+
 @dataclass
 class LeakageReport:
     """Findings from the pre-training inspection pass."""
@@ -104,6 +116,8 @@ class LeakageReport:
     duplicate_input_groups: list[list[str]] = field(default_factory=list)
     duplicate_input_with_conflicting_labels: list[dict[str, Any]] = field(default_factory=list)
     near_duplicate_pairs: list[dict[str, Any]] = field(default_factory=list)
+    near_duplicate_pairs_truncated: bool = False
+    near_duplicate_scan_skipped: bool = False
     cross_fold_near_duplicates: list[dict[str, Any]] = field(default_factory=list)
     inputs_containing_a_label_word: list[dict[str, str]] = field(default_factory=list)
     imbalanced: bool = False
@@ -126,6 +140,8 @@ class LeakageReport:
             "duplicate_input_groups": self.duplicate_input_groups,
             "duplicate_input_with_conflicting_labels": self.duplicate_input_with_conflicting_labels,
             "near_duplicate_pair_count": len(self.near_duplicate_pairs),
+            "near_duplicate_pairs_truncated": self.near_duplicate_pairs_truncated,
+            "near_duplicate_scan_skipped": self.near_duplicate_scan_skipped,
             "near_duplicate_pairs": self.near_duplicate_pairs,
             "cross_fold_near_duplicates": self.cross_fold_near_duplicates,
             "inputs_containing_a_label_word": self.inputs_containing_a_label_word,
@@ -170,15 +186,33 @@ def leakage_report(
             )
 
     token_sets = [_tokens(text) for text in texts]
-    for i in range(len(ids)):
-        for j in range(i + 1, len(ids)):
-            if min(len(token_sets[i]), len(token_sets[j])) < 4:
-                continue
-            score = _jaccard(token_sets[i], token_sets[j])
-            if score >= near_duplicate_threshold:
-                report.near_duplicate_pairs.append(
-                    {"a": ids[i], "b": ids[j], "similarity": round(score, 4)}
+    token_lengths = [len(t) for t in token_sets]
+    if len(texts) > LEAKAGE_SCAN_MAX_CASES:
+        report.near_duplicate_scan_skipped = True
+        report.notes.append(
+            f"near-duplicate scan skipped: {len(texts)} cases exceeds the "
+            f"{LEAKAGE_SCAN_MAX_CASES} limit for an O(n^2) comparison. Cross-fold "
+            "leakage is therefore not checked for this dataset."
+        )
+    else:
+        for i in range(len(ids)):
+            if len(report.near_duplicate_pairs) >= NEAR_DUPLICATE_PAIR_CAP:
+                report.near_duplicate_pairs_truncated = True
+                report.notes.append(
+                    f"near-duplicate pair list truncated at {NEAR_DUPLICATE_PAIR_CAP} entries; "
+                    "the count below is a lower bound, not the total"
                 )
+                break
+            for j in range(i + 1, len(ids)):
+                smaller = min(token_lengths[i], token_lengths[j])
+                larger = max(token_lengths[i], token_lengths[j])
+                if smaller < 4 or (larger - smaller) > larger * _NEAR_DUP_LENGTH_SLACK:
+                    continue
+                score = _jaccard(token_sets[i], token_sets[j])
+                if score >= near_duplicate_threshold:
+                    report.near_duplicate_pairs.append(
+                        {"a": ids[i], "b": ids[j], "similarity": round(score, 4)}
+                    )
 
     if label_words:
         import re
@@ -349,6 +383,52 @@ def _make_pipeline(sk: dict[str, Any]):
     )
 
 
+def _union_find_groups(pair_count: int, pairs: Sequence[dict[str, Any]], ids: Sequence[str]) -> list[int]:
+    """Connected components over near-duplicate pairs.
+
+    Transitive: if A is a near-copy of B and B of C, all three land in one
+    group, because a fold that separates B from A and C still leaks.
+    """
+    parent = list(range(pair_count))
+
+    def find(x: int) -> int:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    index_of_id = {case_id: i for i, case_id in enumerate(ids)}
+    for pair in pairs:
+        left = index_of_id.get(pair["a"])
+        right = index_of_id.get(pair["b"])
+        if left is None or right is None:
+            continue
+        a_root, b_root = find(left), find(right)
+        if a_root != b_root:
+            parent[max(a_root, b_root)] = min(a_root, b_root)
+
+    roots: dict[int, int] = {}
+    groups: list[int] = []
+    for case_id in ids:
+        root = find(index_of_id[case_id])
+        if root not in roots:
+            roots[root] = len(roots)
+        groups.append(roots[root])
+    return groups
+
+
+def _make_grouped_splitter(sk: dict[str, Any], groups: Sequence[int], n_splits: int, seed: int):
+    """Stratified splitter that keeps near-duplicate groups intact.
+
+    ``StratifiedGroupKFold`` balances the label distribution while refusing to
+    split a group across folds, which is exactly what is needed when two cases
+    are the same prompt with punctuation or padding changed. Plain
+    ``StratifiedKFold`` puts them in different folds and the out-of-fold score
+    on both becomes optimistic.
+    """
+    return sk["StratifiedGroupKFold"](n_splits=n_splits, shuffle=True, random_state=seed), list(groups)
+
+
 def cross_validated_predictions(
     ids: Sequence[str],
     texts: Sequence[str],
@@ -397,14 +477,34 @@ def cross_validated_predictions(
     effective_splits = n_splits if n_splits is not None else min(5, smallest, len(ids))
     effective_splits = max(2, min(int(effective_splits), smallest, len(ids)))
 
+    groups = _union_find_groups(len(ids), report.near_duplicate_pairs, list(ids))
+    n_groups = len(set(groups))
+    # A group must fit in one fold, so the split count is also capped by the
+    # number of groups. One group means every case is a near-copy of every other
+    # and no honest split exists.
+    effective_splits = max(2, min(effective_splits, n_groups)) if n_groups >= 2 else 2
+
     out_of_fold: list[str | None] = [None] * len(ids)
     fold_case_ids: list[list[str]] = []
     folds: list[dict[str, Any]] = []
     train_correct = train_total = 0
     vocab_sizes: list[int] = []
 
-    splitter = sk["StratifiedKFold"](n_splits=effective_splits, shuffle=True, random_state=seed)
-    for fold_index, (train_index, test_index) in enumerate(splitter.split(list(texts), label_list)):
+    if n_groups >= effective_splits:
+        splitter, group_labels = _make_grouped_splitter(
+            sk, groups, effective_splits, seed
+        )
+        splits = list(splitter.split(list(texts), label_list, group_labels))
+        splitter_kind = "stratified group k-fold (near-duplicate groups kept whole)"
+    else:
+        # Fewer groups than folds: grouping would put most of the data in one
+        # fold, so fall back and say so rather than pretending the split was
+        # clean.
+        splitter = sk["StratifiedKFold"](n_splits=effective_splits, shuffle=True, random_state=seed)
+        splits = list(splitter.split(list(texts), label_list))
+        splitter_kind = "stratified k-fold (grouping not applied: too few distinct groups)"
+
+    for fold_index, (train_index, test_index) in enumerate(splits):
         pipeline = _make_pipeline(sk)
         _fit(pipeline, [texts[i] for i in train_index], [label_list[i] for i in train_index])
         fold_test = [texts[i] for i in test_index]
@@ -443,6 +543,9 @@ def cross_validated_predictions(
 
     train_accuracy = train_correct / train_total if train_total else None
     notes = list(report.notes)
+    notes.append(
+        f"split: {splitter_kind}; {n_groups} distinct group(s) over {len(ids)} case(s)"
+    )
     if train_accuracy is not None:
         notes.append(
             "train_accuracy is measured on the fitted folds and is optimistic by "
@@ -456,7 +559,7 @@ def cross_validated_predictions(
 
     return LearnedResult(
         name="tfidf_logistic_regression",
-        method="stratified k-fold out-of-fold predictions (vectoriser fitted per training fold)",
+        method=f"{splitter_kind}; vectoriser fitted per training fold",
         predictions=tuple(str(p) for p in out_of_fold),
         n=len(ids),
         seed=seed,

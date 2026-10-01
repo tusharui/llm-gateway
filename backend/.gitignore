@@ -14,3 +14,7 @@ venv/
 # Labelled cases go in evals/golden/ where they are reviewed like anything else.
 evals/production/*.staged.jsonl
 evals/production/raw/
+
+# Failure dumps contain raw case text by design. Harmless while every case is
+# synthetic; a live leak the moment production cases land.
+evals/failures.json

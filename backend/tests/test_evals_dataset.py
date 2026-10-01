@@ -340,9 +340,9 @@ def test_jsonl_round_trip():
     assert [c.id for c in cases] == ["n0", "n1", "n2"]
 
 
-def test_object_without_cases_key_is_an_error():
+def test_multi_line_object_without_cases_key_is_an_error():
     with pytest.raises(DatasetError) as exc:
-        parse_dataset_text('{"version": 2}', path="x.json")
+        parse_dataset_text('{\n  "version": 2\n}', path="x.json")
     assert "'cases' key" in str(exc.value)
 
 

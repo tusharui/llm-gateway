@@ -131,9 +131,11 @@ class BaselineReport:
                 for difficulty, row in sorted(self.rollup["by_difficulty_and_label"].items())
             },
             "by_category": {k: v.to_dict() for k, v in sorted(self.rollup["by_category"].items())},
+            "by_source": {k: v.to_dict() for k, v in sorted(self.rollup["by_source"].items())},
             "by_adversarial_tag": {
                 k: v.to_dict() for k, v in sorted(self.rollup["by_adversarial_tag"].items())
             },
+            "adversarial_any": self.rollup["adversarial_any"].to_dict(),
             "per_class": self.rollup["per_class"],
             "confusion_matrix": self.rollup["confusion_matrix"].to_dict(),
         }

@@ -83,7 +83,7 @@ def test_report_flag_runs(tmp_path, capsys):
     assert code == 0
     output = capsys.readouterr().out
     assert "expected" in output
-    assert "disagreement" in output
+    assert "where the scored systems disagree" in output
 
 
 # --- Gates --------------------------------------------------------------------
@@ -368,10 +368,30 @@ def test_unequal_numbers_both_systems_are_explained(tmp_path):
     assert run(tmp_path, "--dataset", str(GOLDEN)) == 0
     document = json.loads((tmp_path / "results.json").read_text(encoding="utf-8"))
     holdout = document["comparisons"]["tfidf_logistic_regression_holdout"]
+
+    # The holdout evaluates a subset, so the paired comparison is restricted to
+    # cases both systems saw with identical input.
     assert holdout["compared_over_full_dataset"] is False
-    assert holdout["paired_cases_compared"] == document["baselines"][
-        "tfidf_logistic_regression_holdout"
-    ]["overall"]["n"]
+    assert holdout["paired_cases_compared"] < holdout["paired_all_cases"]["discordant"] + (
+        holdout["paired_all_cases"]["both_correct"] + holdout["paired_all_cases"]["both_wrong"]
+    )
+    assert holdout["paired"]["input_identical"] is True
+    assert "multi-turn" in holdout["input_note"]
+    # Proportion comparisons are omitted rather than computed on nested samples.
+    assert "proportion_comparisons_omitted" in holdout
+    assert "clear_vs_clear" not in holdout
+
+
+def test_like_for_like_comparison_excludes_multi_turn_cases(tmp_path):
+    assert run(tmp_path, "--dataset", str(GOLDEN)) == 0
+    document = json.loads((tmp_path / "results.json").read_text(encoding="utf-8"))
+    learned = document["comparisons"]["tfidf_logistic_regression"]
+    all_cases = document["dataset"]["total_cases"]
+    multi_turn = document["dataset"]["multi_turn_cases"]
+    assert learned["paired_cases_compared"] == all_cases - multi_turn
+    assert learned["compared_over_full_dataset"] is False
+    # The unrestricted test is still reported, flagged as using unequal input.
+    assert learned["paired_all_cases"]["input_identical"] is False
 
 
 # --- Failure dumps ------------------------------------------------------------

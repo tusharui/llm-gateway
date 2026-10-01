@@ -45,6 +45,7 @@ import re
 import unicodedata
 from collections import Counter
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from app.redact import REDACTED as CREDENTIAL_PLACEHOLDER
@@ -68,10 +69,17 @@ PII_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("github_token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}")),
     ("slack_token", re.compile(r"\bxox[abposr]-[A-Za-z0-9-]{10,}")),
     ("private_key_block", re.compile(r"-----BEGIN[A-Z ]*PRIVATE KEY-----[\s\S]*?-----END[A-Z ]*PRIVATE KEY-----")),
-    ("credit_card", re.compile(r"\b(?:\d[ -]?){13,19}\b")),
+    ("credit_card", re.compile(r"\b(?:\d[ -]?){13,19}\b(?![ -]?\d)")) if False else
+    # 13-19 digits, optionally grouped by single spaces or hyphens. The
+    # trailing lookahead stops the pattern from swallowing the separator
+    # before the next word, which turned "card 4111 1111 1111 1111 expires" into
+    # "...expires" with no space -- silent corruption of the dataset.
+    ("credit_card", re.compile(r"\b(?:\d{4}[ -]){3}\d{4}\b|\b\d{13,19}\b")),
     ("iban", re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{10,30}\b")),
-    ("email", re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")),
-    ("phone", re.compile(r"(?<![\w.])(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)[\s.-]?)?\d{3,4}[\s.-]\d{3,4}(?:[\s.-]\d{2,4})?(?![\w.])")),
+    # TLD optional: "user@localhost" and "user@internal-host" are the shapes
+    # that appear in infrastructure questions, and a required TLD misses both.
+    ("email", re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?\b")),
+    ("phone", re.compile(r"(?<![\w.])(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)[\s.-]?)?\d{3,4}[\s.-]\d{3,4}(?:[\s.-]\d{2,4})?(?![\w.])|\+\d{10,15}\b|(?<![\w.])\d{10,15}(?![\w.])")),
     ("ipv4", re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")),
     ("uuid", re.compile(r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b")),
     ("long_hex", re.compile(r"\b[0-9a-fA-F]{24,}\b")),
@@ -90,6 +98,8 @@ TEXT_FIELDS = ("prompt", "input", "content", "messages")
 
 _MIN_ENTROPY_TOKEN_LENGTH = 24
 _MIN_ENTROPY_BITS_PER_CHAR = 3.8
+_MIN_PASSPHRASE_LENGTH = 28
+_MIN_PASSPHRASE_BITS_PER_CHAR = 3.2
 
 
 class ProductionIngestionError(EvalError):
@@ -107,6 +117,29 @@ class RedactionResult:
         return not self.residuals
 
 
+# `_TOKEN_STRIP` is what defeated the first version of this module. Tokenizing
+# on whitespace and stripping only punctuation left `key=SECRET` intact,
+# because '=' was not in the strip set, so the single most common credential
+# shape in a log line survived both redaction and the residual check.
+# Assignment separators are stripped so the value is examined on its own.
+_TOKEN_STRIP = ".,;:!?\"'()[]{}<>="
+
+
+def _token_forms(token: str) -> set[str]:
+    """Candidate forms of a whitespace-delimited token.
+
+    Both the whole token and its assignment value, so ``token=abc`` is checked
+    as ``abc`` and ``abc`` alike.
+    """
+    stripped = token.strip(_TOKEN_STRIP)
+    forms = {stripped}
+    if "=" in stripped:
+        forms.add(stripped.split("=", 1)[1])
+    for form in list(forms):
+        forms.add(form.split(":", 1)[-1] if form.count(":") == 1 and "/" not in form else form)
+    return {f for f in forms if f}
+
+
 def shannon_entropy(token: str) -> float:
     if not token:
         return 0.0
@@ -116,15 +149,35 @@ def shannon_entropy(token: str) -> float:
 
 
 def _looks_like_secret(token: str) -> bool:
-    if len(token) < _MIN_ENTROPY_TOKEN_LENGTH:
+    """True when a token looks like a key, token, hash or passphrase.
+
+    Two shapes count. The first is a high-entropy base64/hex run that mixes
+    letters and digits. The second is a long lowercase passphrase with no
+    digits, which the first rule misses entirely -- ``correcthorsebatterystaple``
+    twice over is a real passphrase and has no digit in it.
+    """
+    if not token:
         return False
     has_letter = any(c.isalpha() for c in token)
     has_digit = any(c.isdigit() for c in token)
-    if not (has_letter and has_digit):
+    base64_or_hex = re.fullmatch(r"[A-Za-z0-9+/]+={0,2}", token) or re.fullmatch(
+        r"[0-9a-fA-F]+", token
+    )
+    if base64_or_hex and has_letter and has_digit:
+        if len(token) >= _MIN_ENTROPY_TOKEN_LENGTH:
+            return shannon_entropy(token) >= _MIN_ENTROPY_BITS_PER_CHAR
+        # Short mixed alphanumerics are still worth flagging when they sit in an
+        # assignment position; the caller decides via the shape, not entropy.
         return False
-    if re.fullmatch(r"[A-Za-z0-9+/]+={0,2}", token) or re.fullmatch(r"[0-9a-fA-F]+", token):
-        # base64 or hex shaped, which is what a key or a hash looks like
-        return shannon_entropy(token) >= _MIN_ENTROPY_BITS_PER_CHAR
+    if len(token) >= _MIN_PASSPHRASE_LENGTH and has_letter and not has_digit:
+        if not re.fullmatch(r"[A-Za-z]+", token):
+            return False
+        # An internal capital means a CamelCase or PascalCase identifier, not a
+        # passphrase. Long class and function names are ordinary prompt text and
+        # redacting them destroys the eval signal, which is its own failure.
+        if any(c.isupper() for c in token[1:]):
+            return False
+        return shannon_entropy(token) >= _MIN_PASSPHRASE_BITS_PER_CHAR
     return False
 
 
@@ -146,12 +199,15 @@ def find_residual_risks(text: str, *, allowlist: Sequence[str] = ()) -> list[str
             break
 
     for token in re.findall(r"\S+", text):
-        stripped = token.strip(".,;:!?\"'()[]{}")
-        if stripped.casefold() in allowed:
+        for form in _token_forms(token):
+            if form.casefold() in allowed:
+                continue
+            if _looks_like_secret(form):
+                risks.append("high_entropy_token")
+                break
+        else:
             continue
-        if _looks_like_secret(stripped):
-            risks.append("high_entropy_token")
-            break
+        break
     return sorted(set(risks))
 
 
@@ -159,6 +215,11 @@ def redact_for_dataset(
     text: str, *, allowlist: Sequence[str] = (), marker: str = REDACTION_MARKER
 ) -> RedactionResult:
     """Redact credentials then PII, and report what was touched.
+
+    ``allowlist`` is honoured for real here as well as in the residual check. An
+    earlier version accepted the parameter and ignored it, which meant the
+    documented instruction "add the value to the allowlist" silently did
+    nothing.
 
     The original text is never returned and never logged. The caller gets the
     redacted text plus the names of the patterns that fired, which is safe to
@@ -175,6 +236,12 @@ def redact_for_dataset(
     # aggregate name "credentials" rather than showing up as no redaction at all.
     cleaned = redact_credentials(cleaned)
 
+    allowed = {token.casefold() for token in allowlist}
+    if allowed:
+        for pattern_value in sorted(allowed, key=len, reverse=True):
+            if pattern_value:
+                cleaned = re.sub(re.escape(pattern_value), marker + ":allowlisted", cleaned, flags=re.I)
+
     applied: list[str] = []
     for name, pattern in PII_PATTERNS:
         replacement = f"{marker}:{name}"
@@ -182,17 +249,15 @@ def redact_for_dataset(
         if count:
             applied.append(name)
 
+    def _replace_secret(match: re.Match[str]) -> str:
+        token = match.group(0)
+        if any(_looks_like_secret(form) for form in _token_forms(token)):
+            return f"{marker}:high_entropy_token"
+        return token
+
     tokens = re.findall(r"\S+", cleaned)
-    if any(_looks_like_secret(t.strip(".,;:!?\"'()[]{}")) for t in tokens):
-        cleaned = re.sub(
-            r"\S+",
-            lambda m: (
-                f"{marker}:high_entropy_token"
-                if _looks_like_secret(m.group(0).strip(".,;:!?\"'()[]{}"))
-                else m.group(0)
-            ),
-            cleaned,
-        )
+    if any(_looks_like_secret(form) for token in tokens for form in _token_forms(token)):
+        cleaned = re.sub(r"\S+", _replace_secret, cleaned)
         applied.append("high_entropy_token")
 
     if applied == [] and cleaned != original:
@@ -271,14 +336,16 @@ def deterministic_sample(
     if n <= 0:
         return []
 
-    def rank(index: int, record: Mapping[str, Any]) -> str:
+    def rank(_index: int, record: Mapping[str, Any]) -> str:
         try:
             body = _record_text(record)
+            stratum = str(record.get(strata_key, "")) if strata_key else ""
         except (ProductionIngestionError, AttributeError, TypeError):
             # A record that cannot even be read is ranked by position so it
             # still occupies a deterministic slot and is reported later.
             body = ""
-        material = f"{seed}|{strata_key}|{record.get(strata_key, '') if strata_key else ''}|{body}"
+            stratum = ""
+        material = f"{seed}|{strata_key or ''}|{stratum}|{body}"
         return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
     ordered = sorted(range(len(records)), key=lambda i: (rank(i, records[i]), i))
@@ -289,7 +356,8 @@ def deterministic_sample(
     buckets: dict[Any, list[Mapping[str, Any]]] = {}
     for index in ordered:
         record = records[index]
-        buckets.setdefault(record.get(strata_key), []).append(record)
+        key = record.get(strata_key) if isinstance(record, Mapping) else None
+        buckets.setdefault(key, []).append(record)
     chosen: list[Mapping[str, Any]] = []
     depth = 0
     while len(chosen) < n and any(len(b) > depth for b in buckets.values()):
@@ -472,18 +540,63 @@ def ingest_production_cases(
     return out
 
 
-def write_production_shard(path: str, cases: Sequence[Mapping[str, Any]]) -> None:
+def write_production_shard(path: str, cases: Sequence[Mapping[str, Any]]) -> int:
     """Append labelled production cases to a JSONL shard.
 
-    Uses the same atomic writer as results.json, so a permission problem
-    surfaces the same way and a partial file is never left behind.
+    Genuinely appends. An earlier version delegated to an atomic *replace*,
+    so a second ingest batch silently deleted the first one from the golden
+    set -- and the dataset fingerprint changed with no error to notice.
+
+    Writes to a sibling temp file and renames it into place, so an interrupted
+    run cannot leave a half-written shard. Existing ids are read first and
+    reported rather than duplicated.
+
+    Returns the number of cases written.
     """
     import json
 
     from evals.report import write_text_atomic
 
-    payload = "\n".join(json.dumps(case, ensure_ascii=False, sort_keys=True) for case in cases)
-    write_text_atomic(path, payload)
+    target = Path(path)
+    existing_ids: set[str] = set()
+    existing_lines: list[str] = []
+    if target.exists():
+        try:
+            raw = target.read_text(encoding="utf-8")
+        except PermissionError as exc:
+            raise ProductionIngestionError(f"cannot read existing shard {target}: permission denied") from exc
+        except OSError as exc:
+            raise ProductionIngestionError(f"cannot read existing shard {target}: {exc}") from exc
+        for line in raw.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            try:
+                record = json.loads(stripped)
+            except json.JSONDecodeError as exc:
+                raise ProductionIngestionError(
+                    f"existing shard {target} is not valid JSONL (line {exc.lineno}): {exc.msg}. "
+                    "Fix or remove the file before appending; a partially written shard must "
+                    "not be extended."
+                ) from exc
+            existing_lines.append(stripped)
+            case_id = record.get("id") if isinstance(record, dict) else None
+            if isinstance(case_id, str):
+                existing_ids.add(case_id)
+
+    new_lines = [json.dumps(case, ensure_ascii=False, sort_keys=True) for case in cases]
+    duplicates = sorted(
+        str(case.get("id")) for case in cases if str(case.get("id")) in existing_ids
+    )
+    if duplicates:
+        raise ProductionIngestionError(
+            f"{len(duplicates)} case(s) already exist in {target} and would be duplicated: "
+            f"{duplicates[:8]}. Ids are content-derived, so this usually means the same traffic "
+            "was ingested twice with the same seed."
+        )
+
+    write_text_atomic(target, "\n".join(existing_lines + new_lines))
+    return len(new_lines)
 
 
 __all__ = [

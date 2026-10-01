@@ -70,6 +70,59 @@ RESULTS = Path(__file__).resolve().parent / "results.json"
 BASELINE = Path(__file__).resolve().parent / "baseline_gates.json"
 
 
+def _repo_relative(path: str) -> str:
+    """A path relative to the repo root, so results.json is host-independent.
+
+    An absolute path would make two developers' reports differ for no reason
+    and would record where someone's checkout happens to live.
+    """
+    resolved = Path(path)
+    try:
+        # Forward slashes regardless of platform: a Windows backslash would make
+        # two developers' reports differ for no reason.
+        return resolved.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return resolved.name
+
+
+def _scrub_argv(argv: Sequence[str]) -> list[str]:
+    """Record which flags were used, without recording their values wholesale.
+
+    A value could be a path outside the repo. Flag names are enough to
+    reproduce a command line; the values are all in ``configuration``.
+    """
+    return [token if token.startswith("-") else "<value>" for token in argv]
+
+
+def _merge_baseline(existing: dict[str, Any], fresh: dict[str, Any]) -> dict[str, Any]:
+    """Keep human-written sections of a baseline file when regenerating it.
+
+    The measurements and thresholds are refreshed. The policy paragraph, the
+    dataset pointer and the deliberately-not-gated list are preserved, because
+    those are judgement calls that a command cannot regenerate.
+    """
+    merged = dict(existing)
+    merged.update(
+        {
+            key: fresh[key]
+            for key in ("measurements", "thresholds", "gate_mode", "note")
+            if key in fresh
+        }
+    )
+    # A threshold the human reviewed keeps its reviewed flag; a threshold whose
+    # value moved is marked auto again so the change cannot pass unnoticed.
+    previous = {
+        entry["name"]: entry
+        for entry in existing.get("thresholds", [])
+        if isinstance(entry, dict) and "name" in entry
+    }
+    for entry in merged.get("thresholds", []):
+        old = previous.get(entry["name"])
+        if old is None or old.get("threshold") != entry["threshold"]:
+            entry["auto"] = True
+    return merged
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m evals.run",
@@ -114,8 +167,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     gates.add_argument(
         "--gate-system",
-        default=DEFAULT_GATE_SYSTEM,
-        help="which baseline the gates apply to (default: heuristic)",
+        default=None,
+        help=(
+            "scope every gate on the command line to this baseline "
+            f"(default: {DEFAULT_GATE_SYSTEM}). When set, it also overrides the system "
+            "recorded in a --load-baseline file, so a scoped run cannot be silently "
+            "redirected."
+        ),
     )
 
     output = parser.add_argument_group("output and inspection")
@@ -200,28 +258,48 @@ def _print_table(
 ) -> None:
     """One row per case, one column per system, wrong answers marked.
 
-    A wrong cell is marked rather than coloured or dropped: the point of the
-    table is to make it obvious at a glance which cases every system gets wrong,
-    which is the input to a manual error-analysis pass.
+    Columns are aligned **by case id**, not by list position. The holdout
+    baseline only predicts 95 of the 379 cases, so positional indexing raises
+    an IndexError partway down the table and loses the rest of the report.
     """
     names = sorted(predictions)
+    by_id = {
+        name: dict(zip(report.case_ids, report.predictions))
+        for name, report in reports.items()
+    }
     widths = [max(len(name), 10) for name in names]
     header = f"{'id':<34} {'expected':<10} " + " ".join(
         f"{name:<{width}}" for name, width in zip(names, widths)
     )
     print(header)
     print("-" * len(header))
-    disagreements = 0
-    for index, case in enumerate(cases):
+
+    disagreeing_cases = 0
+    wrong_cells = 0
+    missing = 0
+    for case in cases:
         cells = []
+        answers = []
         for name, width in zip(names, widths):
-            predicted = predictions[name][index]
-            marker = " " if predicted == case.expected_label else "X"
-            if marker == "X":
-                disagreements += 1
-            cells.append(f"{predicted:<{width - 1}}{marker}")
+            predicted = by_id[name].get(case.id)
+            if predicted is None:
+                missing += 1
+                cells.append(f"{'-':<{width}}")
+                continue
+            answers.append(predicted)
+            if predicted != case.expected_label:
+                wrong_cells += 1
+            cells.append(f"{predicted:<{width - 1}}{' ' if predicted == case.expected_label else 'X'}")
+        if len(set(answers)) > 1:
+            disagreeing_cases += 1
         print(f"{case.id:<34} {case.expected_label:<10} " + " ".join(cells))
-    print(f"\n{disagreements} disagreement(s) between the systems above.")
+
+    print(
+        f"\n{wrong_cells} wrong answer(s) across {disagreeing_cases} case(s) where the "
+        f"scored systems disagree."
+    )
+    if missing:
+        print(f"{missing} case(s) were not evaluated by at least one system (shown as '-').")
 
 
 # --- Baseline assembly --------------------------------------------------------
@@ -247,11 +325,46 @@ def collect_baselines(
     return reports
 
 
-def _specs_from_baseline_file(
-    path: str, *, system: str | None
-) -> list[Any]:
-    from evals.gates import GateSpec
+def _build_specs(entry: dict[str, Any], *, default_system: str | None, source: str):
+    """Build one GateSpec from a baseline-file entry, with full validation.
 
+    The CLI path validates thresholds through ``_validate_threshold``. Without
+    the same check here a baseline file containing ``90`` (a percentage where a
+    proportion was expected) or ``-1`` would install a gate that can never pass,
+    with no diagnostic -- the exact failure the CLI path has an error message
+    for.
+    """
+    from evals.gates import GateSpec, _validate_threshold
+
+    name = str(entry["name"])
+    selector = str(entry["selector"])
+    raw_threshold = entry["threshold"]
+    if isinstance(raw_threshold, bool):
+        raise GateConfigurationError(
+            f"{source}: gate {name!r} has threshold {raw_threshold!r}, which is a boolean, "
+            "not a proportion"
+        )
+    try:
+        threshold = float(raw_threshold)
+    except (TypeError, ValueError) as exc:
+        raise GateConfigurationError(
+            f"{source}: gate {name!r} has threshold {entry['threshold']!r}, which is not a number"
+        ) from exc
+    system = str(entry.get("system") or default_system or DEFAULT_GATE_SYSTEM)
+    if default_system is not None and entry.get("system"):
+        # The command line wins over the file, and the file must not be able to
+        # silently redirect a gate the operator thought they had scoped.
+        system = default_system
+    return GateSpec(
+        name=name,
+        selector=selector,
+        threshold=_validate_threshold(name, threshold),
+        system=system,
+        rationale=str(entry.get("rationale", "")),
+    )
+
+
+def _specs_from_baseline_file(path: str, *, system: str | None = None) -> list[Any]:
     payload = load_baseline_file(path)
     entries = payload.get("thresholds")
     if not isinstance(entries, list) or not entries:
@@ -259,23 +372,10 @@ def _specs_from_baseline_file(
             f"baseline file {path} has no 'thresholds' list. Regenerate it with "
             "'python -m evals.run --write-baseline'."
         )
-    specs = []
-    for index, entry in enumerate(entries):
-        if not isinstance(entry, dict):
-            raise GateConfigurationError(f"{path}: thresholds[{index}] is not an object")
-        for required in ("name", "selector", "threshold"):
-            if required not in entry:
-                raise GateConfigurationError(f"{path}: thresholds[{index}] is missing {required!r}")
-        specs.append(
-            GateSpec(
-                name=str(entry["name"]),
-                selector=str(entry["selector"]),
-                threshold=float(entry["threshold"]),
-                system=str(entry.get("system") or system or DEFAULT_GATE_SYSTEM),
-                rationale=str(entry.get("rationale", "")),
-            )
-        )
-    return specs
+    return [
+        _build_specs(entry, default_system=system, source=f"{path} thresholds[{index}]")
+        for index, entry in enumerate(entries)
+    ]
 
 
 # --- Entry point --------------------------------------------------------------
@@ -300,9 +400,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             confidence=args.confidence,
         )
 
+        cli_system = args.gate_system
         specs = []
         if args.load_baseline:
-            specs.extend(_specs_from_baseline_file(args.load_baseline, system=args.gate_system))
+            specs.extend(_specs_from_baseline_file(args.load_baseline, system=cli_system))
         specs.extend(
             build_gates(
                 min_accuracy=args.min_accuracy,
@@ -310,30 +411,29 @@ def main(argv: Sequence[str] | None = None) -> int:
                 min_ambiguous_accuracy=args.min_ambiguous_accuracy,
                 min_adversarial_accuracy=args.min_adversarial_accuracy,
                 tier_gates=args.min_tier_accuracy,
-                system=args.gate_system,
+                system=cli_system or DEFAULT_GATE_SYSTEM,
             )
         )
         gate_results = evaluate_gates(reports, specs, mode=args.gate_on)
+        # The systems the gates actually ran against, which can differ from the
+        # CLI default when --load-baseline supplied per-system thresholds.
+        effective_gate_systems = sorted({result.system for result in gate_results}) or [DEFAULT_GATE_SYSTEM]
 
-        predictions = {name: report.predictions for name, report in reports.items()}
         configuration = {
-            "dataset": str(args.dataset),
+            "dataset": _repo_relative(args.dataset),
             "gate_mode": args.gate_on,
-            "gate_system": args.gate_system,
+            "gate_system": cli_system or "per-threshold (see gates.results[].system)",
+            "gate_systems_effective": effective_gate_systems,
             "confidence": args.confidence,
             "learned_baseline_enabled": not args.no_learned,
             "seed": args.seed,
             "tiers": list(TIERS),
             "difficulties": list(DIFFICULTIES),
-            "argv": list(argv) if argv is not None else sys.argv[1:],
+            "argv": _scrub_argv(argv if argv is not None else sys.argv[1:]),
         }
 
-        if not args.quiet:
-            _print_report(reports, dataset_warnings)
-            if args.report:
-                _print_table(reports, cases, predictions)
-                print()
-
+        # Results are written before anything is printed, so a rendering bug in
+        # the human summary can never cost a run its results.json.
         failures_payload: dict[str, Any] | None = None
         if args.dump_failures > 0:
             failures_payload = {
@@ -351,13 +451,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         document = build_report(
             cases=cases,
             reports=reports,
-            dataset_path=str(args.dataset),
+            dataset_path=_repo_relative(args.dataset),
             dataset_warnings=dataset_warnings,
             configuration=configuration,
             gate_results=gate_results,
             repo_root=ROOT,
             failures=failures_payload,
         )
+
+        if args.write_baseline:
+            from evals.gates import baseline_snapshot
+
+            snapshot = baseline_snapshot(reports, specs, mode=args.gate_on)
+            target = Path(args.write_baseline)
+            if target.is_file():
+                # Regeneration must not delete the parts a human wrote: the
+                # policy paragraph, the "not gated" list, the fingerprint.
+                snapshot = _merge_baseline(load_baseline_file(str(target)), snapshot)
+            write_results(args.write_baseline, snapshot)
+            if not args.quiet:
+                print(f"wrote measured baseline to {args.write_baseline}\n")
 
         if args.dump_failures > 0:
             destination = Path(args.failures_out or (Path(args.results).with_name("failures.json")))
@@ -367,18 +480,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                     print(f"wrote {len(rows)} {name} misclassifications to {destination}")
                 print()
 
-        if args.write_baseline:
-            from evals.gates import baseline_snapshot
-
-            snapshot = baseline_snapshot(reports, specs, mode=args.gate_on)
-            write_results(args.write_baseline, snapshot)
-            if not args.quiet:
-                print(f"wrote measured baseline to {args.write_baseline}\n")
-
         if not args.no_save:
             written = write_results(args.results, document)
             if not args.quiet:
                 print(f"results written to {written}")
+
+        if not args.quiet:
+            _print_report(reports, dataset_warnings)
+            if args.report:
+                _print_table(reports, cases, {n: r.predictions for n, r in reports.items()})
+                print()
 
         if gate_results and not args.quiet:
             print("\nquality gates:")

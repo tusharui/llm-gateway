@@ -77,6 +77,7 @@ class GateResult:
     passed: bool
     reason: str
     rationale: str = ""
+    confidence: float = 0.95
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -94,6 +95,7 @@ class GateResult:
             "passed": self.passed,
             "reason": self.reason,
             "rationale": self.rationale,
+            "interval_confidence": round(self.confidence, 6),
         }
 
     def metric_path(self) -> str:
@@ -105,7 +107,7 @@ class GateResult:
             return f"{state} {self.name}: {self.reason}"
         interval = ""
         if self.ci_lower is not None and self.ci_upper is not None:
-            interval = f", 95% CI {self.ci_lower:.1%}-{self.ci_upper:.1%}"
+            interval = f", {self.confidence:.0%} CI {self.ci_lower:.1%}-{self.ci_upper:.1%}"
         compared = f"{self.compared:.1%}" if self.compared is not None else "n/a"
         return (
             f"{state} {self.name}: {self.observed:.1%} (n={self.n}) {interval} "
@@ -208,6 +210,13 @@ def _proportion_for(report: BaselineReport, selector: str) -> Proportion | None:
     return None
 
 
+def _proportion_n(report: BaselineReport | None, selector: str) -> int:
+    if report is None:
+        return 0
+    proportion = _proportion_for(report, selector)
+    return proportion.n if proportion is not None else 0
+
+
 def evaluate_gates(
     reports: Mapping[str, BaselineReport],
     specs: Iterable[GateSpec],
@@ -219,6 +228,7 @@ def evaluate_gates(
         raise GateConfigurationError(f"gate mode must be one of {list(GATE_MODES)}, got {mode!r}")
 
     results: list[GateResult] = []
+    interval_confidence = next((r.accuracy().confidence for r in reports.values()), 0.95)
     for spec in specs:
         report = reports.get(spec.system)
         if report is None:
@@ -240,6 +250,7 @@ def evaluate_gates(
                         "checked. Failing closed."
                     ),
                     rationale=spec.rationale,
+                    confidence=interval_confidence,
                 )
             )
             continue
@@ -261,6 +272,7 @@ def evaluate_gates(
                     passed=False,
                     reason=f"selector {spec.selector!r} does not exist on system {spec.system!r}",
                     rationale=spec.rationale,
+                    confidence=interval_confidence,
                 )
             )
             continue
@@ -286,6 +298,7 @@ def evaluate_gates(
                         "measured. Failing closed rather than reporting a pass."
                     ),
                     rationale=spec.rationale,
+                    confidence=interval_confidence,
                 )
             )
             continue
@@ -314,6 +327,7 @@ def evaluate_gates(
                 passed=passed,
                 reason=reason,
                 rationale=spec.rationale,
+                confidence=interval_confidence,
             )
         )
     return results
@@ -339,10 +353,37 @@ DEFAULT_SELECTORS: tuple[tuple[str, str, str], ...] = (
     ),
 )
 
+# How far below a measurement a generated threshold sits, in standard errors.
+# Matches the policy written into baseline_gates.json. The previous code rounded
+# the measurement *down to two places* instead, which put generated gates about
+# 0.1 SE under the measurement -- they would flip on the first case anyone
+# relabelled, and they contradicted the committed file's own stated policy.
+GATE_SAFETY_MARGIN_STANDARD_ERRORS = 1.3
+
+
+def standard_error(value: float, n: int) -> float:
+    """Binomial standard error at ``value`` over ``n`` trials."""
+    if n <= 0:
+        return 0.0
+    return math.sqrt(value * (1.0 - value) / n)
+
 
 def _round_down(value: float, places: int = 2) -> float:
     factor = 10**places
     return math.floor(value * factor + 1e-9) / factor
+
+
+def suggested_threshold(observed: float, n: int) -> float:
+    """A floor derived from a measurement, per the documented policy.
+
+    ``floor(observed - 1.3 * standard_error)``, rounded down to two places. One
+    standard error of a proportion over a few hundred cases is a couple of
+    points, so a gate sitting exactly on the measurement fails the next time
+    anyone edits a label. 1.3 standard errors catches a real regression while
+    tolerating the noise a set this size actually has.
+    """
+    floor = observed - GATE_SAFETY_MARGIN_STANDARD_ERRORS * standard_error(observed, n)
+    return max(0.0, _round_down(max(0.0, floor)))
 
 
 def baseline_snapshot(
@@ -390,29 +431,40 @@ def baseline_snapshot(
         report = reports.get(system)
         for name, selector, rationale in DEFAULT_SELECTORS:
             observed = _safe_value(report, selector)
+            n = _proportion_n(report, selector)
             thresholds.append(
                 {
                     "name": name,
                     "system": system,
                     "selector": selector,
-                    "threshold": _round_down(observed) if observed is not None else 0.0,
+                    "threshold": suggested_threshold(observed, n) if observed is not None else 0.0,
                     "observed_at_write_time": round(observed, 6) if observed is not None else None,
+                    "n_at_write_time": n,
                     "auto": True,
                     "rationale": rationale,
                 }
             )
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "gate_mode": mode,
         "gate_system": DEFAULT_GATE_SYSTEM,
+        "threshold_policy": (
+            f"threshold = floor(observed - {GATE_SAFETY_MARGIN_STANDARD_ERRORS} * "
+            "standard_error), rounded down to two places. One standard error of a "
+            "379-case proportion is about 2.6 points, so a gate sitting exactly at the "
+            "measurement fails the next time anyone relabels a case. A threshold above "
+            "the measurement is a permanent red build, which trains people to ignore "
+            "the gate."
+        ),
         "measurements": measurements,
         "thresholds": thresholds,
         "note": (
             "Every threshold must be at or below the observed measurement for the same "
             "selector, or the gate fails permanently and people learn to ignore it. "
-            "Entries marked auto were rounded down from the measurement and still need a "
-            "human decision. Re-measure and re-review whenever the dataset changes."
+            "Entries marked auto were derived from the measurement by the policy above "
+            "and still need a human decision. Re-measure and re-review whenever the "
+            "dataset changes."
         ),
     }
 

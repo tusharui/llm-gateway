@@ -50,13 +50,25 @@ class DatasetValidationError(EvalError):
     """The dataset is readable but contains cases that must not be evaluated.
 
     Carries every issue found rather than only the first, so a single run
-    reports the whole list of problems.
+    reports the whole list of problems. The list is capped: a dataset with
+    hundreds of thousands of malformed records would otherwise produce a
+    hundred-megabyte exception message that CI cannot display and nobody can
+    read. What is dropped is reported, not hidden.
     """
+
+    MAX_LISTED = 50
 
     def __init__(self, issues: list[ValidationIssue]) -> None:
         self.issues = list(issues)
         errors = [i for i in self.issues if i.severity == ERROR]
-        detail = "\n".join(f"  - {i}" for i in self.issues)
+        shown = self.issues[: self.MAX_LISTED]
+        detail = "\n".join(f"  - {i}" for i in shown)
+        if len(self.issues) > len(shown):
+            detail += (
+                f"\n  ... and {len(self.issues) - len(shown)} more "
+                f"({len(errors)} error(s) total). Narrow the dataset or fix the first "
+                "issues and re-run."
+            )
         super().__init__(
             f"{len(errors)} dataset validation error(s) in "
             f"{len(self.issues)} issue(s) total:\n{detail}"
@@ -85,15 +97,28 @@ class ResultsWriteError(EvalError):
 
 @dataclass
 class IssueCollector:
-    """Accumulates validation issues without deduplicating or discarding them."""
+    """Accumulates validation issues without deduplicating or discarding them.
+
+    Capped, because a systematically malformed dataset produces one issue per
+    record and the cap is what keeps a CI log readable. ``dropped`` records how
+    many were not stored, so nothing is silently lost.
+    """
 
     issues: list[ValidationIssue] = field(default_factory=list)
+    max_issues: int = 20_000
+    dropped: int = 0
 
     def error(self, code: str, location: str, message: str) -> None:
-        self.issues.append(ValidationIssue(code, location, message, ERROR))
+        self._add(ValidationIssue(code, location, message, ERROR))
 
     def warn(self, code: str, location: str, message: str) -> None:
-        self.issues.append(ValidationIssue(code, location, message, WARNING))
+        self._add(ValidationIssue(code, location, message, WARNING))
+
+    def _add(self, issue: ValidationIssue) -> None:
+        if len(self.issues) < self.max_issues:
+            self.issues.append(issue)
+        else:
+            self.dropped += 1
 
     @property
     def errors(self) -> list[ValidationIssue]:

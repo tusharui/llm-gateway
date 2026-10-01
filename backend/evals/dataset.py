@@ -195,11 +195,11 @@ def parse_dataset_text(text: str, *, path: str = "<string>") -> list[Any]:
 
     if stripped[0] == "{":
         lines = [ln for ln in text.splitlines() if ln.strip()]
+        # A single line beginning with '{' is a JSON object. It could be either
+        # one JSONL record or a whole one-case document, so try the document
+        # form first and fall back to JSONL rather than rejecting a legitimate
+        # one-record shard.
         if len(lines) > 1:
-            # Multi-line input beginning with '{' is far more likely to be
-            # JSONL than a truncated document. Try the document form first so
-            # a pretty-printed v2 file still works, then fall back to JSONL and
-            # report JSONL's line number, which is the actionable message.
             try:
                 payload = json.loads(text)
             except json.JSONDecodeError:
@@ -207,22 +207,19 @@ def parse_dataset_text(text: str, *, path: str = "<string>") -> list[Any]:
         else:
             try:
                 payload = json.loads(text)
-            except json.JSONDecodeError as exc:
-                raise DatasetError(
-                    f"Dataset {path} is not valid JSON: {exc.msg} "
-                    f"(line {exc.lineno}, column {exc.colno})"
-                ) from exc
-        if not isinstance(payload, dict):
-            raise DatasetError(f"Dataset {path}: expected a JSON object, got {type(payload).__name__}")
-        if "cases" not in payload:
-            raise DatasetError(f"Dataset {path}: object form requires a 'cases' key")
-        version = payload.get("version", 1)
-        if not isinstance(version, int) or isinstance(version, bool):
-            raise DatasetError(f"Dataset {path}: 'version' must be an integer, got {version!r}")
-        cases = payload["cases"]
-        if not isinstance(cases, list):
-            raise DatasetError(f"Dataset {path}: 'cases' must be a list, got {type(cases).__name__}")
-        return cases
+            except json.JSONDecodeError:
+                return _parse_jsonl(text, path)
+        if "cases" in payload:
+            return _document_cases(payload, path)
+        if len(lines) == 1:
+            # One line, valid JSON object, no "cases" key. That is a one-record
+            # JSONL shard, which is legal: requiring a wrapper document would
+            # make a single-case shard unloadable.
+            return _parse_jsonl(text, path)
+        raise DatasetError(
+            f"Dataset {path}: object form requires a 'cases' key. A single JSONL record "
+            'on its own line is fine; wrap a document in {"cases": [...]}.'
+        )
 
     if stripped[0] == "[":
         try:
@@ -237,6 +234,18 @@ def parse_dataset_text(text: str, *, path: str = "<string>") -> list[Any]:
 
     # JSONL fallback: one JSON object per non-empty line.
     return _parse_jsonl(text, path)
+
+
+def _document_cases(payload: dict[str, Any], path: str) -> list[Any]:
+    if not isinstance(payload, dict):
+        raise DatasetError(f"Dataset {path}: expected a JSON object, got {type(payload).__name__}")
+    version = payload.get("version", 1)
+    if not isinstance(version, int) or isinstance(version, bool):
+        raise DatasetError(f"Dataset {path}: 'version' must be an integer, got {version!r}")
+    cases = payload.get("cases")
+    if not isinstance(cases, list):
+        raise DatasetError(f"Dataset {path}: 'cases' must be a list, got {type(cases).__name__}")
+    return cases
 
 
 def _parse_jsonl(text: str, path: str) -> list[Any]:
@@ -284,6 +293,7 @@ def _validate_messages(raw: Any, location: str, collector: IssueCollector) -> tu
                 f"content is {len(content)} chars, limit is {MAX_INPUT_CHARS}",
             )
         if role in ROLES and isinstance(content, str) and content.strip():
+            _check_unicode(content, f"{loc}.content", collector)
             out.append((str(role), content))
     if not out:
         return None
@@ -344,7 +354,14 @@ def _check_unicode(value: str, location: str, collector: IssueCollector) -> None
 def _coerce_case(raw: Any, index: int, collector: IssueCollector) -> EvalCase | None:
     location = f"cases[{index}]"
     if isinstance(raw, str):
-        collector.error("case.type", location, f"case must be an object, got the string {raw[:40]!r}")
+        # Length only. Echoing the first 40 characters of a malformed record
+        # puts raw dataset text into a validation error, and validation errors
+        # go to CI logs.
+        collector.error(
+            "case.type",
+            location,
+            f"case must be an object, got a string of length {len(raw)}",
+        )
         return None
     if not isinstance(raw, dict):
         collector.error("case.type", location, f"case must be an object, got {type(raw).__name__}")
@@ -497,11 +514,13 @@ def _coerce_case(raw: Any, index: int, collector: IssueCollector) -> EvalCase | 
 
     # --- notes ---
     notes = raw.get("notes", "")
+    notes_valid = True
     if notes is None:
         notes = ""
     if not isinstance(notes, str):
         collector.error("notes.type", f"{location}.notes", f"notes must be a string, got {type(notes).__name__}")
         notes = ""
+        notes_valid = False
 
     # --- messages ---
     messages: tuple[tuple[str, str], ...] | None = None
@@ -522,6 +541,8 @@ def _coerce_case(raw: Any, index: int, collector: IssueCollector) -> EvalCase | 
                     "the last user message in 'messages' differs from 'input'",
                 )
 
+    if label is None or not notes_valid:
+        return None
     _check_label_leakage(raw, label, location, collector)
 
     if None in (case_id, text, label, difficulty, source, category):
@@ -578,7 +599,6 @@ def _check_duplicates(cases: Sequence[EvalCase], collector: IssueCollector) -> N
     # overlap, and refusing to load the dataset over a warning would be a
     # worse failure than recording it.
     token_map = [(case.id, _word_tokens(case.input)) for case in cases]
-    reported: set[tuple[str, str]] = set()
     for i in range(len(token_map)):
         id_a, tokens_a = token_map[i]
         if len(tokens_a) < 4:
@@ -591,10 +611,6 @@ def _check_duplicates(cases: Sequence[EvalCase], collector: IssueCollector) -> N
                 continue
             score = jaccard(tokens_a, tokens_b)
             if score >= 0.8:
-                key = (id_a, id_b) if id_a < id_b else (id_b, id_a)
-                if key in reported:
-                    continue
-                reported.add(key)
                 collector.warn(
                     "input.near_duplicate",
                     f"{id_a} ~ {id_b}",
@@ -625,6 +641,13 @@ def validate_cases(raw_cases: Iterable[Any], *, limit: int | None = MAX_CASES) -
     if cases:
         _check_duplicates(cases, collector)
 
+    if collector.dropped:
+        collector.warn(
+            "issues.truncated",
+            "<dataset>",
+            f"{collector.dropped} further issue(s) were found and not listed; "
+            f"only the first {collector.max_issues} are reported",
+        )
     if collector.errors:
         raise DatasetValidationError(collector.issues)
     return cases, collector.issues
@@ -655,8 +678,11 @@ def find_dataset_shards(directory: str | Path) -> list[Path]:
     """
     root = Path(directory)
     try:
+        # Only JSONL. Accepting a stray .json in the directory would let a
+        # metadata file turn into a "no usable cases" failure about the wrong
+        # shard.
         entries = sorted(
-            (p for p in root.iterdir() if p.is_file() and p.suffix in (".jsonl", ".json")),
+            (p for p in root.iterdir() if p.is_file() and p.suffix == ".jsonl"),
             key=lambda p: p.name,
         )
     except FileNotFoundError as exc:
@@ -666,7 +692,10 @@ def find_dataset_shards(directory: str | Path) -> list[Path]:
     except OSError as exc:
         raise DatasetError(f"Could not list dataset directory {root}: {exc.strerror or exc}") from exc
     if not entries:
-        raise DatasetError(f"Dataset directory {root} contains no .json/.jsonl shards")
+        raise DatasetError(
+            f"Dataset directory {root} contains no .jsonl shards. Shards must be JSONL "
+            "so a case cannot span more than one line."
+        )
     return entries
 
 

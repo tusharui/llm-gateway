@@ -21,11 +21,20 @@ Failure counts come from `--dump-failures`, and the 23 cases behind
 | system | overall | clear | ambiguous | adversarial |
 |---|---|---|---|---|
 | heuristic | **0.533** (202/379) [0.483–0.583] | 0.560 (149/266) [0.500–0.619] | 0.469 (53/113) [0.380–0.561] | 0.474 (46/97) [0.378–0.573] |
-| tfidf + logistic regression | **0.715** (271/379) [0.668–0.758] | 0.748 (199/266) [0.693–0.797] | 0.637 (72/113) [0.545–0.720] | 0.649 (63/97) [0.550–0.737] |
+| tfidf + logistic regression | **0.689** (261/379) [0.640–0.733] | 0.744 (198/266) [0.689–0.793] | 0.558 (63/113) [0.466–0.646] | 0.660 (64/97) [0.561–0.746] |
 | majority class (floor) | 0.380 (144/379) [0.333–0.430] | 0.350 | 0.451 | 0.371 |
 
 Per tier, heuristic: `fast` 0.771 (111/144), `balanced` 0.473 (69/146),
 `powerful` **0.247** (22/89).
+
+### A note on the learned baseline's number
+
+An earlier version of this document reported 0.715 for the learned baseline.
+That figure was wrong. Two near-duplicate case pairs were landing on opposite
+sides of a stratified split, so a model had seen a twin of its test case. The
+folds are now grouped (`StratifiedGroupKFold`, near-duplicate groups kept
+whole) and the same model scores **0.689**. The lower number is the honest one,
+and the committed gate moved with it from 0.68 to 0.65.
 
 ### Confusion matrix (rows = expected, columns = predicted)
 
@@ -55,28 +64,29 @@ hardest. It fails about equally everywhere. The intuition that a transparent
 keyword rule "works on clear cases and breaks on ambiguous ones" is *not*
 supported by this dataset. Where it does break down is along the axes below.
 
-The learned baseline drops 11 points from clear to ambiguous (0.748 → 0.637),
-which is a more ordinary pattern. Neither system's gap is significant at 95% on
-113 cases.
+The learned baseline drops 18.4 points from clear to ambiguous (0.744 →
+0.558), which is a more ordinary pattern, and its ambiguous interval is wide
+enough (0.466–0.646) that the drop is not itself significant.
 
 ### Does the learned baseline replace the heuristic?
 
-On this data, yes, and the comparison is significant.
+On this data, yes, and the comparison is significant. Restricted to the 365
+cases where both systems received **identical input** (see the limits section
+for why that restriction exists):
 
-- Paired (McNemar exact, all 379 cases): heuristic wins 48, learned wins 117,
-  165 discordant, p = 8e-08.
-- Clear cases: learned is 18.8 points better, CI [10.7, 26.5], p = 5.2e-06.
-- Ambiguous cases: learned is 16.8 points better, CI [3.9, 29.0], p = 0.011.
-- Per-tier recall for `powerful` is 0.247 heuristic versus 0.461 learned. Both
+- Paired (McNemar exact, 146 discordant): heuristic wins 45, learned wins 101,
+  p < 1e-8.
+- Clear cases: learned is 18.4 points better.
+- Ambiguous cases: learned is 8.8 points better.
+- Per-tier recall for `powerful` is 0.247 heuristic versus 0.427 learned. Both
   are bad; the learned one is less bad.
 
 I am **not** recommending the swap, for reasons that have nothing to do with
 this table and everything to do with it: the learned model is trained on 379
-cases written by the same person who writes the labels, so its 0.715 measures
+cases written by the same person who writes the labels, so its 0.689 measures
 agreement with my judgement, not correctness. Its training accuracy is 0.989
-against 0.715 out-of-fold, which is memorisation, and the two
-near-duplicate pairs that straddle fold boundaries are a live version of the
-same problem. It is a reference point, not a candidate.
+against 0.689 out-of-fold, which is memorisation. It is a reference point, not
+a candidate.
 
 ---
 
@@ -175,16 +185,21 @@ A three-turn conversation scores the same as a three-word prompt.
 - `mt_early_design_01` — `Design a rate limiter for a public API.` / `Here is one approach using a token bucket.` / `what about distributed?`. Score 0.
 - `mt_history_debug_01` — six turns of diagnosing a 500 on `POST /charges`; last turn `It has a trailing comma.` Score 1, from the system-message bonus.
 
-**Which system failed:** the heuristic only. The learned baseline sees
-`case.input` (the last user turn) and nothing else, so it fails these too --
-but differently, and its `mt_` accuracy is reported per case in
-`results.json` rather than as a separate subset, which is itself a gap in the
-harness.
+**Which system failed:** the heuristic only, but not for the reason the first
+draft of this document gave. The learned baseline reads `case.input` -- the
+last user turn -- while the heuristic reads the whole conversation. On these
+cases the baseline is wrong too, but on 4 of 14 rather than 10 of 14, because
+the last turn sometimes carries enough on its own. That is not a fair contest:
+the two systems are answering different questions, and the headline comparison
+is now restricted to the 365 single-message cases where the input is identical.
+`by_multi_turn` is still not a gated subset.
 
 **Classification:** heuristic limitation, plus a **harness gap**. The dataset
 has 14 multi-turn cases out of 379 (3.7%), so this mode is under-represented
 relative to real traffic, where most requests are the second or later turn of a
-conversation. The eval's own 71%-wrong-on-10-cases number is based on a
+conversation. Worse, the longest conversation in the set is six messages, so
+the `len(messages) > 10` and `> 20` branches of the classifier are never
+exercised at all. The eval's own 71%-wrong-on-10-cases number is based on a
 sample too small to gate.
 
 **Remediation.** Score the whole conversation: take text signals from the last
@@ -293,10 +308,16 @@ mechanisms are roughly orthogonal to whether a human would call the case
 ambiguous. Anyone expecting the ambiguous subset to be the headline problem
 will be disappointed by the data, which is itself worth knowing.
 
-**Both systems are weak on `powerful`.** 0.247 and 0.461 recall. 67 of 89
+**Both systems are weak on `powerful`.** 0.247 and 0.427 recall. 67 of 89
 genuinely hard prompts are sent to a cheap model by the current router. This is
 the finding with the clearest operational consequence and it is not visible in
 the single accuracy number that the old harness printed.
+
+**Macro-F1 is reported with its convention stated.** The first version of this
+document's tooling dropped classes with an undefined F1 from the macro average,
+which inflated the majority-class floor to 0.386 on exactly the class it fails
+completely. The convention is now "average over every label, undefined counted
+as 0.0", and the floor reads 0.257.
 
 **Over-routing is rarer but real.** 41 errors go the other way, mostly `fast`
 prompts scoring 2–4 on length or an incidental keyword. That is the cheap
@@ -341,6 +362,15 @@ be fixed in the router:
   never been run, because there is no traffic export wired up yet.
 - **`by_multi_turn` is not a subset in the report.** Multi-turn accuracy is
   visible per case but not aggregated, so it is not gated. That should change.
+  The set also stops at six messages, so `len(messages) > 10` and `> 20` in the
+  classifier are untested.
+- **The two systems do not receive the same input.** The heuristic sees
+  `case.chat_messages()`, the learned baseline sees `case.input`. On the 365
+  single-message cases that is the same string; on the 14 multi-turn cases it is
+  not. The headline comparison is restricted to the 365 and the unrestricted
+  numbers are reported alongside, flagged. This is a real asymmetry in the
+  comparison rather than a modelling choice, and the right long-term fix is a
+  learned model that reads a transcript.
 - **No cost or latency dimension.** The eval measures whether the right tier was
   chosen, not whether the choice saved anything. A classifier that is right and
   routes everything to the expensive model scores well and is useless.

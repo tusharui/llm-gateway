@@ -41,6 +41,12 @@ _ALPHA = 1.0 - DEFAULT_CONFIDENCE
 # is indistinguishable from a correct one at a glance.
 ORIENTATION = "rows=expected_label(actual), columns=predicted_label"
 
+MACRO_F1_CONVENTION = (
+    "unweighted mean of per-label F1 over every label in the universe, with an "
+    "undefined F1 (a label that is never predicted) counted as 0.0 rather than "
+    "excluded from the average"
+)
+
 
 def z_for(confidence: float = DEFAULT_CONFIDENCE) -> float:
     """Two-sided z multiplier for a confidence level."""
@@ -240,7 +246,13 @@ def per_class_report(pairs: Sequence[tuple[str, str]], *, labels: Sequence[str] 
     what the requested gates are defined on.
     """
     if not pairs:
-        return {"per_class": {}, "macro_f1": None, "micro_f1": None, "notes": "no predictions"}
+        return {
+            "per_class": {},
+            "macro_f1": None,
+            "micro_f1": None,
+            "notes": "no predictions",
+            "macro_f1_convention": MACRO_F1_CONVENTION,
+        }
 
     matrix = confusion_matrix(pairs, labels=labels)
     per_class: dict[str, dict[str, Any]] = {}
@@ -263,7 +275,11 @@ def per_class_report(pairs: Sequence[tuple[str, str]], *, labels: Sequence[str] 
             "f1": round(f1, 6) if f1 is not None else None,
         }
 
-    f1_values = [entry["f1"] for entry in per_class.values() if entry["f1"] is not None]
+    f1_values = [entry["f1"] if entry["f1"] is not None else 0.0 for entry in per_class.values()]
+    # Averaged over every label, with an undefined F1 counted as zero. Dropping
+    # undefined values instead would inflate macro-F1 for a classifier that
+    # fails a class entirely -- exactly the case a floor reference exists to
+    # expose.
     macro_f1 = sum(f1_values) / len(f1_values) if f1_values else None
     total_correct = sum(entry["true_positives"] for entry in per_class.values())
     micro_f1 = total_correct / matrix.total if matrix.total else None
@@ -271,6 +287,7 @@ def per_class_report(pairs: Sequence[tuple[str, str]], *, labels: Sequence[str] 
         "per_class": per_class,
         "macro_f1": round(macro_f1, 6) if macro_f1 is not None else None,
         "micro_f1": round(micro_f1, 6) if micro_f1 is not None else None,
+        "macro_f1_convention": MACRO_F1_CONVENTION,
     }
 
 
@@ -399,7 +416,7 @@ def serialise_rollup(result: Mapping[str, Any]) -> dict[str, Any]:
         "by_source": {k: v.to_dict() for k, v in sorted(result["by_source"].items())},
         "by_adversarial_tag": {k: v.to_dict() for k, v in sorted(result["by_adversarial_tag"].items())},
         "adversarial_any": result["adversarial_any"].to_dict(),
-        "confusion_matrix": result["confusion_matrix"].to_dict(),
+"confusion_matrix": result["confusion_matrix"].to_dict(),
         "per_class": result["per_class"],
     }
 
@@ -517,6 +534,8 @@ class PairedComparison:
     p_value: float | None
     significant: bool
     method: str = "exact binomial (McNemar)"
+    note: str = ""
+    input_identical: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -530,19 +549,67 @@ class PairedComparison:
             "p_value": round(self.p_value, 8) if self.p_value is not None else None,
             "significant_at_95": self.significant,
             "method": self.method,
+            "input_identical": self.input_identical,
             "note": "no discordant cases: the systems agree on every case"
             if self.a_only + self.b_only == 0
-            else "",
+            else (
+                "the two systems did not receive identical input for every compared case; "
+                "see dataset.messages in SCHEMA.md"
+                if not self.input_identical
+                else ""
+            ),
         }
 
     def describe(self) -> str:
         if self.a_only + self.b_only == 0:
             return f"{self.name_a} vs {self.name_b}: identical outcomes on every case"
         verdict = "significant" if self.significant else "not significant"
+        p_text = "<1e-8" if self.p_value is not None and self.p_value < 1e-8 else f"{self.p_value:.4f}"
+        caveat = "" if self.input_identical else " [input differed on some cases]"
         return (
             f"{self.name_a} wins {self.a_only}, {self.name_b} wins {self.b_only} "
-            f"on {self.a_only + self.b_only} discordant cases: {verdict} (p={self.p_value:.4f})"
+            f"on {self.a_only + self.b_only} discordant cases: {verdict} (p={p_text}){caveat}"
         )
+
+
+def _exact_mcnemar(a_only: int, b_only: int) -> float:
+    """Two-sided exact binomial p-value for McNemar's test.
+
+    Uses integer arithmetic throughout and returns an integer-derived float, so
+    a dataset with thousands of discordant pairs cannot overflow on
+    ``2 ** discordant``. Past a few hundred pairs the exact sum underflows to
+    zero anyway, so the caller switches to the chi-square approximation.
+    """
+    discordant = a_only + b_only
+    if discordant == 0:
+        return 1.0
+    # Scaled to avoid a huge intermediate: sum_k C(n,k) computed as a running
+    # fraction of 2**n using Fraction-free integer division.
+    total = 1 << discordant
+    tail = 0
+    for k in range(0, min(a_only, b_only) + 1):
+        tail += math.comb(discordant, k)
+    return min(1.0, 2.0 * (tail / total))
+
+
+def _approx_mcnemar(a_only: int, b_only: int) -> float:
+    """McNemar's chi-square approximation with a continuity correction.
+
+    Used past ``EXACT_MCNEMAR_MAX_DISCORDANT`` pairs, where the exact sum is
+    both numerically awkward and irrelevant: the tail is far below any
+    threshold that matters.
+    """
+    discordant = a_only + b_only
+    if discordant == 0:
+        return 1.0
+    chi2 = (abs(a_only - b_only) - 1) ** 2 / discordant
+    return math.erfc(math.sqrt(chi2 / 2.0))
+
+
+# Above this many discordant pairs the exact binomial tail is smaller than any
+# p-value a reader can act on, so the approximation is used instead of an
+# enormous integer sum.
+EXACT_MCNEMAR_MAX_DISCORDANT = 500
 
 
 def compare_paired(
@@ -552,8 +619,9 @@ def compare_paired(
     name_a: str = "a",
     name_b: str = "b",
     alpha: float = _ALPHA,
+    input_identical: bool = True,
 ) -> PairedComparison:
-    """Exact McNemar test between two systems over the same cases."""
+    """McNemar test between two systems over the same cases."""
     if len(a_correct) != len(b_correct):
         raise MetricsError(
             f"paired comparison needs equal lengths, got {len(a_correct)} vs {len(b_correct)}"
@@ -566,13 +634,26 @@ def compare_paired(
     discordant = a_only + b_only
     if discordant == 0:
         return PairedComparison(
-            name_a, name_b, both_correct, a_only, b_only, both_wrong, None, False
+            name_a, name_b, both_correct, a_only, b_only, both_wrong, None, False,
+            input_identical=input_identical,
         )
-    # Two-sided exact binomial against p = 0.5 on the discordant pairs.
-    tail = sum(math.comb(discordant, k) for k in range(0, min(a_only, b_only) + 1))
-    p_value = min(1.0, 2.0 * tail / (2.0**discordant))
+    if discordant <= EXACT_MCNEMAR_MAX_DISCORDANT:
+        p_value = _exact_mcnemar(a_only, b_only)
+        method = "exact binomial (McNemar)"
+    else:
+        p_value = _approx_mcnemar(a_only, b_only)
+        method = "chi-square approximation with continuity correction (McNemar)"
     return PairedComparison(
-        name_a, name_b, both_correct, a_only, b_only, both_wrong, p_value, p_value < alpha
+        name_a,
+        name_b,
+        both_correct,
+        a_only,
+        b_only,
+        both_wrong,
+        p_value,
+        p_value < alpha,
+        method,
+        input_identical=input_identical,
     )
 
 

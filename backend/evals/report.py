@@ -92,6 +92,28 @@ def environment_metadata(repo_root: Path) -> dict[str, Any]:
     return metadata
 
 
+def _identical_input_ids(
+    cases: Sequence[EvalCase], heuristic: BaselineReport, other: BaselineReport
+) -> list[str]:
+    """Case ids where both systems were given the same information.
+
+    The heuristic reads ``case.chat_messages()`` -- the whole conversation,
+    including earlier user turns and the presence of a system message. The
+    learned baseline reads ``case.input``, the last user turn only. On a
+    single-message case those are the same text and a paired test is fair. On
+    a multi-turn case they are not, and a comparison that ignores that is
+    comparing answers to two different questions.
+    """
+    heuristic_ids = set(heuristic.case_ids)
+    return [
+        case.id
+        for case in cases
+        if case.id in heuristic_ids
+        and case.id in set(other.case_ids)
+        and (not case.messages or len(case.messages) == 1)
+    ]
+
+
 def build_report(
     *,
     cases: Sequence[EvalCase],
@@ -146,32 +168,65 @@ def build_report(
             other_report = reports[other]
             other_by_id = dict(zip(other_report.case_ids, other_report.predictions))
             shared = [cid for cid in other_report.case_ids if cid in heuristic_by_id]
-            paired = compare_paired(
+            like_for_like = _identical_input_ids(cases, heuristic, other_report)
+            differing_input = [cid for cid in shared if cid not in set(like_for_like)]
+
+            paired_all = compare_paired(
                 [heuristic_by_id[cid] == expected_by_id[cid] for cid in shared],
                 [other_by_id[cid] == expected_by_id[cid] for cid in shared],
                 name_a="heuristic",
                 name_b=other,
+                input_identical=not differing_input,
             )
-            clear = compare_proportions(
-                heuristic.rollup["by_difficulty"]["clear"],
-                other_report.rollup["by_difficulty"]["clear"],
-                label_a="heuristic.clear",
-                label_b=f"{other}.clear",
+            paired_like = compare_paired(
+                [heuristic_by_id[cid] == expected_by_id[cid] for cid in like_for_like],
+                [other_by_id[cid] == expected_by_id[cid] for cid in like_for_like],
+                name_a="heuristic",
+                name_b=other,
             )
-            ambiguous = compare_proportions(
-                heuristic.rollup["by_difficulty"]["ambiguous"],
-                other_report.rollup["by_difficulty"]["ambiguous"],
-                label_a="heuristic.ambiguous",
-                label_b=f"{other}.ambiguous",
-            )
-            comparisons[other] = {
-                "paired": paired.to_dict(),
-                "paired_description": paired.describe(),
-                "paired_cases_compared": len(shared),
-                "compared_over_full_dataset": len(shared) == len(cases),
-                "clear_vs_clear": clear.to_dict(),
-                "ambiguous_vs_ambiguous": ambiguous.to_dict(),
+
+            entry: dict[str, Any] = {
+                # Headline: the like-for-like test, restricted to cases where
+                # both systems saw the same input.
+                "paired": paired_like.to_dict(),
+                "paired_description": paired_like.describe(),
+                "paired_cases_compared": len(like_for_like),
+                "compared_over_full_dataset": len(like_for_like) == len(cases),
+                "input_note": (
+                    "restricted to cases where both systems received identical input; "
+                    f"{len(differing_input)} multi-turn case(s) are excluded because the "
+                    "heuristic reads the whole conversation and the learned baseline reads "
+                    "the last user turn only"
+                ),
+                "paired_all_cases": paired_all.to_dict(),
+                "paired_all_cases_description": paired_all.describe(),
             }
+            # Proportion comparisons need the two systems to cover the same
+            # population. The holdout covers 95 cases, so its clear subset is a
+            # nested sample of the heuristic's 266 and an unpaired test on
+            # nested samples overstates significance.
+            same_population = set(other_report.case_ids) == set(heuristic.case_ids)
+            if same_population:
+                entry["clear_vs_clear"] = compare_proportions(
+                    heuristic.rollup["by_difficulty"]["clear"],
+                    other_report.rollup["by_difficulty"]["clear"],
+                    label_a="heuristic.clear",
+                    label_b=f"{other}.clear",
+                ).to_dict()
+                entry["ambiguous_vs_ambiguous"] = compare_proportions(
+                    heuristic.rollup["by_difficulty"]["ambiguous"],
+                    other_report.rollup["by_difficulty"]["ambiguous"],
+                    label_a="heuristic.ambiguous",
+                    label_b=f"{other}.ambiguous",
+                ).to_dict()
+            else:
+                entry["proportion_comparisons_omitted"] = (
+                    f"{other} evaluates {other_report.accuracy().n} of {len(cases)} cases, so its "
+                    "subsets are nested inside the heuristic's rather than independent. An "
+                    "unpaired proportion test on nested samples would overstate significance; "
+                    "the paired test above is the valid comparison."
+                )
+            comparisons[other] = entry
         clear_vs_ambiguous = compare_proportions(
             heuristic.rollup["by_difficulty"]["clear"],
             heuristic.rollup["by_difficulty"]["ambiguous"],
@@ -204,6 +259,7 @@ def build_report(
         "gates": {
             "mode": configuration.get("gate_mode"),
             "system": configuration.get("gate_system"),
+            "systems_effective": configuration.get("gate_systems_effective"),
             "all_passed": all(result.passed for result in gate_results) if gate_results else None,
             "checked": len(gate_results),
             "results": [result.to_dict() for result in gate_results],

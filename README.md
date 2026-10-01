@@ -2,28 +2,28 @@
 
 A production-style multi-provider LLM gateway with auto-routing, semantic caching, failover, cost analytics, and a Next.js dashboard. Routes every request across Groq, Gemini, and OpenRouter through a single OpenAI-style API.
 
-Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) · [API docs](https://llm-gateway-2not.onrender.com/docs)
+Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) Â· [API docs](https://llm-gateway-2not.onrender.com/docs)
 
 ## What it does
 
-- **Auto-routing** — classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`): 379 labelled cases, confidence intervals, a confusion matrix, a learned baseline for comparison, and CI gates. It scores 0.533 [0.483–0.583] — read the honesty note under Testing & quality before quoting that.
-- **Multi-provider failover** — circuit breakers + per-request failover chain, so a dead provider never breaks a request.
-- **Semantic + exact caching** — similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
-- **Auth + rate limiting** — per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware.
-- **Cost analytics** — per-model / per-provider usage, spend, cache savings, latency, and request history.
-- **Observability** — every request carries a correlatable `X-Request-ID` and structured JSON logs.
-- **Next.js dashboard** — chat UI with streaming, session history, model picker, Markdown export, and an analytics page.
+- **Auto-routing** â€” classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`): 379 labelled cases, confidence intervals, a confusion matrix, a learned baseline for comparison, and CI gates. It scores 0.533 [0.483â€“0.583] â€” read the honesty note under Testing & quality before quoting that.
+- **Multi-provider failover** â€” circuit breakers + per-request failover chain, so a dead provider never breaks a request.
+- **Semantic + exact caching** â€” similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
+- **Auth + rate limiting** â€” per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware.
+- **Cost analytics** â€” per-model / per-provider usage, spend, cache savings, latency, and request history.
+- **Observability** â€” every request carries a correlatable `X-Request-ID` and structured JSON logs.
+- **Next.js dashboard** â€” chat UI with streaming, session history, model picker, Markdown export, and an analytics page.
 
 ## Tech stack
 
 | Layer | Choice |
 |---|---|
-| Backend | Python 3.12 · FastAPI · Uvicorn |
-| Frontend | Next.js 16 (App Router) · React 19 · Tailwind v4 · framer-motion |
+| Backend | Python 3.12 Â· FastAPI Â· Uvicorn |
+| Frontend | Next.js 16 (App Router) Â· React 19 Â· Tailwind v4 Â· framer-motion |
 | Database | Neon PostgreSQL (SQLAlchemy async + asyncpg) |
 | HTTP client | httpx (async) |
 | Cache | In-memory + persisted semantic cache (embedding similarity) |
-| Quality | pytest (301 tests) · routing eval harness with Wilson intervals and CI gates · GitHub Actions CI · typed contract |
+| Quality | pytest (351 tests) | routing eval harness with Wilson intervals and CI gates | GitHub Actions CI | typed contract |
 
 ## Repository layout
 
@@ -70,7 +70,7 @@ copy .env.example .env.local                      # NEXT_PUBLIC_BACKEND_URL, GAT
 npm run dev
 ```
 
-Tables auto-create on startup. The default dev gateway key is `sk-gateway-dev-key` — set a real `GATEWAY_API_KEY` in production.
+Tables auto-create on startup. The default dev gateway key is `sk-gateway-dev-key` â€” set a real `GATEWAY_API_KEY` in production.
 
 ## Environment variables
 
@@ -78,11 +78,11 @@ Tables auto-create on startup. The default dev gateway key is `sk-gateway-dev-ke
 
 | Variable | Default | Description |
 |---|---|---|
-| `DATABASE_URL` | — | Neon/PostgreSQL async connection string |
+| `DATABASE_URL` | â€” | Neon/PostgreSQL async connection string |
 | `GATEWAY_API_KEY` | `sk-gateway-dev-key` | Admin bypass key (`sk-gateway-*` format) |
-| `GROQ_API_KEY` | — | Groq API key |
-| `GEMINI_API_KEY` | — | Google Gemini API key |
-| `OPENROUTER_API_KEY` | — | OpenRouter API key |
+| `GROQ_API_KEY` | â€” | Groq API key |
+| `GEMINI_API_KEY` | â€” | Google Gemini API key |
+| `OPENROUTER_API_KEY` | â€” | OpenRouter API key |
 | `PORT` | `8000` | API server port |
 | `LOG_LEVEL` | `info` | Logging level |
 
@@ -108,7 +108,7 @@ curl -N -X POST http://localhost:8000/chat \
   }'
 ```
 
-`"model": "auto"` triggers the complexity router — try it with `"Hi"` (fast tier) vs `"Prove that the square root of 2 is irrational"` (powerful tier).
+`"model": "auto"` triggers the complexity router â€” try it with `"Hi"` (fast tier) vs `"Prove that the square root of 2 is irrational"` (powerful tier).
 
 ### Inspect routing decision
 
@@ -134,7 +134,7 @@ Full interactive docs at `http://localhost:8000/docs`.
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-python -m pytest -q                       # 301 unit/integration tests
+python -m pytest -q                       # 351 unit/integration tests
 python -m evals.run                       # routing eval: both baselines + gates
 python -m evals.run --report              # + a per-case table
 python -m evals.run --load-baseline evals/baseline_gates.json   # CI behaviour, exit 1 on failure
@@ -154,25 +154,25 @@ reports, for every system, accuracy with a Wilson 95% interval overall and per
 difficulty, per tier, per category and per adversarial tag, plus a
 machine-readable confusion matrix. Two systems are compared: the production
 heuristic and a TF-IDF + logistic regression baseline scored from stratified
-out-of-fold predictions, alongside a majority-class floor so the headline has a
-reference point.
+group k-fold out-of-fold predictions, alongside a majority-class floor so the
+headline has a reference point.
 
 Current measurements, with intervals:
 
 | system | overall | clear | ambiguous | powerful tier |
 |---|---|---|---|---|
-| heuristic | 0.533 [0.483–0.583] | 0.560 [0.500–0.619] | 0.469 [0.380–0.561] | 0.247 |
-| TF-IDF + logreg | 0.715 [0.668–0.758] | 0.748 [0.693–0.797] | 0.637 [0.545–0.720] | 0.461 |
-| majority floor | 0.380 [0.333–0.430] | 0.350 | 0.451 | 0.000 |
+| heuristic | 0.533 [0.483â€“0.583] | 0.560 [0.500â€“0.619] | 0.469 [0.380â€“0.561] | 0.247 |
+| TF-IDF + logreg | 0.689 [0.640-0.733] | 0.744 [0.689-0.793] | 0.558 [0.466-0.646] | 0.427 |
+| majority floor | 0.380 [0.333â€“0.430] | 0.350 | 0.451 | 0.000 |
 
 **The heuristic is not good, and the previous CI floor was measuring the test
 set rather than the router.** The old gate was `--min-accuracy 0.9` against an
 18-case golden set that scored 18/18; six of those cases were near-copies of
 the router's own regexes and none exercised multi-turn input. The committed
 floors in `backend/evals/baseline_gates.json` are 0.49 / 0.52 / 0.40 / 0.40,
-each derived as `floor(observed − 1.3 × standard error)`, and each sitting next
+each derived as `floor(observed âˆ’ 1.3 Ã— standard error)`, and each sitting next
 to the measurement it came from. Raising them back to 0.90 is possible two
-ways — make the router better, or make the dataset worse — and only the first
+ways â€” make the router better, or make the dataset worse â€” and only the first
 is worth doing.
 
 Three findings worth knowing before you touch the router:
@@ -197,5 +197,5 @@ and how to add a case.
 
 ## Deploy
 
-- **Backend** — Render web service (see `render.yaml`). Uses a managed PostgreSQL database.
-- **Frontend** — Vercel; pushes to `main` auto-deploy.
+- **Backend** â€” Render web service (see `render.yaml`). Uses a managed PostgreSQL database.
+- **Frontend** â€” Vercel; pushes to `main` auto-deploy.
