@@ -7,7 +7,9 @@ services:
     # removed from the app, so without this a deploy boots against an
     # unmigrated database and every database-backed route fails.
     preDeployCommand: cd backend && alembic upgrade head
-    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: >-
+      cd backend &&
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT --ws-max-size 65536
     # /ready, not /health. Liveness only proves the process booted; readiness
     # also checks the database. Pointing this at /health is how a broken
     # instance ends up receiving production traffic.

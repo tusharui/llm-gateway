@@ -14,3 +14,9 @@ scikit-learn==1.7.0
 # targeted filter around the fit so an unpinned environment stays quiet without
 # hiding warnings raised anywhere else.
 scipy<1.16
+
+# tests/test_render_config.py parses the deployment file to assert that
+# uvicorn's --ws-max-size matches WS_MAX_MESSAGE_BYTES. PyYAML arrives
+# transitively through uvicorn, but a test that imports it should not depend on
+# that staying true.
+pyyaml>=6.0
