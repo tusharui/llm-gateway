@@ -348,7 +348,12 @@ def rollup(
 
     adversarial: Counter[str] = Counter()
     adversarial_correct: Counter[str] = Counter()
+    adversarial_total_cases = 0
+    adversarial_correct_cases = 0
     for case, is_correct in zip(cases, correct_flags):
+        if case.adversarial:
+            adversarial_total_cases += 1
+            adversarial_correct_cases += int(is_correct)
         for tag in case.adversarial:
             adversarial[tag] += 1
             adversarial_correct[tag] += int(is_correct)
@@ -371,6 +376,9 @@ def rollup(
             tag: _proportion(adversarial_correct[tag], adversarial[tag], confidence)
             for tag in sorted(adversarial)
         },
+        "adversarial_any": _proportion(
+            adversarial_correct_cases, adversarial_total_cases, confidence
+        ),
         "confusion_matrix": matrix,
         "per_class": detail,
         "_correct_flags": correct_flags,
@@ -390,6 +398,7 @@ def serialise_rollup(result: Mapping[str, Any]) -> dict[str, Any]:
         "by_category": {k: v.to_dict() for k, v in sorted(result["by_category"].items())},
         "by_source": {k: v.to_dict() for k, v in sorted(result["by_source"].items())},
         "by_adversarial_tag": {k: v.to_dict() for k, v in sorted(result["by_adversarial_tag"].items())},
+        "adversarial_any": result["adversarial_any"].to_dict(),
         "confusion_matrix": result["confusion_matrix"].to_dict(),
         "per_class": result["per_class"],
     }

@@ -277,6 +277,39 @@ class LearnedResult:
         }
 
 
+def _suppress_iprint_warning():
+    """Silence scipy's ``iprint`` OptimizeWarning for the duration of a fit.
+
+    scipy >= 1.16 removed the ``iprint`` kwarg that sklearn's lbfgs path still
+    passes through, so every fit emits OptimizeWarning with no effect on the
+    fitted coefficients. requirements-dev.txt pins scipy below 1.16 as well;
+    this covers an environment that does not honour the pin.
+
+    Scoped to the fit rather than applied at import, so a genuine optimisation
+    warning raised anywhere else still reaches the operator.
+    """
+    import warnings
+    from contextlib import contextmanager
+
+    @contextmanager
+    def _ctx():
+        with warnings.catch_warnings():
+            try:
+                from scipy.optimize import OptimizeWarning
+
+                warnings.filterwarnings("ignore", category=OptimizeWarning, message=".*iprint.*")
+            except ImportError:  # pragma: no cover - scipy always ships with sklearn
+                pass
+            yield
+
+    return _ctx()
+
+
+def _fit(pipeline, texts: Sequence[str], labels: Sequence[str]):
+    with _suppress_iprint_warning():
+        return pipeline.fit(list(texts), list(labels))
+
+
 def _make_pipeline(sk: dict[str, Any]):
     """Word 1-2 gram TF-IDF into L2-regularised multinomial logistic regression.
 
@@ -373,7 +406,7 @@ def cross_validated_predictions(
     splitter = sk["StratifiedKFold"](n_splits=effective_splits, shuffle=True, random_state=seed)
     for fold_index, (train_index, test_index) in enumerate(splitter.split(list(texts), label_list)):
         pipeline = _make_pipeline(sk)
-        pipeline.fit([texts[i] for i in train_index], [label_list[i] for i in train_index])
+        _fit(pipeline, [texts[i] for i in train_index], [label_list[i] for i in train_index])
         fold_test = [texts[i] for i in test_index]
         fold_labels = [label_list[i] for i in test_index]
         fold_predictions = pipeline.predict(fold_test)
@@ -476,7 +509,7 @@ def holdout_predictions(
         stratify=label_list if min(counts.values()) >= 2 else None,
     )
     pipeline = _make_pipeline(sk)
-    pipeline.fit([texts[i] for i in train_index], [label_list[i] for i in train_index])
+    _fit(pipeline, [texts[i] for i in train_index], [label_list[i] for i in train_index])
     predictions = pipeline.predict([texts[i] for i in test_index])
     train_predictions = pipeline.predict([texts[i] for i in train_index])
     train_correct = sum(

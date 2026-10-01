@@ -100,7 +100,13 @@ class MajorityBaseline:
 
 @dataclass
 class BaselineReport:
-    """One system's predictions plus every metric derived from them."""
+    """One system's predictions plus every metric derived from them.
+
+    ``case_ids`` records which cases were actually evaluated. A holdout baseline
+    covers a subset, and any comparison against it has to align by id rather
+    than by position -- comparing 379 predictions with 95 by index compares
+    the wrong pairs and silently produces a meaningless number.
+    """
 
     name: str
     kind: str
@@ -108,6 +114,7 @@ class BaselineReport:
     rollup: dict[str, Any]
     detail: dict[str, Any]
     training: dict[str, Any] | None = None
+    case_ids: tuple[str, ...] = ()
 
     def accuracy(self) -> Proportion:
         return self.rollup["overall"]
@@ -152,6 +159,7 @@ def evaluate_baseline(
         rollup=result,
         detail=serialise_rollup(result),
         training=training,
+        case_ids=tuple(case.id for case in cases),
     )
 
 
