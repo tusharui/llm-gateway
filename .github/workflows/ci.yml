@@ -51,7 +51,21 @@ jobs:
           DATABASE_URL="$TEST_DATABASE_URL" python -m alembic upgrade head
           DATABASE_URL="$TEST_DATABASE_URL" python -m alembic check
       - name: Run routing quality eval
-        run: python -m evals.run --min-accuracy 0.9
+        # Thresholds live in backend/evals/baseline_gates.json, not here, so
+        # that every number they were derived from sits in one reviewable file
+        # next to the gate it produced. That file also records which metrics are
+        # deliberately not gated and why.
+        #
+        # The previous floor was 0.90 against an 18-case golden set the router
+        # scored 18/18 on. That 100% measured the test set, not the router: six
+        # of those eighteen cases are near-copies of the router's own regexes and
+        # none exercised multi-turn input. Against the 379-case set the honest
+        # overall accuracy is 0.533 and the committed floors are 0.49 overall,
+        # 0.52 clear, 0.40 ambiguous, 0.40 adversarial, each derived as
+        # floor(observed - 1.3 * standard error). Raising the floor back to 0.90
+        # would require weakening the dataset, and weakening the dataset to pass
+        # a gate is how an eval becomes theatre.
+        run: python -m evals.run --load-baseline backend/evals/baseline_gates.json
 
   frontend:
     name: Frontend (lint + build)

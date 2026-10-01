@@ -1,2 +1,16 @@
 pytest>=8.0
 httpx>=0.27
+
+# Learned baseline for the routing eval (backend/evals/learned.py).
+# Dev-only on purpose: requirements.txt must stay minimal, because adding a
+# heavy numeric stack to the runtime image costs cold-start time and memory on
+# every deploy for no serving benefit. The heuristic path does not import
+# sklearn, and `python -m evals.run --no-learned` works without it.
+scikit-learn==1.7.0
+
+# scipy>=1.16 removed the `iprint` kwarg that sklearn 1.7's lbfgs path still
+# passes through, so every fit emits OptimizeWarning: Unknown solver options:
+# iprint. The pin removes the noise at the source. evals.learned also scopes a
+# targeted filter around the fit so an unpinned environment stays quiet without
+# hiding warnings raised anywhere else.
+scipy<1.16
