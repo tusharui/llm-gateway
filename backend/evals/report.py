@@ -268,6 +268,51 @@ def write_results(path: str | Path, document: Mapping[str, Any]) -> Path:
     return target
 
 
+def write_text_atomic(path: str | Path, payload: str) -> Path:
+    """Write arbitrary text atomically, with the same failure behaviour.
+
+    Used for JSONL shards, where the caller supplies the exact bytes and
+    ``json.dumps`` would double-encode them.
+    """
+    target = Path(path)
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise ResultsWriteError(
+            f"could not create the directory for {target}: {exc.strerror or exc}"
+        ) from exc
+
+    temp_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=str(target.parent),
+            prefix=f".{target.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temp_name = handle.name
+            handle.write(payload)
+            if not payload.endswith("\n"):
+                handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_name, target)
+        temp_name = None
+    except PermissionError as exc:
+        raise ResultsWriteError(f"permission denied writing {target}") from exc
+    except OSError as exc:
+        raise ResultsWriteError(f"could not write {target}: {exc.strerror or exc}") from exc
+    finally:
+        if temp_name:
+            try:
+                os.unlink(temp_name)
+            except OSError:
+                pass
+    return target
+
+
 def load_baseline_file(path: str | Path) -> dict[str, Any]:
     """Read a committed baseline file, with actionable errors."""
     from evals.errors import DatasetError
@@ -303,4 +348,5 @@ __all__ = [
     "load_baseline_file",
     "utc_now_iso",
     "write_results",
+    "write_text_atomic",
 ]
