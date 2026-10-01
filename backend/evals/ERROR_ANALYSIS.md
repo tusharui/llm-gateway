@@ -1,7 +1,7 @@
 # Error analysis: the routing classifier
 
-Dataset `backend/evals/golden`, 379 cases, fingerprint
-`9923f6760d716aff3e2464078561473527327cdcc70ff20e29841e81fc54d9cd`.
+Dataset `backend/evals/golden`, 391 cases, fingerprint
+`ac1428bab827856b7fbd08f3e43020761996a1769cc840a5bb0a82ecd9deb8d7`.
 Commit `f4bff76`. Reproduce with:
 
 ```bash
@@ -18,45 +18,36 @@ Failure counts come from `--dump-failures`, and the 23 cases behind
 
 ## Headline
 
-| system | overall | clear | ambiguous | adversarial |
-|---|---|---|---|---|
-| heuristic | **0.533** (202/379) [0.483–0.583] | 0.560 (149/266) [0.500–0.619] | 0.469 (53/113) [0.380–0.561] | 0.474 (46/97) [0.378–0.573] |
-| tfidf + logistic regression | **0.689** (261/379) [0.640–0.733] | 0.744 (198/266) [0.689–0.793] | 0.558 (63/113) [0.466–0.646] | 0.660 (64/97) [0.561–0.746] |
-| majority class (floor) | 0.380 (144/379) [0.333–0.430] | 0.350 | 0.451 | 0.371 |
+| system | overall | clear | ambiguous | adversarial | multi-turn |
+|---|---|---|---|---|---|
+| heuristic | **0.529** (207/391) [0.480–0.578] | 0.552 (153/277) [0.494–0.610] | 0.474 (54/114) [0.384–0.565] | 0.474 (46/97) [0.378–0.573] | 0.346 (9/26) [0.193–0.537] |
+| tfidf + logistic regression | **0.703** (275/391) [0.656–0.746] | 0.747 (207/277) [0.693–0.795] | 0.596 (68/114) [0.505–0.682] | 0.680 (66/97) [0.582–0.765] | 0.731 (19/26) [0.532–0.875] |
+| majority class (floor) | 0.379 (148/391) [0.333–0.426] | 0.350 | 0.456 | 0.371 | 0.577 |
 
-Per tier, heuristic: `fast` 0.771 (111/144), `balanced` 0.473 (69/146),
-`powerful` **0.247** (22/89).
-
-### A note on the learned baseline's number
-
-An earlier version of this document reported 0.715 for the learned baseline.
-That figure was wrong. Two near-duplicate case pairs were landing on opposite
-sides of a stratified split, so a model had seen a twin of its test case. The
-folds are now grouped (`StratifiedGroupKFold`, near-duplicate groups kept
-whole) and the same model scores **0.689**. The lower number is the honest one,
-and the committed gate moved with it from 0.68 to 0.65.
+Per tier, heuristic: `fast` 0.752 (112/149), `balanced` 0.480 (72/150),
+`powerful` **0.250** (23/92).
 
 ### Confusion matrix (rows = expected, columns = predicted)
 
 ```
               fast  balanced  powerful
-fast           111        31         2
-balanced        69        69         8
-powerful        20        47        22
+fast           112        35         2
+balanced        69        72         9
+powerful        20        49        23
 ```
 
 ### The one-sentence finding
 
-**The heuristic fails open.** 136 of its 177 errors are under-routes (it sends
-genuinely hard work to a cheaper model) and 41 are over-routes. It predicts
-`powerful` for only 32 of 379 prompts when 89 need it. Under-routing is the
+**The heuristic fails open.** 138 of its 184 errors are under-routes (it sends
+genuinely hard work to a cheaper model) and 46 are over-routes. It predicts
+`powerful` for only 34 of 391 prompts when 92 need it. Under-routing is the
 expensive direction: it costs answer quality silently, while over-routing only
 costs money, which the router's own cost tracking can see and quality cannot.
 
 ### Does clear beat ambiguous?
 
-Not by a measurable margin. 0.560 versus 0.469, a difference of +9.1 points
-with a 95% interval of **−1.8 to +19.8 points, p = 0.104**. Not significant.
+Not by a measurable margin. 0.552 versus 0.474, a difference of +7.9 points
+with a 95% interval of **−3.0 to +18.5 points, p = 0.157**. Not significant.
 
 This is the most surprising result in the analysis and it is worth being precise
 about what it means: the ambiguous subset is not where the heuristic fails
@@ -64,9 +55,8 @@ hardest. It fails about equally everywhere. The intuition that a transparent
 keyword rule "works on clear cases and breaks on ambiguous ones" is *not*
 supported by this dataset. Where it does break down is along the axes below.
 
-The learned baseline drops 18.4 points from clear to ambiguous (0.744 →
-0.558), which is a more ordinary pattern, and its ambiguous interval is wide
-enough (0.466–0.646) that the drop is not itself significant.
+The learned baseline drops 15.1 points from clear to ambiguous (0.747 → 0.596),
+which is a more ordinary pattern. Neither system's gap is significant at 95%.
 
 ### Does the learned baseline replace the heuristic?
 
@@ -74,25 +64,25 @@ On this data, yes, and the comparison is significant. Restricted to the 365
 cases where both systems received **identical input** (see the limits section
 for why that restriction exists):
 
-- Paired (McNemar exact, 146 discordant): heuristic wins 45, learned wins 101,
+- Paired (McNemar exact, 154 discordant): heuristic wins 48, learned wins 106,
   p < 1e-8.
-- Clear cases: learned is 18.4 points better.
-- Ambiguous cases: learned is 8.8 points better.
-- Per-tier recall for `powerful` is 0.247 heuristic versus 0.427 learned. Both
+- Clear cases: learned is 19.5 points better.
+- Ambiguous cases: learned is 12.3 points better.
+- Per-tier recall for `powerful` is 0.250 heuristic versus 0.467 learned. Both
   are bad; the learned one is less bad.
 
 I am **not** recommending the swap, for reasons that have nothing to do with
-this table and everything to do with it: the learned model is trained on 379
-cases written by the same person who writes the labels, so its 0.689 measures
+this table and everything to do with it: the learned model is trained on 391
+cases written by the same person who writes the labels, so its 0.703 measures
 agreement with my judgement, not correctness. Its training accuracy is 0.989
-against 0.689 out-of-fold, which is memorisation. It is a reference point, not
+against 0.703 out-of-fold, which is memorisation. It is a reference point, not
 a candidate.
 
 ---
 
 ## Failure mode 1: prompt surface is the only signal
 
-**Observed failures: 43 of 177 (24.3%)**
+**Observed failures: 43 of 184 (22.8%)**
 Categories: `keyword_stuffing` 10/10 wrong, `long_distractor` 8/10,
 `misleading_keyword` 8/10, `borderline_length` 5/8, `conflicting_signals` 3/10,
 `casing` 3/6, `irrelevant_context` 3/8, `contradiction` 3/6.
@@ -134,7 +124,7 @@ representative case in `evals/REVIEW.md`.
 
 ## Failure mode 2: verbs that mean real work are not in the keyword list
 
-**Observed failures: 25 of 177 (14.1%)**
+**Observed failures: 25 of 184 (13.6%)**
 `howto` 8/8 wrong (0% accuracy), `summarization` 5/6, `troubleshooting` 5/7,
 `drafting` 3/3, `advice` 2/9, `rewriting` 2/3.
 
@@ -171,8 +161,8 @@ those prompts scores 0 or 1 on a hand recount.
 
 ## Failure mode 3: the conversation is ignored
 
-**Observed failures: 10 of 177 (5.6%) — but 10 of the 14 multi-turn cases
-(71%), where they are 71% of that subset's error rate.**
+**Observed failures: 10 of 184 (5.4%) — but 10 of the 26 multi-turn cases
+(38%), where they are the single worst subset in the dataset.**
 
 **Mechanism.** `classify_complexity` reads only the last user message for its
 text signals (`auto_router.py:42-48`). Its only use of earlier turns is
@@ -185,22 +175,37 @@ A three-turn conversation scores the same as a three-word prompt.
 - `mt_early_design_01` — `Design a rate limiter for a public API.` / `Here is one approach using a token bucket.` / `what about distributed?`. Score 0.
 - `mt_history_debug_01` — six turns of diagnosing a 500 on `POST /charges`; last turn `It has a trailing comma.` Score 1, from the system-message bonus.
 
+**The length bonus makes it worse, not better.** A twelve-case shard of
+conversations long enough to cross both `> 10` and `> 20` scores **0.417**
+(5/12) for the heuristic against 0.703 for the learned baseline. Two of those
+twelve end in `thanks` or a three-word question and should be cheap; the
+message-count bonus routes them to a bigger model on the strength of how much
+conversation preceded them. That is the length signal from mode 1 applied to
+conversation length instead of character count.
+
 **Which system failed:** the heuristic only, but not for the reason the first
 draft of this document gave. The learned baseline reads `case.input` -- the
 last user turn -- while the heuristic reads the whole conversation. On these
-cases the baseline is wrong too, but on 4 of 14 rather than 10 of 14, because
+cases the baseline is wrong too, but on 7 of 26 rather than 17 of 26, because
 the last turn sometimes carries enough on its own. That is not a fair contest:
 the two systems are answering different questions, and the headline comparison
 is now restricted to the 365 single-message cases where the input is identical.
-`by_multi_turn` is still not a gated subset.
+`by_multi_turn` is reported but not gated.
 
 **Classification:** heuristic limitation, plus a **harness gap**. The dataset
-has 14 multi-turn cases out of 379 (3.7%), so this mode is under-represented
-relative to real traffic, where most requests are the second or later turn of a
-conversation. Worse, the longest conversation in the set is six messages, so
-the `len(messages) > 10` and `> 20` branches of the classifier are never
-exercised at all. The eval's own 71%-wrong-on-10-cases number is based on a
-sample too small to gate.
+has 26 multi-turn cases out of 391 (6.7%), up from 14, but real traffic is
+mostly second-or-later turns, so this is still under-represented. And at 26
+cases one case is worth 3.8 points, so the subset is reported, not gated.
+
+**Remediation.** Score the whole conversation: take text signals from the last
+three user turns, and treat the message-count bonus as at most a tiebreaker
+rather than as +1 each. Then **add roughly 60 multi-turn cases** before
+trusting or gating any number about this mode.
+
+**Evidence.** The three transcripts in `evals/REVIEW.md`, the
+`conversation.multi_turn` and `conversation.over_ten_messages` subsets in
+`results.json`, and the per-case `n_messages` and `has_system_message` fields in
+`--dump-failures`.
 
 **Remediation.** Score the whole conversation: take text signals from the last
 three user turns, and lower the message-count bonus thresholds from 10/20 to
@@ -214,7 +219,7 @@ cases** before trusting any number about this mode.
 
 ## Failure mode 4: requested output size is invisible
 
-**Observed failures: 4 of 177 (2.3%) — but 4 of the 4 cases that state an
+**Observed failures: 4 of 184 (2.2%) — but 4 of the 4 cases that state an
 output length.**
 
 **Mechanism.** Every length signal in the score measures the *input*:
@@ -247,7 +252,7 @@ length are misclassified.
 
 ## Failure mode 5: pattern bugs, including one that matches ordinary English
 
-**Observed failures: 11 of 177 (6.2%)** — 3 from the `plan` false positive, 8
+**Observed failures: 11 of 184 (6.0%)** — 3 from the `plan` false positive, 8
 from missing spellings and vocabulary.
 
 **5a. `\bplan\w*\b` matches "plant" and "planet".** The pattern at
@@ -301,14 +306,14 @@ in `evals/REVIEW.md`.
 
 ## Not a failure mode, but worth stating
 
-**The ambiguous subset is not where the classifier breaks.** Clear 0.560
-versus ambiguous 0.469 is not a significant difference (p = 0.104, CI spans
+**The ambiguous subset is not where the classifier breaks.** Clear 0.552
+versus ambiguous 0.474 is not a significant difference (p = 0.157, CI spans
 zero). The five failure modes above are organised by *mechanism*, and the
 mechanisms are roughly orthogonal to whether a human would call the case
 ambiguous. Anyone expecting the ambiguous subset to be the headline problem
 will be disappointed by the data, which is itself worth knowing.
 
-**Both systems are weak on `powerful`.** 0.247 and 0.427 recall. 67 of 89
+**Both systems are weak on `powerful`.** 0.250 and 0.467 recall. 69 of 92
 genuinely hard prompts are sent to a cheap model by the current router. This is
 the finding with the clearest operational consequence and it is not visible in
 the single accuracy number that the old harness printed.
@@ -321,7 +326,7 @@ as 0.0", and the floor reads 0.257.
 
 **Over-routing is rarer but real.** 41 errors go the other way, mostly `fast`
 prompts scoring 2–4 on length or an incidental keyword. That is the cheap
-direction, but 31 `fast` prompts sent to `balanced` is real money at volume.
+direction, but 35 `fast` prompts sent to `balanced` is real money at volume.
 
 ---
 
@@ -360,10 +365,8 @@ be fixed in the router:
   probably over-represented: keyword-stuffing prompts are a thing evaluators
   write, not a thing users send. `evals/production` exists to fix this and has
   never been run, because there is no traffic export wired up yet.
-- **`by_multi_turn` is not a subset in the report.** Multi-turn accuracy is
-  visible per case but not aggregated, so it is not gated. That should change.
-  The set also stops at six messages, so `len(messages) > 10` and `> 20` in the
-  classifier are untested.
+- **`by_multi_turn` is reported but not gated.** 26 cases is one case per 3.8
+  points, which is not enough to gate a subset this broken. It needs about 60.
 - **The two systems do not receive the same input.** The heuristic sees
   `case.chat_messages()`, the learned baseline sees `case.input`. On the 365
   single-message cases that is the same string; on the 14 multi-turn cases it is

@@ -210,6 +210,11 @@ def _print_report(reports: dict[str, BaselineReport], dataset_warnings: Sequence
         print(f"  clear        {report.rollup['by_difficulty']['clear']}")
         print(f"  ambiguous    {report.rollup['by_difficulty']['ambiguous']}")
         print(f"  adversarial  {report.rollup['adversarial_any']}")
+        multi = report.rollup["multi_turn_any"]
+        long_conv = report.rollup["long_conversation"]
+        if multi.n or long_conv.n:
+            print(f"  multi-turn   {multi}")
+            print(f"  10+ msgs     {long_conv}")
         for tier in TIERS:
             print(f"  tier {tier:<9}{report.rollup['by_expected_label'][tier]}")
         per_class = report.rollup["per_class"]

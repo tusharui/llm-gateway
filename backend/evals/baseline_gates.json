@@ -6,34 +6,167 @@
   "why_the_gate_is_low": "The heuristic scores 0.533 on this dataset. The previous CI floor was 0.90 against an 18-case golden set the heuristic scored 18/18 on. That 100% was a property of the test set, not of the router: six of the eighteen cases are near-copies of the router's own regexes, and none of them exercised multi-turn input. The honest baseline is what is gated here. Raising the floor back to 0.90 would require either weakening the dataset or rewriting the router, and doing the first to pass the second is how an eval becomes theatre.",
   "dataset": {
     "path": "backend/evals/golden",
-    "total_cases": 379,
-    "fingerprint": "9923f6760d716aff3e2464078561473527327cdcc70ff20e29841e81fc54d9cd",
-    "by_difficulty": { "clear": 266, "ambiguous": 113 },
-    "by_expected_label": { "fast": 144, "balanced": 146, "powerful": 89 }
+    "total_cases": 391,
+    "fingerprint": "ac1428bab827856b7fbd08f3e43020761996a1769cc840a5bb0a82ecd9deb8d7",
+    "by_difficulty": {
+      "clear": 277,
+      "ambiguous": 114
+    },
+    "by_expected_label": {
+      "fast": 149,
+      "balanced": 150,
+      "powerful": 92
+    },
+    "multi_turn_cases": 26,
+    "long_conversation_cases": 12
   },
   "measurements": {
     "heuristic": {
-      "overall": { "correct": 202, "n": 379, "value": 0.532982, "wilson_95": [0.482673, 0.582628] },
-      "clear": { "correct": 149, "n": 266, "value": 0.560150, "wilson_95": [0.500064, 0.618524] },
-      "ambiguous": { "correct": 53, "n": 113, "value": 0.469027, "wilson_95": [0.379552, 0.560537] },
-      "adversarial": { "correct": 46, "n": 97, "value": 0.474227, "wilson_95": [0.377745, 0.572672] },
+      "overall": {
+        "correct": 207,
+        "n": 391,
+        "value": 0.529412,
+        "wilson_95": [
+          0.479893,
+          0.578425
+        ]
+      },
+      "clear": {
+        "correct": 153,
+        "n": 277,
+        "value": 0.552347,
+        "wilson_95": [
+          0.493547,
+          0.609838
+        ]
+      },
+      "ambiguous": {
+        "correct": 54,
+        "n": 114,
+        "value": 0.473684,
+        "wilson_95": [
+          0.384428,
+          0.564743
+        ]
+      },
+      "adversarial": {
+        "correct": 46,
+        "n": 97,
+        "value": 0.474227,
+        "wilson_95": [
+          0.377745,
+          0.572672
+        ]
+      },
+      "multi_turn": {
+        "correct": 9,
+        "n": 26,
+        "value": 0.346154,
+        "wilson_95": [
+          0.193259,
+          0.536712
+        ]
+      },
+      "over_ten_messages": {
+        "correct": 5,
+        "n": 12,
+        "value": 0.416667,
+        "wilson_95": [
+          0.193259,
+          0.680489
+        ]
+      },
       "by_tier": {
-        "fast": { "correct": 111, "n": 144, "value": 0.770833 },
-        "balanced": { "correct": 69, "n": 146, "value": 0.472603 },
-        "powerful": { "correct": 22, "n": 89, "value": 0.247191 }
+        "fast": {
+          "correct": 112,
+          "n": 149,
+          "value": 0.751678
+        },
+        "balanced": {
+          "correct": 72,
+          "n": 150,
+          "value": 0.48
+        },
+        "powerful": {
+          "correct": 23,
+          "n": 92,
+          "value": 0.25
+        }
       }
     },
     "tfidf_logistic_regression": {
-      "overall": { "correct": 261, "n": 379, "value": 0.688654, "wilson_95": [0.640278, 0.733155] },
-      "clear": { "correct": 198, "n": 266, "value": 0.744361, "wilson_95": [0.688659, 0.793026] },
-      "ambiguous": { "correct": 63, "n": 113, "value": 0.557522, "wilson_95": [0.465643, 0.645686] },
-      "adversarial": { "correct": 64, "n": 97, "value": 0.659794, "wilson_95": [0.561048, 0.746364] },
-      "by_tier": {
-        "fast": { "correct": 108, "n": 144, "value": 0.75 },
-        "balanced": { "correct": 115, "n": 146, "value": 0.787671 },
-        "powerful": { "correct": 38, "n": 89, "value": 0.426966 }
+      "overall": {
+        "correct": 275,
+        "n": 391,
+        "value": 0.703325,
+        "wilson_95": [
+          0.656204,
+          0.746445
+        ]
       },
-      "note": "Measured with stratified group k-fold: near-duplicate cases are kept in one fold, so the out-of-fold score is not inflated by a twin of the test case sitting in training. Before that fix the same model scored 0.715 and the gate was 0.68. The lower number is the honest one."
+      "clear": {
+        "correct": 207,
+        "n": 277,
+        "value": 0.747292,
+        "wilson_95": [
+          0.692982,
+          0.794764
+        ]
+      },
+      "ambiguous": {
+        "correct": 68,
+        "n": 114,
+        "value": 0.596491,
+        "wilson_95": [
+          0.504674,
+          0.682045
+        ]
+      },
+      "adversarial": {
+        "correct": 66,
+        "n": 97,
+        "value": 0.680412,
+        "wilson_95": [
+          0.582336,
+          0.764815
+        ]
+      },
+      "multi_turn": {
+        "correct": 19,
+        "n": 26,
+        "value": 0.730769,
+        "wilson_95": [
+          0.531872,
+          0.875496
+        ]
+      },
+      "over_ten_messages": {
+        "correct": 10,
+        "n": 12,
+        "value": 0.833333,
+        "wilson_95": [
+          0.434436,
+          0.974544
+        ]
+      },
+      "by_tier": {
+        "fast": {
+          "correct": 113,
+          "n": 149,
+          "value": 0.758389
+        },
+        "balanced": {
+          "correct": 119,
+          "n": 150,
+          "value": 0.793333
+        },
+        "powerful": {
+          "correct": 43,
+          "n": 92,
+          "value": 0.467391
+        }
+      },
+      "note": "Measured with stratified group k-fold: near-duplicate cases are kept in one fold, so the out-of-fold score is not inflated by a twin of the test case sitting in training. Before that fix the same model scored 0.715 on a 379-case set and the gate was 0.68. The lower number is the honest one."
     }
   },
   "thresholds": [
@@ -42,36 +175,36 @@
       "system": "heuristic",
       "selector": "accuracy",
       "threshold": 0.49,
-      "observed_at_write_time": 0.532982,
+      "observed_at_write_time": 0.529412,
       "n_at_write_time": 379,
       "auto": false,
-      "rationale": "Overall routing accuracy. 0.533 observed minus 1.3 SE (0.0256) is 0.500; rounded down to 0.49 for margin. Catches any change that costs more than about four percentage points."
+      "rationale": "Overall routing accuracy. 0.529 observed minus 1.3 SE (0.0251) is 0.497; rounded down to 0.49. Catches any change that costs more than about four percentage points."
     },
     {
       "name": "min-clear-accuracy",
       "system": "heuristic",
       "selector": "clear-accuracy",
       "threshold": 0.52,
-      "observed_at_write_time": 0.560150,
+      "observed_at_write_time": 0.552347,
       "n_at_write_time": 266,
       "auto": false,
-      "rationale": "Clear cases are where a transparent rule should work. 0.560 observed minus 1.3 SE (0.0304) is 0.521. If this stops being the strongest subset, the keyword scoring is no longer doing what it was written to do."
+      "rationale": "Clear cases are where a transparent rule should work. 0.552 observed minus 1.3 SE (0.0299) is 0.514. If this stops being the strongest subset, the keyword scoring is no longer doing what it was written to do."
     },
     {
       "name": "min-ambiguous-accuracy",
       "system": "heuristic",
       "selector": "ambiguous-accuracy",
-      "threshold": 0.40,
-      "observed_at_write_time": 0.469027,
+      "threshold": 0.4,
+      "observed_at_write_time": 0.473684,
       "n_at_write_time": 113,
       "auto": false,
-      "rationale": "Ambiguous cases carry a wide interval (0.380-0.561) because there are only 113 of them. 0.469 minus 1.3 SE (0.0469) is 0.408. Gated separately so a change that only hurts borderline input is caught even if the overall number moves little."
+      "rationale": "Ambiguous cases carry a wide interval (0.384-0.565) because there are only 114 of them. 0.474 minus 1.3 SE (0.0465) is 0.413. Gated separately so a change that only hurts borderline input is caught even if the overall number moves little."
     },
     {
       "name": "min-adversarial-accuracy",
       "system": "heuristic",
       "selector": "adversarial-accuracy",
-      "threshold": 0.40,
+      "threshold": 0.4,
       "observed_at_write_time": 0.474227,
       "n_at_write_time": 97,
       "auto": false,
@@ -82,17 +215,17 @@
       "system": "tfidf_logistic_regression",
       "selector": "accuracy",
       "threshold": 0.65,
-      "observed_at_write_time": 0.688654,
+      "observed_at_write_time": 0.703325,
       "n_at_write_time": 379,
       "auto": false,
-      "rationale": "Same policy applied to the learned baseline. 0.689 minus 1.3 SE (0.0232) is 0.659. Gated because the learned model is the reference implementation: if the heuristic is ever replaced by it, this floor has to hold too."
+      "rationale": "Same policy applied to the learned baseline. 0.703 minus 1.3 SE (0.0224) is 0.674. Gated because the learned model is the reference implementation: if the heuristic is ever replaced by it, this floor has to hold too."
     },
     {
       "name": "min-clear-accuracy",
       "system": "tfidf_logistic_regression",
       "selector": "clear-accuracy",
-      "threshold": 0.70,
-      "observed_at_write_time": 0.744361,
+      "threshold": 0.7,
+      "observed_at_write_time": 0.747292,
       "n_at_write_time": 266,
       "auto": false,
       "rationale": "0.744 minus 1.3 SE (0.0266) is 0.709."
@@ -102,26 +235,26 @@
       "system": "tfidf_logistic_regression",
       "selector": "ambiguous-accuracy",
       "threshold": 0.49,
-      "observed_at_write_time": 0.557522,
+      "observed_at_write_time": 0.596491,
       "n_at_write_time": 113,
       "auto": false,
-      "rationale": "0.558 minus 1.3 SE (0.0452) is 0.499. This is the gate that moved when grouped folds were introduced: the old 0.57 was derived from an out-of-fold score of 0.637 that included a near-duplicate of a test case in its training fold. The learned baseline still drops 18.7 points from clear to ambiguous, which is a dataset property rather than evidence that either model handles ambiguity."
+      "rationale": "0.596 minus 1.3 SE (0.0450) is 0.538. This gate moved twice: from 0.57 when the 379-case set first moved it, and again when grouped folds removed a near-duplicate leak. Neither move was a dataset edit; both were measurement corrections."
     },
     {
       "name": "min-adversarial-accuracy",
       "system": "tfidf_logistic_regression",
       "selector": "adversarial-accuracy",
       "threshold": 0.59,
-      "observed_at_write_time": 0.659794,
+      "observed_at_write_time": 0.680412,
       "n_at_write_time": 97,
       "auto": false,
-      "rationale": "0.660 minus 1.3 SE (0.0484) is 0.597."
+      "rationale": "0.680 minus 1.3 SE (0.0461) is 0.620."
     }
   ],
   "deliberately_not_gated": [
     {
       "system": "tfidf_logistic_regression_holdout",
-      "reason": "It evaluates 95 of 379 cases. A floor on it would be a floor on 25 ambiguous cases and 25 adversarial ones, where the interval is roughly plus or minus 17 points. Gating it would produce a build that flips on dataset edits without telling anyone anything about quality."
+      "reason": "It evaluates 95 of 391 cases. A floor on it would be a floor on 25 ambiguous cases and 25 adversarial ones, where the interval is roughly plus or minus 17 points. Gating it would produce a build that flips on dataset edits without telling anyone anything about quality."
     },
     {
       "system": "majority_class",
@@ -129,11 +262,11 @@
     },
     {
       "selector": "by_tier",
-      "reason": "The powerful tier sits at 0.247 for the heuristic with an interval of 0.169-0.346. A gate there would be inside its own noise. Per-tier numbers are reported on every run and the per-tier gate is available as --min-tier-accuracy for anyone who wants to raise one deliberately."
+      "reason": "The powerful tier sits at 0.250 for the heuristic with an interval of 0.174-0.349. A gate there would be inside its own noise. Per-tier numbers are reported on every run and the per-tier gate is available as --min-tier-accuracy for anyone who wants to raise one deliberately."
     },
     {
-      "selector": "multi_turn",
-      "reason": "The dataset has 14 multi-turn cases, 10 of which the heuristic gets wrong. That is a real finding and not enough cases to gate: one case is 7 points. Multi-turn accuracy is reported per case and --min-tier-accuracy-style gating should wait until there are about 60 of them."
+      "selector": "multi_turn and over_ten_messages",
+      "reason": "26 and 12 cases respectively. The heuristic scores 0.346 and 0.417 on them, which is a real and important finding, but one case is 4 points on the first subset and 8 on the second. Both are reported on every run and neither is gated until there are about 60 cases."
     }
   ]
 }

@@ -1,31 +1,31 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-01T10:40:12.783887+00:00",
+  "generated_at": "2026-10-01T10:45:19.623102+00:00",
   "environment": {
     "python_version": "3.12.7",
     "python_implementation": "CPython",
     "platform": "windows",
     "executable_name": "python.exe",
-    "git_commit": "693ef1e210d4639f12e7094db5a3195a97edf29b",
+    "git_commit": "2e491ad4de32cb5bc80048b250a4efa9e70c0e6e",
     "sklearn_version": "1.7.0"
   },
   "dataset": {
-    "total_cases": 379,
+    "total_cases": 391,
     "schema_version": 2,
-    "fingerprint": "9923f6760d716aff3e2464078561473527327cdcc70ff20e29841e81fc54d9cd",
+    "fingerprint": "ac1428bab827856b7fbd08f3e43020761996a1769cc840a5bb0a82ecd9deb8d7",
     "by_difficulty": {
-      "clear": 266,
-      "ambiguous": 113
+      "clear": 277,
+      "ambiguous": 114
     },
     "by_expected_label": {
-      "fast": 144,
-      "balanced": 146,
-      "powerful": 89
+      "fast": 149,
+      "balanced": 150,
+      "powerful": 92
     },
     "by_source": {
       "synthetic": 189,
       "adversarial": 97,
-      "manually_created": 93
+      "manually_created": 105
     },
     "by_category": {
       "acknowledgement": 10,
@@ -51,6 +51,7 @@
       "insufficient_context": 9,
       "irrelevant_context": 8,
       "keyword_stuffing": 10,
+      "long_conversation": 12,
       "long_distractor": 10,
       "mathematics": 7,
       "misleading_keyword": 10,
@@ -104,8 +105,8 @@
       "typos": 8,
       "unicode_lookalike": 4
     },
-    "multi_turn_cases": 14,
-    "unique_inputs": 379,
+    "multi_turn_cases": 26,
+    "unique_inputs": 391,
     "path": "evals/golden",
     "warnings": [
       {
@@ -151,89 +152,89 @@
       "name": "heuristic",
       "kind": "rule_based",
       "overall": {
-        "n": 379,
-        "correct": 202,
-        "incorrect": 177,
-        "value": 0.532982,
+        "n": 391,
+        "correct": 207,
+        "incorrect": 184,
+        "value": 0.529412,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.482673,
-          "upper": 0.582628,
+          "lower": 0.479892,
+          "upper": 0.578359,
           "defined": true
         }
       },
       "by_difficulty": {
         "ambiguous": {
-          "n": 113,
-          "correct": 53,
+          "n": 114,
+          "correct": 54,
           "incorrect": 60,
-          "value": 0.469027,
+          "value": 0.473684,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.379552,
-            "upper": 0.560537,
+            "lower": 0.384388,
+            "upper": 0.564696,
             "defined": true
           }
         },
         "clear": {
-          "n": 266,
-          "correct": 149,
-          "incorrect": 117,
-          "value": 0.56015,
+          "n": 277,
+          "correct": 153,
+          "incorrect": 124,
+          "value": 0.552347,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.500064,
-            "upper": 0.618524,
+            "lower": 0.49347,
+            "upper": 0.609791,
             "defined": true
           }
         }
       },
       "by_expected_label": {
         "balanced": {
-          "n": 146,
-          "correct": 69,
-          "incorrect": 77,
-          "value": 0.472603,
+          "n": 150,
+          "correct": 72,
+          "incorrect": 78,
+          "value": 0.48,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.393365,
-            "upper": 0.553245,
+            "lower": 0.401551,
+            "upper": 0.559448,
             "defined": true
           }
         },
         "fast": {
-          "n": 144,
-          "correct": 111,
-          "incorrect": 33,
-          "value": 0.770833,
+          "n": 149,
+          "correct": 112,
+          "incorrect": 37,
+          "value": 0.751678,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.695682,
-            "upper": 0.83191,
+            "lower": 0.676567,
+            "upper": 0.814138,
             "defined": true
           }
         },
         "powerful": {
-          "n": 89,
-          "correct": 22,
-          "incorrect": 67,
-          "value": 0.247191,
+          "n": 92,
+          "correct": 23,
+          "incorrect": 69,
+          "value": 0.25,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.169282,
-            "upper": 0.34602,
+            "lower": 0.172753,
+            "upper": 0.347288,
             "defined": true
           }
         }
@@ -241,16 +242,16 @@
       "by_difficulty_and_label": {
         "ambiguous": {
           "balanced": {
-            "n": 60,
-            "correct": 25,
+            "n": 61,
+            "correct": 26,
             "incorrect": 35,
-            "value": 0.416667,
+            "value": 0.42623,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.300643,
-              "upper": 0.542719,
+              "lower": 0.310152,
+              "upper": 0.551048,
               "defined": true
             }
           },
@@ -285,44 +286,44 @@
         },
         "clear": {
           "balanced": {
-            "n": 86,
-            "correct": 44,
-            "incorrect": 42,
-            "value": 0.511628,
+            "n": 89,
+            "correct": 46,
+            "incorrect": 43,
+            "value": 0.516854,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.407767,
-              "upper": 0.614494,
+              "lower": 0.414506,
+              "upper": 0.617807,
               "defined": true
             }
           },
           "fast": {
-            "n": 115,
-            "correct": 91,
-            "incorrect": 24,
-            "value": 0.791304,
+            "n": 120,
+            "correct": 92,
+            "incorrect": 28,
+            "value": 0.766667,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.708222,
-              "upper": 0.855555,
+              "lower": 0.683446,
+              "upper": 0.833344,
               "defined": true
             }
           },
           "powerful": {
-            "n": 65,
-            "correct": 14,
-            "incorrect": 51,
-            "value": 0.215385,
+            "n": 68,
+            "correct": 15,
+            "incorrect": 53,
+            "value": 0.220588,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.132868,
-              "upper": 0.329666,
+              "lower": 0.13849,
+              "upper": 0.332567,
               "defined": true
             }
           }
@@ -648,6 +649,20 @@
             "z": 1.959964,
             "lower": 0.0,
             "upper": 0.277533,
+            "defined": true
+          }
+        },
+        "long_conversation": {
+          "n": 12,
+          "correct": 5,
+          "incorrect": 7,
+          "value": 0.416667,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.19326,
+            "upper": 0.680489,
             "defined": true
           }
         },
@@ -1158,16 +1173,16 @@
           }
         },
         "manually_created": {
-          "n": 93,
-          "correct": 41,
-          "incorrect": 52,
-          "value": 0.44086,
+          "n": 105,
+          "correct": 46,
+          "incorrect": 59,
+          "value": 0.438095,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.344294,
-            "upper": 0.542118,
+            "lower": 0.347044,
+            "upper": 0.533517,
             "defined": true
           }
         },
@@ -1412,35 +1427,63 @@
           "defined": true
         }
       },
+      "multi_turn_any": {
+        "n": 26,
+        "correct": 9,
+        "incorrect": 17,
+        "value": 0.346154,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.194122,
+          "upper": 0.537794,
+          "defined": true
+        }
+      },
+      "long_conversation": {
+        "n": 12,
+        "correct": 5,
+        "incorrect": 7,
+        "value": 0.416667,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.19326,
+          "upper": 0.680489,
+          "defined": true
+        }
+      },
       "per_class": {
         "per_class": {
           "fast": {
-            "support": 144,
-            "predicted": 200,
-            "true_positives": 111,
-            "precision": 0.555,
-            "recall": 0.770833,
-            "f1": 0.645349
+            "support": 149,
+            "predicted": 201,
+            "true_positives": 112,
+            "precision": 0.557214,
+            "recall": 0.751678,
+            "f1": 0.64
           },
           "balanced": {
-            "support": 146,
-            "predicted": 147,
-            "true_positives": 69,
-            "precision": 0.469388,
-            "recall": 0.472603,
-            "f1": 0.47099
+            "support": 150,
+            "predicted": 156,
+            "true_positives": 72,
+            "precision": 0.461538,
+            "recall": 0.48,
+            "f1": 0.470588
           },
           "powerful": {
-            "support": 89,
-            "predicted": 32,
-            "true_positives": 22,
-            "precision": 0.6875,
-            "recall": 0.247191,
-            "f1": 0.363636
+            "support": 92,
+            "predicted": 34,
+            "true_positives": 23,
+            "precision": 0.676471,
+            "recall": 0.25,
+            "f1": 0.365079
           }
         },
-        "macro_f1": 0.493325,
-        "micro_f1": 0.532982,
+        "macro_f1": 0.491889,
+        "micro_f1": 0.529412,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -1461,25 +1504,25 @@
           "powerful"
         ],
         "support": {
-          "fast": 144,
-          "balanced": 146,
-          "powerful": 89
+          "fast": 149,
+          "balanced": 150,
+          "powerful": 92
         },
         "counts": {
           "fast": {
-            "fast": 111,
-            "balanced": 31,
+            "fast": 112,
+            "balanced": 35,
             "powerful": 2
           },
           "balanced": {
             "fast": 69,
-            "balanced": 69,
-            "powerful": 8
+            "balanced": 72,
+            "powerful": 9
           },
           "powerful": {
             "fast": 20,
-            "balanced": 47,
-            "powerful": 22
+            "balanced": 49,
+            "powerful": 23
           }
         }
       }
@@ -1488,89 +1531,89 @@
       "name": "majority_class",
       "kind": "trivial_reference",
       "overall": {
-        "n": 379,
-        "correct": 144,
-        "incorrect": 235,
-        "value": 0.379947,
+        "n": 391,
+        "correct": 149,
+        "incorrect": 242,
+        "value": 0.381074,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.332517,
-          "upper": 0.429787,
+          "lower": 0.334314,
+          "upper": 0.430148,
           "defined": true
         }
       },
       "by_difficulty": {
         "ambiguous": {
-          "n": 113,
-          "correct": 51,
-          "incorrect": 62,
-          "value": 0.451327,
+          "n": 114,
+          "correct": 55,
+          "incorrect": 59,
+          "value": 0.482456,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.362683,
-            "upper": 0.543172,
+            "lower": 0.392806,
+            "upper": 0.57325,
             "defined": true
           }
         },
         "clear": {
-          "n": 266,
-          "correct": 93,
-          "incorrect": 173,
-          "value": 0.349624,
+          "n": 277,
+          "correct": 94,
+          "incorrect": 183,
+          "value": 0.33935,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.294829,
-            "upper": 0.4087,
+            "lower": 0.286127,
+            "upper": 0.396968,
             "defined": true
           }
         }
       },
       "by_expected_label": {
         "balanced": {
-          "n": 146,
-          "correct": 116,
+          "n": 150,
+          "correct": 120,
           "incorrect": 30,
-          "value": 0.794521,
+          "value": 0.8,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.721836,
-            "upper": 0.852104,
+            "lower": 0.728859,
+            "upper": 0.856159,
             "defined": true
           }
         },
         "fast": {
-          "n": 144,
-          "correct": 28,
-          "incorrect": 116,
-          "value": 0.194444,
+          "n": 149,
+          "correct": 29,
+          "incorrect": 120,
+          "value": 0.194631,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.138095,
-            "upper": 0.266672,
+            "lower": 0.139071,
+            "upper": 0.26554,
             "defined": true
           }
         },
         "powerful": {
-          "n": 89,
+          "n": 92,
           "correct": 0,
-          "incorrect": 89,
+          "incorrect": 92,
           "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
             "lower": 0.0,
-            "upper": 0.041377,
+            "upper": 0.040081,
             "defined": true
           }
         }
@@ -1578,30 +1621,30 @@
       "by_difficulty_and_label": {
         "ambiguous": {
           "balanced": {
-            "n": 60,
-            "correct": 43,
-            "incorrect": 17,
-            "value": 0.716667,
+            "n": 61,
+            "correct": 48,
+            "incorrect": 13,
+            "value": 0.786885,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.592327,
-              "upper": 0.814932,
+              "lower": 0.668776,
+              "upper": 0.871002,
               "defined": true
             }
           },
           "fast": {
             "n": 29,
-            "correct": 8,
-            "incorrect": 21,
-            "value": 0.275862,
+            "correct": 7,
+            "incorrect": 22,
+            "value": 0.241379,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.146988,
-              "upper": 0.457171,
+              "lower": 0.122184,
+              "upper": 0.421076,
               "defined": true
             }
           },
@@ -1622,44 +1665,44 @@
         },
         "clear": {
           "balanced": {
-            "n": 86,
-            "correct": 73,
-            "incorrect": 13,
-            "value": 0.848837,
+            "n": 89,
+            "correct": 72,
+            "incorrect": 17,
+            "value": 0.808989,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.758364,
-              "upper": 0.909479,
+              "lower": 0.715227,
+              "upper": 0.87718,
               "defined": true
             }
           },
           "fast": {
-            "n": 115,
-            "correct": 20,
-            "incorrect": 95,
-            "value": 0.173913,
+            "n": 120,
+            "correct": 22,
+            "incorrect": 98,
+            "value": 0.183333,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.115497,
-              "upper": 0.25341,
+              "lower": 0.124303,
+              "upper": 0.262009,
               "defined": true
             }
           },
           "powerful": {
-            "n": 65,
+            "n": 68,
             "correct": 0,
-            "incorrect": 65,
+            "incorrect": 68,
             "value": 0.0,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
               "lower": 0.0,
-              "upper": 0.055802,
+              "upper": 0.053471,
               "defined": true
             }
           }
@@ -1668,29 +1711,29 @@
       "by_category": {
         "acknowledgement": {
           "n": 10,
-          "correct": 1,
-          "incorrect": 9,
-          "value": 0.1,
+          "correct": 4,
+          "incorrect": 6,
+          "value": 0.4,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.017876,
-            "upper": 0.40415,
+            "lower": 0.16818,
+            "upper": 0.687326,
             "defined": true
           }
         },
         "advice": {
           "n": 9,
-          "correct": 7,
-          "incorrect": 2,
-          "value": 0.777778,
+          "correct": 6,
+          "incorrect": 3,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.452589,
-            "upper": 0.936775,
+            "lower": 0.354202,
+            "upper": 0.879416,
             "defined": true
           }
         },
@@ -1752,15 +1795,15 @@
         },
         "casing": {
           "n": 6,
-          "correct": 2,
-          "incorrect": 4,
-          "value": 0.333333,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.096771,
-            "upper": 0.700007,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
@@ -1780,43 +1823,43 @@
         },
         "comparison": {
           "n": 11,
-          "correct": 11,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 10,
+          "incorrect": 1,
+          "value": 0.909091,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.741167,
-            "upper": 1.0,
+            "lower": 0.622642,
+            "upper": 0.983768,
             "defined": true
           }
         },
         "conflicting_signals": {
           "n": 10,
-          "correct": 5,
-          "incorrect": 5,
-          "value": 0.5,
+          "correct": 3,
+          "incorrect": 7,
+          "value": 0.3,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.107791,
+            "upper": 0.603222,
             "defined": true
           }
         },
         "contradiction": {
           "n": 6,
-          "correct": 1,
-          "incorrect": 5,
-          "value": 0.166667,
+          "correct": 2,
+          "incorrect": 4,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.030053,
-            "upper": 0.563503,
+            "lower": 0.096771,
+            "upper": 0.700007,
             "defined": true
           }
         },
@@ -1836,15 +1879,15 @@
         },
         "definition": {
           "n": 8,
-          "correct": 2,
-          "incorrect": 6,
-          "value": 0.25,
+          "correct": 0,
+          "incorrect": 8,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.071479,
-            "upper": 0.590725,
+            "lower": 0.0,
+            "upper": 0.324408,
             "defined": true
           }
         },
@@ -1892,29 +1935,29 @@
         },
         "factual_lookup": {
           "n": 13,
-          "correct": 2,
-          "incorrect": 11,
-          "value": 0.153846,
+          "correct": 3,
+          "incorrect": 10,
+          "value": 0.230769,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.043258,
-            "upper": 0.422346,
+            "lower": 0.081795,
+            "upper": 0.502564,
             "defined": true
           }
         },
         "greeting": {
           "n": 6,
-          "correct": 0,
-          "incorrect": 6,
-          "value": 0.0,
+          "correct": 2,
+          "incorrect": 4,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.390334,
+            "lower": 0.096771,
+            "upper": 0.700007,
             "defined": true
           }
         },
@@ -1934,71 +1977,85 @@
         },
         "indirect_wording": {
           "n": 10,
-          "correct": 6,
-          "incorrect": 4,
-          "value": 0.6,
+          "correct": 5,
+          "incorrect": 5,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.312674,
-            "upper": 0.83182,
+            "lower": 0.236593,
+            "upper": 0.763407,
             "defined": true
           }
         },
         "insufficient_context": {
           "n": 9,
-          "correct": 3,
-          "incorrect": 6,
-          "value": 0.333333,
+          "correct": 6,
+          "incorrect": 3,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.120584,
-            "upper": 0.645798,
+            "lower": 0.354202,
+            "upper": 0.879416,
             "defined": true
           }
         },
         "irrelevant_context": {
           "n": 8,
-          "correct": 2,
-          "incorrect": 6,
-          "value": 0.25,
+          "correct": 1,
+          "incorrect": 7,
+          "value": 0.125,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.071479,
-            "upper": 0.590725,
+            "lower": 0.022417,
+            "upper": 0.470888,
             "defined": true
           }
         },
         "keyword_stuffing": {
           "n": 10,
-          "correct": 4,
-          "incorrect": 6,
-          "value": 0.4,
+          "correct": 2,
+          "incorrect": 8,
+          "value": 0.2,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.16818,
-            "upper": 0.687326,
+            "lower": 0.056682,
+            "upper": 0.509838,
+            "defined": true
+          }
+        },
+        "long_conversation": {
+          "n": 12,
+          "correct": 3,
+          "incorrect": 9,
+          "value": 0.25,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.088942,
+            "upper": 0.532305,
             "defined": true
           }
         },
         "long_distractor": {
           "n": 10,
-          "correct": 1,
-          "incorrect": 9,
-          "value": 0.1,
+          "correct": 3,
+          "incorrect": 7,
+          "value": 0.3,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.017876,
-            "upper": 0.40415,
+            "lower": 0.107791,
+            "upper": 0.603222,
             "defined": true
           }
         },
@@ -2018,61 +2075,33 @@
         },
         "misleading_keyword": {
           "n": 10,
-          "correct": 1,
-          "incorrect": 9,
-          "value": 0.1,
+          "correct": 2,
+          "incorrect": 8,
+          "value": 0.2,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.017876,
-            "upper": 0.40415,
+            "lower": 0.056682,
+            "upper": 0.509838,
             "defined": true
           }
         },
         "multi_intent": {
           "n": 10,
-          "correct": 1,
-          "incorrect": 9,
-          "value": 0.1,
+          "correct": 2,
+          "incorrect": 8,
+          "value": 0.2,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.017876,
-            "upper": 0.40415,
+            "lower": 0.056682,
+            "upper": 0.509838,
             "defined": true
           }
         },
         "multi_turn_debugging": {
-          "n": 2,
-          "correct": 2,
-          "incorrect": 0,
-          "value": 1.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.34238,
-            "upper": 1.0,
-            "defined": true
-          }
-        },
-        "multi_turn_injection": {
-          "n": 1,
-          "correct": 0,
-          "incorrect": 1,
-          "value": 0.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.793451,
-            "defined": true
-          }
-        },
-        "multi_turn_multi_question": {
           "n": 2,
           "correct": 1,
           "incorrect": 1,
@@ -2086,17 +2115,45 @@
             "defined": true
           }
         },
-        "multi_turn_short_history": {
-          "n": 5,
-          "correct": 3,
-          "incorrect": 2,
-          "value": 0.6,
+        "multi_turn_injection": {
+          "n": 1,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.230724,
-            "upper": 0.882379,
+            "lower": 0.206549,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "multi_turn_multi_question": {
+          "n": 2,
+          "correct": 0,
+          "incorrect": 2,
+          "value": 0.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.0,
+            "upper": 0.65762,
+            "defined": true
+          }
+        },
+        "multi_turn_short_history": {
+          "n": 5,
+          "correct": 2,
+          "incorrect": 3,
+          "value": 0.4,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.117621,
+            "upper": 0.769276,
             "defined": true
           }
         },
@@ -2130,29 +2187,29 @@
         },
         "nested_request": {
           "n": 6,
-          "correct": 1,
-          "incorrect": 5,
-          "value": 0.166667,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.030053,
-            "upper": 0.563503,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
         "numeric": {
           "n": 1,
-          "correct": 0,
-          "incorrect": 1,
-          "value": 0.0,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.793451,
+            "lower": 0.206549,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -2200,29 +2257,29 @@
         },
         "punctuation": {
           "n": 6,
-          "correct": 4,
-          "incorrect": 2,
-          "value": 0.666667,
+          "correct": 0,
+          "incorrect": 6,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.299993,
-            "upper": 0.903229,
+            "lower": 0.0,
+            "upper": 0.390334,
             "defined": true
           }
         },
         "quoted_text": {
           "n": 6,
-          "correct": 4,
-          "incorrect": 2,
-          "value": 0.666667,
+          "correct": 6,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.299993,
-            "upper": 0.903229,
+            "lower": 0.609666,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -2242,15 +2299,15 @@
         },
         "rewriting": {
           "n": 3,
-          "correct": 2,
-          "incorrect": 1,
-          "value": 0.666667,
+          "correct": 3,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.438503,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -2270,29 +2327,29 @@
         },
         "short_utterance": {
           "n": 3,
-          "correct": 0,
-          "incorrect": 3,
-          "value": 0.0,
+          "correct": 1,
+          "incorrect": 2,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.561497,
+            "lower": 0.061492,
+            "upper": 0.79234,
             "defined": true
           }
         },
         "small_talk": {
           "n": 2,
-          "correct": 2,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.34238,
-            "upper": 1.0,
+            "lower": 0.094531,
+            "upper": 0.905469,
             "defined": true
           }
         },
@@ -2312,75 +2369,89 @@
         },
         "summarization": {
           "n": 6,
-          "correct": 6,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 5,
+          "incorrect": 1,
+          "value": 0.833333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.609666,
-            "upper": 1.0,
+            "lower": 0.436497,
+            "upper": 0.969947,
             "defined": true
           }
         },
         "synonym": {
           "n": 6,
-          "correct": 6,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 5,
+          "incorrect": 1,
+          "value": 0.833333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.609666,
-            "upper": 1.0,
+            "lower": 0.436497,
+            "upper": 0.969947,
             "defined": true
           }
         },
         "thanks": {
           "n": 5,
-          "correct": 2,
-          "incorrect": 3,
-          "value": 0.4,
+          "correct": 1,
+          "incorrect": 4,
+          "value": 0.2,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.117621,
-            "upper": 0.769276,
+            "lower": 0.036224,
+            "upper": 0.624465,
             "defined": true
           }
         },
         "time": {
           "n": 3,
-          "correct": 1,
-          "incorrect": 2,
-          "value": 0.333333,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.061492,
-            "upper": 0.79234,
-            "defined": true
-          }
-        },
-        "translation": {
-          "n": 2,
           "correct": 0,
-          "incorrect": 2,
+          "incorrect": 3,
           "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
             "lower": 0.0,
-            "upper": 0.65762,
+            "upper": 0.561497,
+            "defined": true
+          }
+        },
+        "translation": {
+          "n": 2,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.094531,
+            "upper": 0.905469,
             "defined": true
           }
         },
         "troubleshooting": {
+          "n": 7,
+          "correct": 7,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.64567,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "typos": {
           "n": 7,
           "correct": 5,
           "incorrect": 2,
@@ -2391,20 +2462,6 @@
             "z": 1.959964,
             "lower": 0.358934,
             "upper": 0.917781,
-            "defined": true
-          }
-        },
-        "typos": {
-          "n": 7,
-          "correct": 4,
-          "incorrect": 3,
-          "value": 0.571429,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.250458,
-            "upper": 0.84178,
             "defined": true
           }
         },
@@ -2452,29 +2509,29 @@
         },
         "weather": {
           "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
+          "correct": 0,
+          "incorrect": 2,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
+            "lower": 0.0,
+            "upper": 0.65762,
             "defined": true
           }
         },
         "yes_no": {
           "n": 3,
-          "correct": 2,
-          "incorrect": 1,
-          "value": 0.666667,
+          "correct": 0,
+          "incorrect": 3,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.0,
+            "upper": 0.561497,
             "defined": true
           }
         }
@@ -2482,43 +2539,43 @@
       "by_source": {
         "adversarial": {
           "n": 97,
-          "correct": 36,
-          "incorrect": 61,
-          "value": 0.371134,
+          "correct": 37,
+          "incorrect": 60,
+          "value": 0.381443,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.281624,
-            "upper": 0.470462,
+            "lower": 0.291047,
+            "upper": 0.480873,
             "defined": true
           }
         },
         "manually_created": {
-          "n": 93,
-          "correct": 43,
-          "incorrect": 50,
-          "value": 0.462366,
+          "n": 105,
+          "correct": 46,
+          "incorrect": 59,
+          "value": 0.438095,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.364546,
-            "upper": 0.563171,
+            "lower": 0.347044,
+            "upper": 0.533517,
             "defined": true
           }
         },
         "synthetic": {
           "n": 189,
-          "correct": 65,
-          "incorrect": 124,
-          "value": 0.343915,
+          "correct": 66,
+          "incorrect": 123,
+          "value": 0.349206,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.27991,
-            "upper": 0.41414,
+            "lower": 0.284859,
+            "upper": 0.419561,
             "defined": true
           }
         }
@@ -2540,57 +2597,57 @@
         },
         "contradiction": {
           "n": 6,
-          "correct": 1,
-          "incorrect": 5,
-          "value": 0.166667,
+          "correct": 2,
+          "incorrect": 4,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.030053,
-            "upper": 0.563503,
+            "lower": 0.096771,
+            "upper": 0.700007,
             "defined": true
           }
         },
         "irrelevant_context": {
           "n": 8,
-          "correct": 2,
-          "incorrect": 6,
-          "value": 0.25,
+          "correct": 1,
+          "incorrect": 7,
+          "value": 0.125,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.071479,
-            "upper": 0.590725,
+            "lower": 0.022417,
+            "upper": 0.470888,
             "defined": true
           }
         },
         "keyword_stuffing": {
           "n": 11,
-          "correct": 5,
-          "incorrect": 6,
-          "value": 0.454545,
+          "correct": 2,
+          "incorrect": 9,
+          "value": 0.181818,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.212713,
-            "upper": 0.719908,
+            "lower": 0.051368,
+            "upper": 0.476981,
             "defined": true
           }
         },
         "misleading_keyword": {
           "n": 10,
-          "correct": 1,
-          "incorrect": 9,
-          "value": 0.1,
+          "correct": 2,
+          "incorrect": 8,
+          "value": 0.2,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.017876,
-            "upper": 0.40415,
+            "lower": 0.056682,
+            "upper": 0.509838,
             "defined": true
           }
         },
@@ -2610,71 +2667,71 @@
         },
         "nested_request": {
           "n": 6,
-          "correct": 1,
-          "incorrect": 5,
-          "value": 0.166667,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.030053,
-            "upper": 0.563503,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
         "prompt_injection": {
           "n": 7,
-          "correct": 2,
-          "incorrect": 5,
-          "value": 0.285714,
+          "correct": 3,
+          "incorrect": 4,
+          "value": 0.428571,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.082219,
-            "upper": 0.641066,
+            "lower": 0.15822,
+            "upper": 0.749542,
             "defined": true
           }
         },
         "punctuation": {
           "n": 6,
-          "correct": 4,
-          "incorrect": 2,
-          "value": 0.666667,
+          "correct": 0,
+          "incorrect": 6,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.299993,
-            "upper": 0.903229,
+            "lower": 0.0,
+            "upper": 0.390334,
             "defined": true
           }
         },
         "quoted_text": {
           "n": 7,
-          "correct": 4,
-          "incorrect": 3,
-          "value": 0.571429,
+          "correct": 6,
+          "incorrect": 1,
+          "value": 0.857143,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.250458,
-            "upper": 0.84178,
+            "lower": 0.486872,
+            "upper": 0.97432,
             "defined": true
           }
         },
         "repetition": {
           "n": 14,
-          "correct": 4,
-          "incorrect": 10,
-          "value": 0.285714,
+          "correct": 3,
+          "incorrect": 11,
+          "value": 0.214286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.117214,
-            "upper": 0.546491,
+            "lower": 0.075714,
+            "upper": 0.475892,
             "defined": true
           }
         },
@@ -2694,29 +2751,29 @@
         },
         "synonym": {
           "n": 6,
-          "correct": 6,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 5,
+          "incorrect": 1,
+          "value": 0.833333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.609666,
-            "upper": 1.0,
+            "lower": 0.436497,
+            "upper": 0.969947,
             "defined": true
           }
         },
         "typos": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 6,
+          "incorrect": 2,
+          "value": 0.75,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.409275,
+            "upper": 0.928521,
             "defined": true
           }
         },
@@ -2737,38 +2794,66 @@
       },
       "adversarial_any": {
         "n": 97,
-        "correct": 36,
-        "incorrect": 61,
-        "value": 0.371134,
+        "correct": 37,
+        "incorrect": 60,
+        "value": 0.381443,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.281624,
-          "upper": 0.470462,
+          "lower": 0.291047,
+          "upper": 0.480873,
+          "defined": true
+        }
+      },
+      "multi_turn_any": {
+        "n": 26,
+        "correct": 8,
+        "incorrect": 18,
+        "value": 0.307692,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.165013,
+          "upper": 0.499883,
+          "defined": true
+        }
+      },
+      "long_conversation": {
+        "n": 12,
+        "correct": 3,
+        "incorrect": 9,
+        "value": 0.25,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.088942,
+          "upper": 0.532305,
           "defined": true
         }
       },
       "per_class": {
         "per_class": {
           "fast": {
-            "support": 144,
-            "predicted": 75,
-            "true_positives": 28,
-            "precision": 0.373333,
-            "recall": 0.194444,
-            "f1": 0.255708
+            "support": 149,
+            "predicted": 78,
+            "true_positives": 29,
+            "precision": 0.371795,
+            "recall": 0.194631,
+            "f1": 0.255507
           },
           "balanced": {
-            "support": 146,
-            "predicted": 304,
-            "true_positives": 116,
-            "precision": 0.381579,
-            "recall": 0.794521,
-            "f1": 0.515556
+            "support": 150,
+            "predicted": 313,
+            "true_positives": 120,
+            "precision": 0.383387,
+            "recall": 0.8,
+            "f1": 0.518359
           },
           "powerful": {
-            "support": 89,
+            "support": 92,
             "predicted": 0,
             "true_positives": 0,
             "precision": null,
@@ -2776,8 +2861,8 @@
             "f1": null
           }
         },
-        "macro_f1": 0.257088,
-        "micro_f1": 0.379947,
+        "macro_f1": 0.257955,
+        "micro_f1": 0.381074,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -2798,24 +2883,24 @@
           "powerful"
         ],
         "support": {
-          "fast": 144,
-          "balanced": 146,
-          "powerful": 89
+          "fast": 149,
+          "balanced": 150,
+          "powerful": 92
         },
         "counts": {
           "fast": {
-            "fast": 28,
-            "balanced": 116,
+            "fast": 29,
+            "balanced": 120,
             "powerful": 0
           },
           "balanced": {
             "fast": 30,
-            "balanced": 116,
+            "balanced": 120,
             "powerful": 0
           },
           "powerful": {
-            "fast": 17,
-            "balanced": 72,
+            "fast": 19,
+            "balanced": 73,
             "powerful": 0
           }
         }
@@ -2823,7 +2908,7 @@
       "training": {
         "name": "majority_class",
         "method": "most frequent training label per fold, 5 stratified folds (floor reference)",
-        "n_evaluated": 379,
+        "n_evaluated": 391,
         "seed": 20250101,
         "n_splits": 5,
         "vocabulary_size": null,
@@ -3207,62 +3292,74 @@
           "mt_two_questions_02",
           "mt_history_debug_01",
           "mt_history_debug_02",
-          "mt_injection_in_history_01"
+          "mt_injection_in_history_01",
+          "long_conv_fact_01",
+          "long_conv_fact_02",
+          "long_conv_acks_01",
+          "long_conv_explain_01",
+          "long_conv_explain_02",
+          "long_conv_tips_01",
+          "long_conv_code_01",
+          "long_conv_design_01",
+          "long_conv_proof_01",
+          "long_conv_history_01",
+          "long_conv_short_01",
+          "long_conv_short_02"
         ],
         "folds": [
           {
             "fold": 0,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 312,
+            "n_test": 79,
             "predicted_label": "balanced",
             "train_label_counts": {
-              "balanced": 117,
-              "fast": 115,
-              "powerful": 71
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 73
             }
           },
           {
             "fold": 1,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 313,
+            "n_test": 78,
             "predicted_label": "balanced",
             "train_label_counts": {
-              "balanced": 117,
-              "fast": 115,
-              "powerful": 71
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 74
             }
           },
           {
             "fold": 2,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 313,
+            "n_test": 78,
             "predicted_label": "balanced",
             "train_label_counts": {
-              "balanced": 117,
-              "fast": 115,
-              "powerful": 71
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 74
             }
           },
           {
             "fold": 3,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 313,
+            "n_test": 78,
             "predicted_label": "balanced",
             "train_label_counts": {
-              "balanced": 117,
-              "fast": 115,
-              "powerful": 71
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 74
             }
           },
           {
             "fold": 4,
-            "n_train": 304,
-            "n_test": 75,
+            "n_train": 313,
+            "n_test": 78,
             "predicted_label": "fast",
             "train_label_counts": {
-              "balanced": 116,
-              "fast": 116,
-              "powerful": 72
+              "balanced": 120,
+              "fast": 120,
+              "powerful": 73
             }
           }
         ],
@@ -3279,89 +3376,89 @@
       "name": "tfidf_logistic_regression",
       "kind": "learned",
       "overall": {
-        "n": 379,
-        "correct": 261,
-        "incorrect": 118,
-        "value": 0.688654,
+        "n": 391,
+        "correct": 275,
+        "incorrect": 116,
+        "value": 0.703325,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.64034,
-          "upper": 0.733183,
+          "lower": 0.656247,
+          "upper": 0.746446,
           "defined": true
         }
       },
       "by_difficulty": {
         "ambiguous": {
-          "n": 113,
-          "correct": 63,
-          "incorrect": 50,
-          "value": 0.557522,
+          "n": 114,
+          "correct": 68,
+          "incorrect": 46,
+          "value": 0.596491,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.465552,
-            "upper": 0.64571,
+            "lower": 0.504712,
+            "upper": 0.68198,
             "defined": true
           }
         },
         "clear": {
-          "n": 266,
-          "correct": 198,
-          "incorrect": 68,
-          "value": 0.744361,
+          "n": 277,
+          "correct": 207,
+          "incorrect": 70,
+          "value": 0.747292,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.688719,
-            "upper": 0.793046,
+            "lower": 0.692973,
+            "upper": 0.794847,
             "defined": true
           }
         }
       },
       "by_expected_label": {
         "balanced": {
-          "n": 146,
-          "correct": 115,
+          "n": 150,
+          "correct": 119,
           "incorrect": 31,
-          "value": 0.787671,
+          "value": 0.793333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.714402,
-            "upper": 0.84619,
+            "lower": 0.721606,
+            "upper": 0.850411,
             "defined": true
           }
         },
         "fast": {
-          "n": 144,
-          "correct": 108,
+          "n": 149,
+          "correct": 113,
           "incorrect": 36,
-          "value": 0.75,
+          "value": 0.758389,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.673403,
-            "upper": 0.813605,
+            "lower": 0.683722,
+            "upper": 0.820068,
             "defined": true
           }
         },
         "powerful": {
-          "n": 89,
-          "correct": 38,
-          "incorrect": 51,
-          "value": 0.426966,
+          "n": 92,
+          "correct": 43,
+          "incorrect": 49,
+          "value": 0.467391,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.329328,
-            "upper": 0.530649,
+            "lower": 0.368801,
+            "upper": 0.568595,
             "defined": true
           }
         }
@@ -3369,30 +3466,30 @@
       "by_difficulty_and_label": {
         "ambiguous": {
           "balanced": {
-            "n": 60,
-            "correct": 41,
-            "incorrect": 19,
-            "value": 0.683333,
+            "n": 61,
+            "correct": 45,
+            "incorrect": 16,
+            "value": 0.737705,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.557662,
-              "upper": 0.786941,
+              "lower": 0.615633,
+              "upper": 0.831612,
               "defined": true
             }
           },
           "fast": {
             "n": 29,
-            "correct": 18,
-            "incorrect": 11,
-            "value": 0.62069,
+            "correct": 19,
+            "incorrect": 10,
+            "value": 0.655172,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.440025,
-              "upper": 0.77312,
+              "lower": 0.473451,
+              "upper": 0.800593,
               "defined": true
             }
           },
@@ -3413,44 +3510,44 @@
         },
         "clear": {
           "balanced": {
-            "n": 86,
+            "n": 89,
             "correct": 74,
-            "incorrect": 12,
-            "value": 0.860465,
+            "incorrect": 15,
+            "value": 0.831461,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.771763,
-              "upper": 0.918342,
+              "lower": 0.740374,
+              "upper": 0.895117,
               "defined": true
             }
           },
           "fast": {
-            "n": 115,
-            "correct": 90,
-            "incorrect": 25,
-            "value": 0.782609,
+            "n": 120,
+            "correct": 94,
+            "incorrect": 26,
+            "value": 0.783333,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.698755,
-              "upper": 0.848192,
+              "lower": 0.701456,
+              "upper": 0.847633,
               "defined": true
             }
           },
           "powerful": {
-            "n": 65,
-            "correct": 34,
-            "incorrect": 31,
-            "value": 0.523077,
+            "n": 68,
+            "correct": 39,
+            "incorrect": 29,
+            "value": 0.573529,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.403796,
-              "upper": 0.639782,
+              "lower": 0.455168,
+              "upper": 0.684028,
               "defined": true
             }
           }
@@ -3459,15 +3556,15 @@
       "by_category": {
         "acknowledgement": {
           "n": 10,
-          "correct": 8,
-          "incorrect": 2,
-          "value": 0.8,
+          "correct": 7,
+          "incorrect": 3,
+          "value": 0.7,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.490162,
-            "upper": 0.943318,
+            "lower": 0.396778,
+            "upper": 0.892209,
             "defined": true
           }
         },
@@ -3487,43 +3584,43 @@
         },
         "analysis": {
           "n": 9,
-          "correct": 0,
-          "incorrect": 9,
-          "value": 0.0,
+          "correct": 1,
+          "incorrect": 8,
+          "value": 0.111111,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.299145,
+            "lower": 0.019891,
+            "upper": 0.435,
             "defined": true
           }
         },
         "architecture": {
           "n": 10,
-          "correct": 5,
-          "incorrect": 5,
-          "value": 0.5,
+          "correct": 7,
+          "incorrect": 3,
+          "value": 0.7,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.396778,
+            "upper": 0.892209,
             "defined": true
           }
         },
         "arithmetic": {
           "n": 7,
-          "correct": 6,
-          "incorrect": 1,
-          "value": 0.857143,
+          "correct": 7,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.486872,
-            "upper": 0.97432,
+            "lower": 0.64567,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -3557,43 +3654,43 @@
         },
         "code": {
           "n": 22,
-          "correct": 16,
-          "incorrect": 6,
-          "value": 0.727273,
+          "correct": 17,
+          "incorrect": 5,
+          "value": 0.772727,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.518483,
-            "upper": 0.868492,
+            "lower": 0.5656,
+            "upper": 0.89877,
             "defined": true
           }
         },
         "comparison": {
           "n": 11,
-          "correct": 11,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 10,
+          "incorrect": 1,
+          "value": 0.909091,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.741167,
-            "upper": 1.0,
+            "lower": 0.622642,
+            "upper": 0.983768,
             "defined": true
           }
         },
         "conflicting_signals": {
           "n": 10,
-          "correct": 6,
-          "incorrect": 4,
-          "value": 0.6,
+          "correct": 7,
+          "incorrect": 3,
+          "value": 0.7,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.312674,
-            "upper": 0.83182,
+            "lower": 0.396778,
+            "upper": 0.892209,
             "defined": true
           }
         },
@@ -3627,15 +3724,15 @@
         },
         "definition": {
           "n": 8,
-          "correct": 8,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 7,
+          "incorrect": 1,
+          "value": 0.875,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.675592,
-            "upper": 1.0,
+            "lower": 0.529112,
+            "upper": 0.977583,
             "defined": true
           }
         },
@@ -3725,15 +3822,15 @@
         },
         "indirect_wording": {
           "n": 10,
-          "correct": 6,
-          "incorrect": 4,
-          "value": 0.6,
+          "correct": 5,
+          "incorrect": 5,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.312674,
-            "upper": 0.83182,
+            "lower": 0.236593,
+            "upper": 0.763407,
             "defined": true
           }
         },
@@ -3779,6 +3876,20 @@
             "defined": true
           }
         },
+        "long_conversation": {
+          "n": 12,
+          "correct": 10,
+          "incorrect": 2,
+          "value": 0.833333,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.551969,
+            "upper": 0.953035,
+            "defined": true
+          }
+        },
         "long_distractor": {
           "n": 10,
           "correct": 6,
@@ -3795,29 +3906,29 @@
         },
         "mathematics": {
           "n": 7,
-          "correct": 3,
-          "incorrect": 4,
-          "value": 0.428571,
+          "correct": 2,
+          "incorrect": 5,
+          "value": 0.285714,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.15822,
-            "upper": 0.749542,
+            "lower": 0.082219,
+            "upper": 0.641066,
             "defined": true
           }
         },
         "misleading_keyword": {
           "n": 10,
-          "correct": 5,
-          "incorrect": 5,
-          "value": 0.5,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
@@ -3879,15 +3990,15 @@
         },
         "multi_turn_short_history": {
           "n": 5,
-          "correct": 1,
-          "incorrect": 4,
-          "value": 0.2,
+          "correct": 3,
+          "incorrect": 2,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.036224,
-            "upper": 0.624465,
+            "lower": 0.230724,
+            "upper": 0.882379,
             "defined": true
           }
         },
@@ -3907,15 +4018,15 @@
         },
         "negation": {
           "n": 8,
-          "correct": 2,
-          "incorrect": 6,
-          "value": 0.25,
+          "correct": 4,
+          "incorrect": 4,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.071479,
-            "upper": 0.590725,
+            "lower": 0.215216,
+            "upper": 0.784784,
             "defined": true
           }
         },
@@ -3977,15 +4088,15 @@
         },
         "prompt_injection": {
           "n": 6,
-          "correct": 4,
-          "incorrect": 2,
-          "value": 0.666667,
+          "correct": 5,
+          "incorrect": 1,
+          "value": 0.833333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.299993,
-            "upper": 0.903229,
+            "lower": 0.436497,
+            "upper": 0.969947,
             "defined": true
           }
         },
@@ -4061,15 +4172,15 @@
         },
         "short_utterance": {
           "n": 3,
-          "correct": 2,
-          "incorrect": 1,
-          "value": 0.666667,
+          "correct": 1,
+          "incorrect": 2,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.061492,
+            "upper": 0.79234,
             "defined": true
           }
         },
@@ -4173,29 +4284,29 @@
         },
         "troubleshooting": {
           "n": 7,
-          "correct": 7,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 6,
+          "incorrect": 1,
+          "value": 0.857143,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.64567,
-            "upper": 1.0,
+            "lower": 0.486872,
+            "upper": 0.97432,
             "defined": true
           }
         },
         "typos": {
           "n": 7,
-          "correct": 4,
-          "incorrect": 3,
-          "value": 0.571429,
+          "correct": 2,
+          "incorrect": 5,
+          "value": 0.285714,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.250458,
-            "upper": 0.84178,
+            "lower": 0.082219,
+            "upper": 0.641066,
             "defined": true
           }
         },
@@ -4215,57 +4326,57 @@
         },
         "unit_conversion": {
           "n": 2,
-          "correct": 0,
-          "incorrect": 2,
-          "value": 0.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.65762,
-            "defined": true
-          }
-        },
-        "vague_request": {
-          "n": 10,
-          "correct": 5,
-          "incorrect": 5,
+          "correct": 1,
+          "incorrect": 1,
           "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.094531,
+            "upper": 0.905469,
+            "defined": true
+          }
+        },
+        "vague_request": {
+          "n": 10,
+          "correct": 7,
+          "incorrect": 3,
+          "value": 0.7,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.396778,
+            "upper": 0.892209,
             "defined": true
           }
         },
         "weather": {
           "n": 2,
-          "correct": 2,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.34238,
-            "upper": 1.0,
+            "lower": 0.094531,
+            "upper": 0.905469,
             "defined": true
           }
         },
         "yes_no": {
           "n": 3,
-          "correct": 2,
-          "incorrect": 1,
-          "value": 0.666667,
+          "correct": 1,
+          "incorrect": 2,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.061492,
+            "upper": 0.79234,
             "defined": true
           }
         }
@@ -4273,43 +4384,43 @@
       "by_source": {
         "adversarial": {
           "n": 97,
-          "correct": 64,
-          "incorrect": 33,
-          "value": 0.659794,
+          "correct": 66,
+          "incorrect": 31,
+          "value": 0.680412,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.561036,
-            "upper": 0.746377,
+            "lower": 0.582266,
+            "upper": 0.764813,
             "defined": true
           }
         },
         "manually_created": {
-          "n": 93,
-          "correct": 52,
-          "incorrect": 41,
-          "value": 0.55914,
+          "n": 105,
+          "correct": 66,
+          "incorrect": 39,
+          "value": 0.628571,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.457882,
-            "upper": 0.655706,
+            "lower": 0.533145,
+            "upper": 0.714922,
             "defined": true
           }
         },
         "synthetic": {
           "n": 189,
-          "correct": 145,
-          "incorrect": 44,
-          "value": 0.767196,
+          "correct": 143,
+          "incorrect": 46,
+          "value": 0.756614,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.701988,
-            "upper": 0.821758,
+            "lower": 0.69072,
+            "upper": 0.812284,
             "defined": true
           }
         }
@@ -4373,29 +4484,29 @@
         },
         "misleading_keyword": {
           "n": 10,
-          "correct": 5,
-          "incorrect": 5,
-          "value": 0.5,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
         "negation": {
           "n": 10,
-          "correct": 2,
-          "incorrect": 8,
-          "value": 0.2,
+          "correct": 4,
+          "incorrect": 6,
+          "value": 0.4,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.056682,
-            "upper": 0.509838,
+            "lower": 0.16818,
+            "upper": 0.687326,
             "defined": true
           }
         },
@@ -4415,15 +4526,15 @@
         },
         "prompt_injection": {
           "n": 7,
-          "correct": 5,
-          "incorrect": 2,
-          "value": 0.714286,
+          "correct": 6,
+          "incorrect": 1,
+          "value": 0.857143,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.358934,
-            "upper": 0.917781,
+            "lower": 0.486872,
+            "upper": 0.97432,
             "defined": true
           }
         },
@@ -4499,15 +4610,15 @@
         },
         "typos": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 3,
+          "incorrect": 5,
+          "value": 0.375,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.136844,
+            "upper": 0.694258,
             "defined": true
           }
         },
@@ -4528,47 +4639,75 @@
       },
       "adversarial_any": {
         "n": 97,
-        "correct": 64,
-        "incorrect": 33,
-        "value": 0.659794,
+        "correct": 66,
+        "incorrect": 31,
+        "value": 0.680412,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.561036,
-          "upper": 0.746377,
+          "lower": 0.582266,
+          "upper": 0.764813,
+          "defined": true
+        }
+      },
+      "multi_turn_any": {
+        "n": 26,
+        "correct": 19,
+        "incorrect": 7,
+        "value": 0.730769,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.53917,
+          "upper": 0.862956,
+          "defined": true
+        }
+      },
+      "long_conversation": {
+        "n": 12,
+        "correct": 10,
+        "incorrect": 2,
+        "value": 0.833333,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.551969,
+          "upper": 0.953035,
           "defined": true
         }
       },
       "per_class": {
         "per_class": {
           "fast": {
-            "support": 144,
-            "predicted": 143,
-            "true_positives": 108,
-            "precision": 0.755245,
-            "recall": 0.75,
-            "f1": 0.752613
+            "support": 149,
+            "predicted": 142,
+            "true_positives": 113,
+            "precision": 0.795775,
+            "recall": 0.758389,
+            "f1": 0.776632
           },
           "balanced": {
-            "support": 146,
-            "predicted": 187,
-            "true_positives": 115,
-            "precision": 0.614973,
-            "recall": 0.787671,
-            "f1": 0.690691
+            "support": 150,
+            "predicted": 194,
+            "true_positives": 119,
+            "precision": 0.613402,
+            "recall": 0.793333,
+            "f1": 0.69186
           },
           "powerful": {
-            "support": 89,
-            "predicted": 49,
-            "true_positives": 38,
-            "precision": 0.77551,
-            "recall": 0.426966,
-            "f1": 0.550725
+            "support": 92,
+            "predicted": 55,
+            "true_positives": 43,
+            "precision": 0.781818,
+            "recall": 0.467391,
+            "f1": 0.585034
           }
         },
-        "macro_f1": 0.664676,
-        "micro_f1": 0.688654,
+        "macro_f1": 0.684509,
+        "micro_f1": 0.703325,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -4589,36 +4728,36 @@
           "powerful"
         ],
         "support": {
-          "fast": 144,
-          "balanced": 146,
-          "powerful": 89
+          "fast": 149,
+          "balanced": 150,
+          "powerful": 92
         },
         "counts": {
           "fast": {
-            "fast": 108,
-            "balanced": 33,
-            "powerful": 3
+            "fast": 113,
+            "balanced": 34,
+            "powerful": 2
           },
           "balanced": {
-            "fast": 23,
-            "balanced": 115,
-            "powerful": 8
+            "fast": 21,
+            "balanced": 119,
+            "powerful": 10
           },
           "powerful": {
-            "fast": 12,
-            "balanced": 39,
-            "powerful": 38
+            "fast": 8,
+            "balanced": 41,
+            "powerful": 43
           }
         }
       },
       "training": {
         "name": "tfidf_logistic_regression",
         "method": "stratified group k-fold (near-duplicate groups kept whole); vectoriser fitted per training fold",
-        "n_evaluated": 379,
+        "n_evaluated": 391,
         "seed": 20250101,
         "n_splits": 5,
-        "vocabulary_size": 3338,
-        "train_accuracy": 0.989446,
+        "vocabulary_size": 3371,
+        "train_accuracy": 0.98977,
         "evaluated_ids": [
           "greeting",
           "thanks",
@@ -4998,103 +5137,115 @@
           "mt_two_questions_02",
           "mt_history_debug_01",
           "mt_history_debug_02",
-          "mt_injection_in_history_01"
+          "mt_injection_in_history_01",
+          "long_conv_fact_01",
+          "long_conv_fact_02",
+          "long_conv_acks_01",
+          "long_conv_explain_01",
+          "long_conv_explain_02",
+          "long_conv_tips_01",
+          "long_conv_code_01",
+          "long_conv_design_01",
+          "long_conv_proof_01",
+          "long_conv_history_01",
+          "long_conv_short_01",
+          "long_conv_short_02"
         ],
         "folds": [
           {
             "fold": 0,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 314,
+            "n_test": 77,
             "train_label_counts": {
-              "balanced": 117,
-              "fast": 113,
-              "powerful": 73
+              "balanced": 121,
+              "fast": 121,
+              "powerful": 72
             },
             "test_label_counts": {
               "balanced": 29,
-              "fast": 31,
-              "powerful": 16
+              "fast": 28,
+              "powerful": 20
             },
             "test_correct": 57,
-            "vocabulary_size": 3266
+            "vocabulary_size": 3267
           },
           {
             "fold": 1,
-            "n_train": 304,
-            "n_test": 75,
+            "n_train": 314,
+            "n_test": 77,
             "train_label_counts": {
-              "balanced": 119,
-              "fast": 111,
-              "powerful": 74
+              "balanced": 117,
+              "fast": 120,
+              "powerful": 77
             },
             "test_label_counts": {
-              "balanced": 27,
-              "fast": 33,
+              "balanced": 33,
+              "fast": 29,
               "powerful": 15
             },
-            "test_correct": 50,
-            "vocabulary_size": 3338
+            "test_correct": 55,
+            "vocabulary_size": 3371
           },
           {
             "fold": 2,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 312,
+            "n_test": 79,
             "train_label_counts": {
-              "balanced": 116,
-              "fast": 118,
-              "powerful": 69
+              "balanced": 119,
+              "fast": 117,
+              "powerful": 76
             },
             "test_label_counts": {
-              "balanced": 30,
-              "fast": 26,
-              "powerful": 20
+              "balanced": 31,
+              "fast": 32,
+              "powerful": 16
             },
-            "test_correct": 52,
-            "vocabulary_size": 3246
+            "test_correct": 56,
+            "vocabulary_size": 3304
           },
           {
             "fold": 3,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 312,
+            "n_test": 79,
             "train_label_counts": {
-              "balanced": 118,
-              "fast": 115,
-              "powerful": 70
+              "balanced": 121,
+              "fast": 117,
+              "powerful": 74
             },
             "test_label_counts": {
-              "balanced": 28,
-              "fast": 29,
-              "powerful": 19
+              "balanced": 29,
+              "fast": 32,
+              "powerful": 18
             },
-            "test_correct": 47,
-            "vocabulary_size": 3300
+            "test_correct": 58,
+            "vocabulary_size": 3316
           },
           {
             "fold": 4,
-            "n_train": 303,
-            "n_test": 76,
+            "n_train": 312,
+            "n_test": 79,
             "train_label_counts": {
-              "balanced": 114,
-              "fast": 119,
-              "powerful": 70
+              "balanced": 122,
+              "fast": 121,
+              "powerful": 69
             },
             "test_label_counts": {
-              "balanced": 32,
-              "fast": 25,
-              "powerful": 19
+              "balanced": 28,
+              "fast": 28,
+              "powerful": 23
             },
-            "test_correct": 55,
-            "vocabulary_size": 3205
+            "test_correct": 49,
+            "vocabulary_size": 3278
           }
         ],
         "leakage": {
-          "n_cases": 379,
+          "n_cases": 391,
           "class_counts": {
-            "balanced": 146,
-            "fast": 144,
-            "powerful": 89
+            "balanced": 150,
+            "fast": 149,
+            "powerful": 92
           },
-          "class_imbalance_ratio": 1.64,
+          "class_imbalance_ratio": 1.63,
           "imbalanced": false,
           "duplicate_input_groups": [],
           "duplicate_input_with_conflicting_labels": [],
@@ -5119,7 +5270,7 @@
           "notes": []
         },
         "notes": [
-          "split: stratified group k-fold (near-duplicate groups kept whole); 377 distinct group(s) over 379 case(s)",
+          "split: stratified group k-fold (near-duplicate groups kept whole); 389 distinct group(s) over 391 case(s)",
           "train_accuracy is measured on the fitted folds and is optimistic by construction; the out-of-fold score is the one to quote"
         ],
         "versions": {
@@ -5132,89 +5283,89 @@
       "name": "tfidf_logistic_regression_holdout",
       "kind": "learned",
       "overall": {
-        "n": 95,
-        "correct": 70,
-        "incorrect": 25,
-        "value": 0.736842,
+        "n": 98,
+        "correct": 76,
+        "incorrect": 22,
+        "value": 0.77551,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.64034,
-          "upper": 0.814935,
+          "lower": 0.683418,
+          "upper": 0.846818,
           "defined": true
         }
       },
       "by_difficulty": {
         "ambiguous": {
-          "n": 25,
-          "correct": 18,
-          "incorrect": 7,
-          "value": 0.72,
+          "n": 21,
+          "correct": 15,
+          "incorrect": 6,
+          "value": 0.714286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.524234,
-            "upper": 0.857161,
+            "lower": 0.500436,
+            "upper": 0.861861,
             "defined": true
           }
         },
         "clear": {
-          "n": 70,
-          "correct": 52,
-          "incorrect": 18,
-          "value": 0.742857,
+          "n": 77,
+          "correct": 61,
+          "incorrect": 16,
+          "value": 0.792208,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.629739,
-            "upper": 0.830707,
+            "lower": 0.688796,
+            "upper": 0.867849,
             "defined": true
           }
         }
       },
       "by_expected_label": {
         "balanced": {
-          "n": 37,
-          "correct": 34,
-          "incorrect": 3,
-          "value": 0.918919,
+          "n": 38,
+          "correct": 31,
+          "incorrect": 7,
+          "value": 0.815789,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.786993,
-            "upper": 0.972039,
+            "lower": 0.665811,
+            "upper": 0.907782,
             "defined": true
           }
         },
         "fast": {
-          "n": 36,
-          "correct": 27,
-          "incorrect": 9,
-          "value": 0.75,
+          "n": 37,
+          "correct": 33,
+          "incorrect": 4,
+          "value": 0.891892,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.589295,
-            "upper": 0.862495,
+            "lower": 0.752915,
+            "upper": 0.957148,
             "defined": true
           }
         },
         "powerful": {
-          "n": 22,
-          "correct": 9,
-          "incorrect": 13,
-          "value": 0.409091,
+          "n": 23,
+          "correct": 12,
+          "incorrect": 11,
+          "value": 0.521739,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.232558,
-            "upper": 0.612652,
+            "lower": 0.329627,
+            "upper": 0.707628,
             "defined": true
           }
         }
@@ -5222,88 +5373,88 @@
       "by_difficulty_and_label": {
         "ambiguous": {
           "balanced": {
-            "n": 12,
-            "correct": 12,
-            "incorrect": 0,
-            "value": 1.0,
+            "n": 11,
+            "correct": 9,
+            "incorrect": 2,
+            "value": 0.818182,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.757506,
-              "upper": 1.0,
+              "lower": 0.523019,
+              "upper": 0.948632,
               "defined": true
             }
           },
           "fast": {
-            "n": 9,
+            "n": 7,
             "correct": 6,
-            "incorrect": 3,
-            "value": 0.666667,
+            "incorrect": 1,
+            "value": 0.857143,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.354202,
-              "upper": 0.879416,
+              "lower": 0.486872,
+              "upper": 0.97432,
               "defined": true
             }
           },
           "powerful": {
-            "n": 4,
+            "n": 3,
             "correct": 0,
-            "incorrect": 4,
+            "incorrect": 3,
             "value": 0.0,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
               "lower": 0.0,
-              "upper": 0.489891,
+              "upper": 0.561497,
               "defined": true
             }
           }
         },
         "clear": {
           "balanced": {
-            "n": 25,
+            "n": 27,
             "correct": 22,
-            "incorrect": 3,
-            "value": 0.88,
+            "incorrect": 5,
+            "value": 0.814815,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.700442,
-              "upper": 0.958332,
+              "lower": 0.633013,
+              "upper": 0.918193,
               "defined": true
             }
           },
           "fast": {
-            "n": 27,
-            "correct": 21,
-            "incorrect": 6,
-            "value": 0.777778,
+            "n": 30,
+            "correct": 27,
+            "incorrect": 3,
+            "value": 0.9,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.592431,
-              "upper": 0.893928,
+              "lower": 0.743789,
+              "upper": 0.9654,
               "defined": true
             }
           },
           "powerful": {
-            "n": 18,
-            "correct": 9,
-            "incorrect": 9,
-            "value": 0.5,
+            "n": 20,
+            "correct": 12,
+            "incorrect": 8,
+            "value": 0.6,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.29031,
-              "upper": 0.70969,
+              "lower": 0.386582,
+              "upper": 0.781193,
               "defined": true
             }
           }
@@ -5339,30 +5490,30 @@
           }
         },
         "analysis": {
-          "n": 3,
+          "n": 2,
           "correct": 0,
-          "incorrect": 3,
+          "incorrect": 2,
           "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
             "lower": 0.0,
-            "upper": 0.561497,
+            "upper": 0.65762,
             "defined": true
           }
         },
         "architecture": {
           "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
+          "correct": 2,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
+            "lower": 0.34238,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -5381,16 +5532,16 @@
           }
         },
         "borderline_length": {
-          "n": 1,
+          "n": 2,
           "correct": 1,
-          "incorrect": 0,
-          "value": 1.0,
+          "incorrect": 1,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.206549,
-            "upper": 1.0,
+            "lower": 0.094531,
+            "upper": 0.905469,
             "defined": true
           }
         },
@@ -5409,29 +5560,29 @@
           }
         },
         "code": {
-          "n": 5,
-          "correct": 4,
-          "incorrect": 1,
-          "value": 0.8,
+          "n": 9,
+          "correct": 7,
+          "incorrect": 2,
+          "value": 0.777778,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.375535,
-            "upper": 0.963776,
+            "lower": 0.452589,
+            "upper": 0.936775,
             "defined": true
           }
         },
         "comparison": {
-          "n": 3,
-          "correct": 3,
+          "n": 2,
+          "correct": 2,
           "incorrect": 0,
           "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.438503,
+            "lower": 0.34238,
             "upper": 1.0,
             "defined": true
           }
@@ -5451,29 +5602,29 @@
           }
         },
         "contradiction": {
-          "n": 2,
+          "n": 1,
           "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "creative": {
-          "n": 2,
-          "correct": 2,
           "incorrect": 0,
           "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.34238,
+            "lower": 0.206549,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "creative": {
+          "n": 1,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.206549,
             "upper": 1.0,
             "defined": true
           }
@@ -5521,15 +5672,29 @@
           }
         },
         "factual_lookup": {
-          "n": 2,
-          "correct": 2,
+          "n": 3,
+          "correct": 3,
           "incorrect": 0,
           "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.34238,
+            "lower": 0.438503,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "greeting": {
+          "n": 1,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.206549,
             "upper": 1.0,
             "defined": true
           }
@@ -5563,6 +5728,34 @@
           }
         },
         "insufficient_context": {
+          "n": 2,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.094531,
+            "upper": 0.905469,
+            "defined": true
+          }
+        },
+        "irrelevant_context": {
+          "n": 3,
+          "correct": 3,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.438503,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "keyword_stuffing": {
           "n": 3,
           "correct": 2,
           "incorrect": 1,
@@ -5576,91 +5769,35 @@
             "defined": true
           }
         },
-        "irrelevant_context": {
-          "n": 4,
-          "correct": 3,
-          "incorrect": 1,
-          "value": 0.75,
+        "long_conversation": {
+          "n": 7,
+          "correct": 4,
+          "incorrect": 3,
+          "value": 0.571429,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.300642,
-            "upper": 0.954413,
-            "defined": true
-          }
-        },
-        "keyword_stuffing": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
+            "lower": 0.250458,
+            "upper": 0.84178,
             "defined": true
           }
         },
         "long_distractor": {
           "n": 1,
-          "correct": 0,
-          "incorrect": 1,
-          "value": 0.0,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.793451,
+            "lower": 0.206549,
+            "upper": 1.0,
             "defined": true
           }
         },
         "mathematics": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "multi_intent": {
-          "n": 2,
-          "correct": 0,
-          "incorrect": 2,
-          "value": 0.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.65762,
-            "defined": true
-          }
-        },
-        "multi_turn_debugging": {
-          "n": 2,
-          "correct": 2,
-          "incorrect": 0,
-          "value": 1.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.34238,
-            "upper": 1.0,
-            "defined": true
-          }
-        },
-        "multi_turn_injection": {
           "n": 1,
           "correct": 0,
           "incorrect": 1,
@@ -5674,7 +5811,21 @@
             "defined": true
           }
         },
-        "multi_turn_system": {
+        "multi_intent": {
+          "n": 1,
+          "correct": 0,
+          "incorrect": 1,
+          "value": 0.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.0,
+            "upper": 0.793451,
+            "defined": true
+          }
+        },
+        "negation": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -5688,7 +5839,7 @@
             "defined": true
           }
         },
-        "negation": {
+        "nested_request": {
           "n": 2,
           "correct": 1,
           "incorrect": 1,
@@ -5699,20 +5850,6 @@
             "z": 1.959964,
             "lower": 0.094531,
             "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "nested_request": {
-          "n": 1,
-          "correct": 1,
-          "incorrect": 0,
-          "value": 1.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.206549,
-            "upper": 1.0,
             "defined": true
           }
         },
@@ -5731,16 +5868,16 @@
           }
         },
         "overlapping_categories": {
-          "n": 3,
-          "correct": 2,
+          "n": 4,
+          "correct": 3,
           "incorrect": 1,
-          "value": 0.666667,
+          "value": 0.75,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.300642,
+            "upper": 0.954413,
             "defined": true
           }
         },
@@ -5800,20 +5937,6 @@
             "defined": true
           }
         },
-        "repetition": {
-          "n": 1,
-          "correct": 1,
-          "incorrect": 0,
-          "value": 1.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.206549,
-            "upper": 1.0,
-            "defined": true
-          }
-        },
         "rewriting": {
           "n": 1,
           "correct": 1,
@@ -5829,20 +5952,6 @@
           }
         },
         "short_utterance": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "small_talk": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -5852,6 +5961,20 @@
             "confidence": 0.95,
             "z": 1.959964,
             "lower": 0.206549,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "small_talk": {
+          "n": 2,
+          "correct": 2,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.34238,
             "upper": 1.0,
             "defined": true
           }
@@ -5927,34 +6050,20 @@
           }
         },
         "typos": {
-          "n": 1,
+          "n": 2,
           "correct": 1,
-          "incorrect": 0,
-          "value": 1.0,
+          "incorrect": 1,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.206549,
-            "upper": 1.0,
+            "lower": 0.094531,
+            "upper": 0.905469,
             "defined": true
           }
         },
         "unicode_lookalike": {
-          "n": 1,
-          "correct": 0,
-          "incorrect": 1,
-          "value": 0.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.793451,
-            "defined": true
-          }
-        },
-        "vague_request": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -5971,44 +6080,44 @@
       },
       "by_source": {
         "adversarial": {
-          "n": 25,
-          "correct": 17,
-          "incorrect": 8,
-          "value": 0.68,
+          "n": 23,
+          "correct": 18,
+          "incorrect": 5,
+          "value": 0.782609,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.484103,
-            "upper": 0.827948,
+            "lower": 0.580965,
+            "upper": 0.90336,
             "defined": true
           }
         },
         "manually_created": {
-          "n": 19,
-          "correct": 14,
-          "incorrect": 5,
-          "value": 0.736842,
+          "n": 22,
+          "correct": 15,
+          "incorrect": 7,
+          "value": 0.681818,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.512084,
-            "upper": 0.881936,
+            "lower": 0.473186,
+            "upper": 0.836394,
             "defined": true
           }
         },
         "synthetic": {
-          "n": 51,
-          "correct": 39,
-          "incorrect": 12,
-          "value": 0.764706,
+          "n": 53,
+          "correct": 43,
+          "incorrect": 10,
+          "value": 0.811321,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.632378,
-            "upper": 0.859951,
+            "lower": 0.686415,
+            "upper": 0.894147,
             "defined": true
           }
         }
@@ -6029,62 +6138,6 @@
           }
         },
         "contradiction": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "irrelevant_context": {
-          "n": 4,
-          "correct": 3,
-          "incorrect": 1,
-          "value": 0.75,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.300642,
-            "upper": 0.954413,
-            "defined": true
-          }
-        },
-        "keyword_stuffing": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "negation": {
-          "n": 3,
-          "correct": 1,
-          "incorrect": 2,
-          "value": 0.333333,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.061492,
-            "upper": 0.79234,
-            "defined": true
-          }
-        },
-        "nested_request": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -6098,17 +6151,73 @@
             "defined": true
           }
         },
-        "prompt_injection": {
-          "n": 5,
+        "irrelevant_context": {
+          "n": 3,
           "correct": 3,
-          "incorrect": 2,
-          "value": 0.6,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.230724,
-            "upper": 0.882379,
+            "lower": 0.438503,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "keyword_stuffing": {
+          "n": 3,
+          "correct": 2,
+          "incorrect": 1,
+          "value": 0.666667,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.20766,
+            "upper": 0.938508,
+            "defined": true
+          }
+        },
+        "negation": {
+          "n": 1,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.206549,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "nested_request": {
+          "n": 2,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.094531,
+            "upper": 0.905469,
+            "defined": true
+          }
+        },
+        "prompt_injection": {
+          "n": 4,
+          "correct": 3,
+          "incorrect": 1,
+          "value": 0.75,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.300642,
+            "upper": 0.954413,
             "defined": true
           }
         },
@@ -6154,6 +6263,20 @@
             "defined": true
           }
         },
+        "short_context": {
+          "n": 1,
+          "correct": 0,
+          "incorrect": 1,
+          "value": 0.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.0,
+            "upper": 0.793451,
+            "defined": true
+          }
+        },
         "synonym": {
           "n": 2,
           "correct": 2,
@@ -6169,6 +6292,20 @@
           }
         },
         "typos": {
+          "n": 2,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.094531,
+            "upper": 0.905469,
+            "defined": true
+          }
+        },
+        "unicode_lookalike": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -6181,65 +6318,79 @@
             "upper": 1.0,
             "defined": true
           }
-        },
-        "unicode_lookalike": {
-          "n": 1,
-          "correct": 0,
-          "incorrect": 1,
-          "value": 0.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.793451,
-            "defined": true
-          }
         }
       },
       "adversarial_any": {
-        "n": 25,
-        "correct": 17,
-        "incorrect": 8,
-        "value": 0.68,
+        "n": 23,
+        "correct": 18,
+        "incorrect": 5,
+        "value": 0.782609,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.484103,
-          "upper": 0.827948,
+          "lower": 0.580965,
+          "upper": 0.90336,
+          "defined": true
+        }
+      },
+      "multi_turn_any": {
+        "n": 7,
+        "correct": 4,
+        "incorrect": 3,
+        "value": 0.571429,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.250458,
+          "upper": 0.84178,
+          "defined": true
+        }
+      },
+      "long_conversation": {
+        "n": 7,
+        "correct": 4,
+        "incorrect": 3,
+        "value": 0.571429,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.250458,
+          "upper": 0.84178,
           "defined": true
         }
       },
       "per_class": {
         "per_class": {
           "fast": {
-            "support": 36,
-            "predicted": 30,
-            "true_positives": 27,
-            "precision": 0.9,
-            "recall": 0.75,
-            "f1": 0.818182
+            "support": 37,
+            "predicted": 40,
+            "true_positives": 33,
+            "precision": 0.825,
+            "recall": 0.891892,
+            "f1": 0.857143
           },
           "balanced": {
-            "support": 37,
-            "predicted": 54,
-            "true_positives": 34,
-            "precision": 0.62963,
-            "recall": 0.918919,
-            "f1": 0.747253
+            "support": 38,
+            "predicted": 43,
+            "true_positives": 31,
+            "precision": 0.72093,
+            "recall": 0.815789,
+            "f1": 0.765432
           },
           "powerful": {
-            "support": 22,
-            "predicted": 11,
-            "true_positives": 9,
-            "precision": 0.818182,
-            "recall": 0.409091,
-            "f1": 0.545455
+            "support": 23,
+            "predicted": 15,
+            "true_positives": 12,
+            "precision": 0.8,
+            "recall": 0.521739,
+            "f1": 0.631579
           }
         },
-        "macro_f1": 0.70363,
-        "micro_f1": 0.736842,
+        "macro_f1": 0.751385,
+        "micro_f1": 0.77551,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -6260,147 +6411,150 @@
           "powerful"
         ],
         "support": {
-          "fast": 36,
-          "balanced": 37,
-          "powerful": 22
+          "fast": 37,
+          "balanced": 38,
+          "powerful": 23
         },
         "counts": {
           "fast": {
-            "fast": 27,
-            "balanced": 8,
+            "fast": 33,
+            "balanced": 3,
             "powerful": 1
           },
           "balanced": {
-            "fast": 2,
-            "balanced": 34,
-            "powerful": 1
+            "fast": 5,
+            "balanced": 31,
+            "powerful": 2
           },
           "powerful": {
-            "fast": 1,
-            "balanced": 12,
-            "powerful": 9
+            "fast": 2,
+            "balanced": 9,
+            "powerful": 12
           }
         }
       },
       "training": {
         "name": "tfidf_logistic_regression_holdout",
         "method": "single stratified holdout, test_size=0.25",
-        "n_evaluated": 95,
+        "n_evaluated": 98,
         "seed": 20250101,
         "n_splits": null,
-        "vocabulary_size": 3200,
-        "train_accuracy": 0.992958,
+        "vocabulary_size": 3271,
+        "train_accuracy": 0.993174,
         "evaluated_ids": [
-          "amb_context_05",
-          "amb_multi_02",
-          "adv_irrel_03",
-          "clear_fast_time_02",
-          "adv_inject_04",
-          "clear_bal_trouble_02",
-          "clear_bal_advice_04",
-          "clear_bal_rewrite_02",
-          "clear_pow_analyse_10",
-          "clear_bal_summarise_05",
-          "adv_punct_05",
-          "clear_bal_explain_07",
-          "clear_bal_howto_01",
-          "amb_indirect_05",
-          "clear_bal_advice_05",
-          "adv_typo_04",
-          "clear_fast_thanks_04",
-          "mt_history_debug_01",
-          "adv_negate_02",
-          "clear_fast_factual_11",
-          "clear_bal_advice_06",
-          "system-design-chat",
-          "adv_contradict_01",
-          "water-cycle",
-          "clear_bal_advice_03",
-          "adv_inject_01",
-          "amb_overlap_02",
-          "bst",
-          "clear_pow_math_05",
-          "adv_syn_04",
-          "amb_context_02",
-          "adv_stuff_05",
-          "clear_bal_trouble_04",
-          "sql-debug",
-          "clear_pow_code_17",
-          "adv_syn_02",
-          "amb_border_08",
-          "clear_fast_ack_01",
-          "adv_rep_03",
-          "adv_nested_05",
-          "adv_negate_01",
-          "compare-frameworks",
-          "clear_pow_code_13",
-          "clear_pow_create_05",
-          "adv_irrel_01",
-          "clear_pow_analyse_09",
-          "adv_case_03",
-          "clear_pow_plan_04",
-          "clear_bal_explain_10",
-          "clear_pow_plan_03",
-          "clear_fast_ack_04",
-          "adv_inject_06",
-          "clear_pow_analyse_04",
-          "clear_pow_math_02",
-          "adv_uni_03",
-          "adv_irrel_02",
-          "adv_inject_02",
+          "clear_pow_code_20",
+          "adv_uni_02",
+          "adv_irrel_07",
           "adv_quoted_03",
-          "mt_system_thanks_01",
-          "clear_pow_arch_04",
-          "clear_bal_explain_02",
-          "clear_fast_short_03",
-          "clear_bal_explain_06",
-          "clear_bal_explain_03",
-          "clear_pow_code_21",
-          "clear_fast_time_01",
-          "clear_pow_code_11",
           "adv_stuff_08",
-          "clear_pow_create_04",
-          "clear_bal_summarise_03",
-          "mt_injection_in_history_01",
-          "amb_overlap_08",
-          "pros-cons-remote",
-          "clear_bal_compare_03",
-          "clear_bal_summarise_04",
-          "clear_bal_trouble_07",
-          "amb_indirect_02",
-          "amb_overlap_01",
-          "amb_longdistract_08",
-          "clear_bal_draft_01",
-          "clear_fast_affirm_03",
-          "adv_case_01",
-          "clear_fast_bye_02",
-          "clear_fast_factual_04",
-          "adv_contradict_06",
-          "adv_irrel_06",
-          "clear_fast_deny_02",
-          "amb_context_04",
-          "amb_conflict_03",
-          "amb_multi_03",
-          "clear_fast_arith_04",
-          "mt_history_debug_02",
+          "adv_stuff_09",
+          "adv_punct_06",
+          "adv_inject_02",
+          "amb_context_05",
+          "adv_stuff_05",
           "number",
-          "amb_vague_07",
-          "clear_fast_short_01"
+          "adv_negate_01",
+          "clear_fast_ack_01",
+          "amb_overlap_06",
+          "adv_inject_01",
+          "adv_syn_04",
+          "water-cycle",
+          "amb_indirect_05",
+          "clear_bal_advice_06",
+          "clear_bal_trouble_07",
+          "clear_bal_advice_03",
+          "clear_bal_advice_05",
+          "adv_contradict_06",
+          "clear_bal_howto_01",
+          "long_conv_design_01",
+          "long_conv_proof_01",
+          "adv_syn_02",
+          "system-design-chat",
+          "clear_pow_code_11",
+          "long_conv_short_01",
+          "clear_fast_bye_01",
+          "clear_fast_arith_01",
+          "clear_fast_bye_02",
+          "clear_bal_explain_03",
+          "adv_case_05",
+          "clear_fast_ack_04",
+          "clear_pow_arch_02",
+          "amb_overlap_02",
+          "clear_fast_deny_02",
+          "amb_overlap_01",
+          "clear_bal_explain_06",
+          "clear_bal_trouble_04",
+          "amb_border_06",
+          "clear_bal_summarise_04",
+          "clear_pow_plan_06",
+          "clear_fast_time_02",
+          "clear_bal_summarise_05",
+          "clear_bal_compare_03",
+          "clear_fast_factual_11",
+          "amb_multi_02",
+          "clear_fast_greet_02",
+          "clear_bal_explain_07",
+          "clear_bal_rewrite_02",
+          "adv_typo_02",
+          "long_conv_fact_01",
+          "adv_irrel_01",
+          "adv_typo_04",
+          "amb_overlap_07",
+          "clear_bal_summarise_03",
+          "bst",
+          "long_conv_tips_01",
+          "amb_longdistract_08",
+          "clear_bal_trouble_02",
+          "clear_bal_explain_02",
+          "clear_pow_code_13",
+          "clear_bal_advice_04",
+          "long_conv_history_01",
+          "adv_irrel_02",
+          "clear_pow_code_08",
+          "sql-debug",
+          "clear_pow_math_05",
+          "clear_fast_affirm_03",
+          "clear_pow_code_17",
+          "amb_conflict_03",
+          "clear_pow_create_04",
+          "amb_indirect_02",
+          "amb_context_04",
+          "clear_pow_analyse_10",
+          "clear_bal_explain_10",
+          "clear_pow_code_03",
+          "clear_pow_plan_04",
+          "clear_fast_factual_13",
+          "long_conv_fact_02",
+          "amb_border_08",
+          "clear_bal_draft_01",
+          "compare-frameworks",
+          "adv_nested_04",
+          "clear_pow_code_18",
+          "adv_nested_02",
+          "clear_fast_short_03",
+          "clear_fast_factual_04",
+          "clear_pow_code_10",
+          "clear_fast_thanks_04",
+          "clear_pow_analyse_09",
+          "adv_inject_06",
+          "adv_case_03",
+          "clear_fast_time_01",
+          "adv_inject_03"
         ],
         "folds": [
           {
-            "n_train": 284,
-            "n_test": 95,
+            "n_train": 293,
+            "n_test": 98,
             "test_label_counts": {
-              "balanced": 37,
-              "fast": 36,
-              "powerful": 22
+              "balanced": 38,
+              "fast": 37,
+              "powerful": 23
             }
           }
         ],
         "leakage": null,
         "notes": [
-          "reported separately from the out-of-fold score; it evaluates 95 case(s) and must not be used for tuning"
+          "reported separately from the out-of-fold score; it evaluates 98 case(s) and must not be used for tuning"
         ],
         "versions": {
           "sklearn": "1.7.0"
@@ -6411,176 +6565,176 @@
   "subsets": {
     "heuristic": {
       "ambiguous": {
-        "n": 113,
-        "correct": 53,
+        "n": 114,
+        "correct": 54,
         "incorrect": 60,
-        "value": 0.469027,
+        "value": 0.473684,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.379552,
-          "upper": 0.560537,
+          "lower": 0.384388,
+          "upper": 0.564696,
           "defined": true
         }
       },
       "clear": {
-        "n": 266,
-        "correct": 149,
-        "incorrect": 117,
-        "value": 0.56015,
+        "n": 277,
+        "correct": 153,
+        "incorrect": 124,
+        "value": 0.552347,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.500064,
-          "upper": 0.618524,
+          "lower": 0.49347,
+          "upper": 0.609791,
           "defined": true
         }
       },
       "all": {
-        "n": 379,
-        "correct": 202,
-        "incorrect": 177,
-        "value": 0.532982,
+        "n": 391,
+        "correct": 207,
+        "incorrect": 184,
+        "value": 0.529412,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.482673,
-          "upper": 0.582628,
+          "lower": 0.479892,
+          "upper": 0.578359,
           "defined": true
         }
       }
     },
     "majority_class": {
       "ambiguous": {
-        "n": 113,
-        "correct": 51,
-        "incorrect": 62,
-        "value": 0.451327,
+        "n": 114,
+        "correct": 55,
+        "incorrect": 59,
+        "value": 0.482456,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.362683,
-          "upper": 0.543172,
+          "lower": 0.392806,
+          "upper": 0.57325,
           "defined": true
         }
       },
       "clear": {
-        "n": 266,
-        "correct": 93,
-        "incorrect": 173,
-        "value": 0.349624,
+        "n": 277,
+        "correct": 94,
+        "incorrect": 183,
+        "value": 0.33935,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.294829,
-          "upper": 0.4087,
+          "lower": 0.286127,
+          "upper": 0.396968,
           "defined": true
         }
       },
       "all": {
-        "n": 379,
-        "correct": 144,
-        "incorrect": 235,
-        "value": 0.379947,
+        "n": 391,
+        "correct": 149,
+        "incorrect": 242,
+        "value": 0.381074,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.332517,
-          "upper": 0.429787,
+          "lower": 0.334314,
+          "upper": 0.430148,
           "defined": true
         }
       }
     },
     "tfidf_logistic_regression": {
       "ambiguous": {
-        "n": 113,
-        "correct": 63,
-        "incorrect": 50,
-        "value": 0.557522,
+        "n": 114,
+        "correct": 68,
+        "incorrect": 46,
+        "value": 0.596491,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.465552,
-          "upper": 0.64571,
+          "lower": 0.504712,
+          "upper": 0.68198,
           "defined": true
         }
       },
       "clear": {
-        "n": 266,
-        "correct": 198,
-        "incorrect": 68,
-        "value": 0.744361,
+        "n": 277,
+        "correct": 207,
+        "incorrect": 70,
+        "value": 0.747292,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.688719,
-          "upper": 0.793046,
+          "lower": 0.692973,
+          "upper": 0.794847,
           "defined": true
         }
       },
       "all": {
-        "n": 379,
-        "correct": 261,
-        "incorrect": 118,
-        "value": 0.688654,
+        "n": 391,
+        "correct": 275,
+        "incorrect": 116,
+        "value": 0.703325,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.64034,
-          "upper": 0.733183,
+          "lower": 0.656247,
+          "upper": 0.746446,
           "defined": true
         }
       }
     },
     "tfidf_logistic_regression_holdout": {
       "ambiguous": {
-        "n": 25,
-        "correct": 18,
-        "incorrect": 7,
-        "value": 0.72,
+        "n": 21,
+        "correct": 15,
+        "incorrect": 6,
+        "value": 0.714286,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.524234,
-          "upper": 0.857161,
+          "lower": 0.500436,
+          "upper": 0.861861,
           "defined": true
         }
       },
       "clear": {
-        "n": 70,
-        "correct": 52,
-        "incorrect": 18,
-        "value": 0.742857,
+        "n": 77,
+        "correct": 61,
+        "incorrect": 16,
+        "value": 0.792208,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.629739,
-          "upper": 0.830707,
+          "lower": 0.688796,
+          "upper": 0.867849,
           "defined": true
         }
       },
       "all": {
-        "n": 95,
-        "correct": 70,
-        "incorrect": 25,
-        "value": 0.736842,
+        "n": 98,
+        "correct": 76,
+        "incorrect": 22,
+        "value": 0.77551,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.64034,
-          "upper": 0.814935,
+          "lower": 0.683418,
+          "upper": 0.846818,
           "defined": true
         }
       }
@@ -6589,176 +6743,176 @@
   "tiers": {
     "heuristic": {
       "balanced": {
-        "n": 146,
-        "correct": 69,
-        "incorrect": 77,
-        "value": 0.472603,
+        "n": 150,
+        "correct": 72,
+        "incorrect": 78,
+        "value": 0.48,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.393365,
-          "upper": 0.553245,
+          "lower": 0.401551,
+          "upper": 0.559448,
           "defined": true
         }
       },
       "fast": {
-        "n": 144,
-        "correct": 111,
-        "incorrect": 33,
-        "value": 0.770833,
+        "n": 149,
+        "correct": 112,
+        "incorrect": 37,
+        "value": 0.751678,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.695682,
-          "upper": 0.83191,
+          "lower": 0.676567,
+          "upper": 0.814138,
           "defined": true
         }
       },
       "powerful": {
-        "n": 89,
-        "correct": 22,
-        "incorrect": 67,
-        "value": 0.247191,
+        "n": 92,
+        "correct": 23,
+        "incorrect": 69,
+        "value": 0.25,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.169282,
-          "upper": 0.34602,
+          "lower": 0.172753,
+          "upper": 0.347288,
           "defined": true
         }
       }
     },
     "majority_class": {
       "balanced": {
-        "n": 146,
-        "correct": 116,
+        "n": 150,
+        "correct": 120,
         "incorrect": 30,
-        "value": 0.794521,
+        "value": 0.8,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.721836,
-          "upper": 0.852104,
+          "lower": 0.728859,
+          "upper": 0.856159,
           "defined": true
         }
       },
       "fast": {
-        "n": 144,
-        "correct": 28,
-        "incorrect": 116,
-        "value": 0.194444,
+        "n": 149,
+        "correct": 29,
+        "incorrect": 120,
+        "value": 0.194631,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.138095,
-          "upper": 0.266672,
+          "lower": 0.139071,
+          "upper": 0.26554,
           "defined": true
         }
       },
       "powerful": {
-        "n": 89,
+        "n": 92,
         "correct": 0,
-        "incorrect": 89,
+        "incorrect": 92,
         "value": 0.0,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
           "lower": 0.0,
-          "upper": 0.041377,
+          "upper": 0.040081,
           "defined": true
         }
       }
     },
     "tfidf_logistic_regression": {
       "balanced": {
-        "n": 146,
-        "correct": 115,
+        "n": 150,
+        "correct": 119,
         "incorrect": 31,
-        "value": 0.787671,
+        "value": 0.793333,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.714402,
-          "upper": 0.84619,
+          "lower": 0.721606,
+          "upper": 0.850411,
           "defined": true
         }
       },
       "fast": {
-        "n": 144,
-        "correct": 108,
+        "n": 149,
+        "correct": 113,
         "incorrect": 36,
-        "value": 0.75,
+        "value": 0.758389,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.673403,
-          "upper": 0.813605,
+          "lower": 0.683722,
+          "upper": 0.820068,
           "defined": true
         }
       },
       "powerful": {
-        "n": 89,
-        "correct": 38,
-        "incorrect": 51,
-        "value": 0.426966,
+        "n": 92,
+        "correct": 43,
+        "incorrect": 49,
+        "value": 0.467391,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.329328,
-          "upper": 0.530649,
+          "lower": 0.368801,
+          "upper": 0.568595,
           "defined": true
         }
       }
     },
     "tfidf_logistic_regression_holdout": {
       "balanced": {
-        "n": 37,
-        "correct": 34,
-        "incorrect": 3,
-        "value": 0.918919,
+        "n": 38,
+        "correct": 31,
+        "incorrect": 7,
+        "value": 0.815789,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.786993,
-          "upper": 0.972039,
+          "lower": 0.665811,
+          "upper": 0.907782,
           "defined": true
         }
       },
       "fast": {
-        "n": 36,
-        "correct": 27,
-        "incorrect": 9,
-        "value": 0.75,
+        "n": 37,
+        "correct": 33,
+        "incorrect": 4,
+        "value": 0.891892,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.589295,
-          "upper": 0.862495,
+          "lower": 0.752915,
+          "upper": 0.957148,
           "defined": true
         }
       },
       "powerful": {
-        "n": 22,
-        "correct": 9,
-        "incorrect": 13,
-        "value": 0.409091,
+        "n": 23,
+        "correct": 12,
+        "incorrect": 11,
+        "value": 0.521739,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.232558,
-          "upper": 0.612652,
+          "lower": 0.329627,
+          "upper": 0.707628,
           "defined": true
         }
       }
@@ -6996,15 +7150,15 @@
     "majority_class": {
       "any": {
         "n": 97,
-        "correct": 36,
-        "incorrect": 61,
-        "value": 0.371134,
+        "correct": 37,
+        "incorrect": 60,
+        "value": 0.381443,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.281624,
-          "upper": 0.470462,
+          "lower": 0.291047,
+          "upper": 0.480873,
           "defined": true
         }
       },
@@ -7025,57 +7179,57 @@
         },
         "contradiction": {
           "n": 6,
-          "correct": 1,
-          "incorrect": 5,
-          "value": 0.166667,
+          "correct": 2,
+          "incorrect": 4,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.030053,
-            "upper": 0.563503,
+            "lower": 0.096771,
+            "upper": 0.700007,
             "defined": true
           }
         },
         "irrelevant_context": {
           "n": 8,
-          "correct": 2,
-          "incorrect": 6,
-          "value": 0.25,
+          "correct": 1,
+          "incorrect": 7,
+          "value": 0.125,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.071479,
-            "upper": 0.590725,
+            "lower": 0.022417,
+            "upper": 0.470888,
             "defined": true
           }
         },
         "keyword_stuffing": {
           "n": 11,
-          "correct": 5,
-          "incorrect": 6,
-          "value": 0.454545,
+          "correct": 2,
+          "incorrect": 9,
+          "value": 0.181818,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.212713,
-            "upper": 0.719908,
+            "lower": 0.051368,
+            "upper": 0.476981,
             "defined": true
           }
         },
         "misleading_keyword": {
           "n": 10,
-          "correct": 1,
-          "incorrect": 9,
-          "value": 0.1,
+          "correct": 2,
+          "incorrect": 8,
+          "value": 0.2,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.017876,
-            "upper": 0.40415,
+            "lower": 0.056682,
+            "upper": 0.509838,
             "defined": true
           }
         },
@@ -7095,71 +7249,71 @@
         },
         "nested_request": {
           "n": 6,
-          "correct": 1,
-          "incorrect": 5,
-          "value": 0.166667,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.030053,
-            "upper": 0.563503,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
         "prompt_injection": {
           "n": 7,
-          "correct": 2,
-          "incorrect": 5,
-          "value": 0.285714,
+          "correct": 3,
+          "incorrect": 4,
+          "value": 0.428571,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.082219,
-            "upper": 0.641066,
+            "lower": 0.15822,
+            "upper": 0.749542,
             "defined": true
           }
         },
         "punctuation": {
           "n": 6,
-          "correct": 4,
-          "incorrect": 2,
-          "value": 0.666667,
+          "correct": 0,
+          "incorrect": 6,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.299993,
-            "upper": 0.903229,
+            "lower": 0.0,
+            "upper": 0.390334,
             "defined": true
           }
         },
         "quoted_text": {
           "n": 7,
-          "correct": 4,
-          "incorrect": 3,
-          "value": 0.571429,
+          "correct": 6,
+          "incorrect": 1,
+          "value": 0.857143,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.250458,
-            "upper": 0.84178,
+            "lower": 0.486872,
+            "upper": 0.97432,
             "defined": true
           }
         },
         "repetition": {
           "n": 14,
-          "correct": 4,
-          "incorrect": 10,
-          "value": 0.285714,
+          "correct": 3,
+          "incorrect": 11,
+          "value": 0.214286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.117214,
-            "upper": 0.546491,
+            "lower": 0.075714,
+            "upper": 0.475892,
             "defined": true
           }
         },
@@ -7179,29 +7333,29 @@
         },
         "synonym": {
           "n": 6,
-          "correct": 6,
-          "incorrect": 0,
-          "value": 1.0,
+          "correct": 5,
+          "incorrect": 1,
+          "value": 0.833333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.609666,
-            "upper": 1.0,
+            "lower": 0.436497,
+            "upper": 0.969947,
             "defined": true
           }
         },
         "typos": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 6,
+          "incorrect": 2,
+          "value": 0.75,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.409275,
+            "upper": 0.928521,
             "defined": true
           }
         },
@@ -7224,15 +7378,15 @@
     "tfidf_logistic_regression": {
       "any": {
         "n": 97,
-        "correct": 64,
-        "incorrect": 33,
-        "value": 0.659794,
+        "correct": 66,
+        "incorrect": 31,
+        "value": 0.680412,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.561036,
-          "upper": 0.746377,
+          "lower": 0.582266,
+          "upper": 0.764813,
           "defined": true
         }
       },
@@ -7295,29 +7449,29 @@
         },
         "misleading_keyword": {
           "n": 10,
-          "correct": 5,
-          "incorrect": 5,
-          "value": 0.5,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
         "negation": {
           "n": 10,
-          "correct": 2,
-          "incorrect": 8,
-          "value": 0.2,
+          "correct": 4,
+          "incorrect": 6,
+          "value": 0.4,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.056682,
-            "upper": 0.509838,
+            "lower": 0.16818,
+            "upper": 0.687326,
             "defined": true
           }
         },
@@ -7337,15 +7491,15 @@
         },
         "prompt_injection": {
           "n": 7,
-          "correct": 5,
-          "incorrect": 2,
-          "value": 0.714286,
+          "correct": 6,
+          "incorrect": 1,
+          "value": 0.857143,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.358934,
-            "upper": 0.917781,
+            "lower": 0.486872,
+            "upper": 0.97432,
             "defined": true
           }
         },
@@ -7421,15 +7575,15 @@
         },
         "typos": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 3,
+          "incorrect": 5,
+          "value": 0.375,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.136844,
+            "upper": 0.694258,
             "defined": true
           }
         },
@@ -7451,16 +7605,16 @@
     },
     "tfidf_logistic_regression_holdout": {
       "any": {
-        "n": 25,
-        "correct": 17,
-        "incorrect": 8,
-        "value": 0.68,
+        "n": 23,
+        "correct": 18,
+        "incorrect": 5,
+        "value": 0.782609,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.484103,
-          "upper": 0.827948,
+          "lower": 0.580965,
+          "upper": 0.90336,
           "defined": true
         }
       },
@@ -7480,62 +7634,6 @@
           }
         },
         "contradiction": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "irrelevant_context": {
-          "n": 4,
-          "correct": 3,
-          "incorrect": 1,
-          "value": 0.75,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.300642,
-            "upper": 0.954413,
-            "defined": true
-          }
-        },
-        "keyword_stuffing": {
-          "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
-            "defined": true
-          }
-        },
-        "negation": {
-          "n": 3,
-          "correct": 1,
-          "incorrect": 2,
-          "value": 0.333333,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.061492,
-            "upper": 0.79234,
-            "defined": true
-          }
-        },
-        "nested_request": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -7549,17 +7647,73 @@
             "defined": true
           }
         },
-        "prompt_injection": {
-          "n": 5,
+        "irrelevant_context": {
+          "n": 3,
           "correct": 3,
-          "incorrect": 2,
-          "value": 0.6,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.230724,
-            "upper": 0.882379,
+            "lower": 0.438503,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "keyword_stuffing": {
+          "n": 3,
+          "correct": 2,
+          "incorrect": 1,
+          "value": 0.666667,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.20766,
+            "upper": 0.938508,
+            "defined": true
+          }
+        },
+        "negation": {
+          "n": 1,
+          "correct": 1,
+          "incorrect": 0,
+          "value": 1.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.206549,
+            "upper": 1.0,
+            "defined": true
+          }
+        },
+        "nested_request": {
+          "n": 2,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.094531,
+            "upper": 0.905469,
+            "defined": true
+          }
+        },
+        "prompt_injection": {
+          "n": 4,
+          "correct": 3,
+          "incorrect": 1,
+          "value": 0.75,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.300642,
+            "upper": 0.954413,
             "defined": true
           }
         },
@@ -7605,6 +7759,20 @@
             "defined": true
           }
         },
+        "short_context": {
+          "n": 1,
+          "correct": 0,
+          "incorrect": 1,
+          "value": 0.0,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.0,
+            "upper": 0.793451,
+            "defined": true
+          }
+        },
         "synonym": {
           "n": 2,
           "correct": 2,
@@ -7620,6 +7788,20 @@
           }
         },
         "typos": {
+          "n": 2,
+          "correct": 1,
+          "incorrect": 1,
+          "value": 0.5,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.094531,
+            "upper": 0.905469,
+            "defined": true
+          }
+        },
+        "unicode_lookalike": {
           "n": 1,
           "correct": 1,
           "incorrect": 0,
@@ -7632,22 +7814,134 @@
             "upper": 1.0,
             "defined": true
           }
-        },
-        "unicode_lookalike": {
-          "n": 1,
-          "correct": 0,
-          "incorrect": 1,
-          "value": 0.0,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.0,
-            "upper": 0.793451,
-            "defined": true
-          }
         }
       }
+    }
+  },
+  "conversation": {
+    "heuristic": {
+      "multi_turn": {
+        "n": 26,
+        "correct": 9,
+        "incorrect": 17,
+        "value": 0.346154,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.194122,
+          "upper": 0.537794,
+          "defined": true
+        }
+      },
+      "over_ten_messages": {
+        "n": 12,
+        "correct": 5,
+        "incorrect": 7,
+        "value": 0.416667,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.19326,
+          "upper": 0.680489,
+          "defined": true
+        }
+      },
+      "note": "classify_complexity adds a bonus above 10 and above 20 messages. 'over_ten_messages' is the only subset that exercises those branches, and it is reported rather than gated until it has enough cases."
+    },
+    "majority_class": {
+      "multi_turn": {
+        "n": 26,
+        "correct": 8,
+        "incorrect": 18,
+        "value": 0.307692,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.165013,
+          "upper": 0.499883,
+          "defined": true
+        }
+      },
+      "over_ten_messages": {
+        "n": 12,
+        "correct": 3,
+        "incorrect": 9,
+        "value": 0.25,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.088942,
+          "upper": 0.532305,
+          "defined": true
+        }
+      },
+      "note": "classify_complexity adds a bonus above 10 and above 20 messages. 'over_ten_messages' is the only subset that exercises those branches, and it is reported rather than gated until it has enough cases."
+    },
+    "tfidf_logistic_regression": {
+      "multi_turn": {
+        "n": 26,
+        "correct": 19,
+        "incorrect": 7,
+        "value": 0.730769,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.53917,
+          "upper": 0.862956,
+          "defined": true
+        }
+      },
+      "over_ten_messages": {
+        "n": 12,
+        "correct": 10,
+        "incorrect": 2,
+        "value": 0.833333,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.551969,
+          "upper": 0.953035,
+          "defined": true
+        }
+      },
+      "note": "classify_complexity adds a bonus above 10 and above 20 messages. 'over_ten_messages' is the only subset that exercises those branches, and it is reported rather than gated until it has enough cases."
+    },
+    "tfidf_logistic_regression_holdout": {
+      "multi_turn": {
+        "n": 7,
+        "correct": 4,
+        "incorrect": 3,
+        "value": 0.571429,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.250458,
+          "upper": 0.84178,
+          "defined": true
+        }
+      },
+      "over_ten_messages": {
+        "n": 7,
+        "correct": 4,
+        "incorrect": 3,
+        "value": 0.571429,
+        "defined": true,
+        "wilson_95": {
+          "confidence": 0.95,
+          "z": 1.959964,
+          "lower": 0.250458,
+          "upper": 0.84178,
+          "defined": true
+        }
+      },
+      "note": "classify_complexity adds a bonus above 10 and above 20 messages. 'over_ten_messages' is the only subset that exercises those branches, and it is reported rather than gated until it has enough cases."
     }
   },
   "confusion_matrix": {
@@ -7669,25 +7963,25 @@
         "powerful"
       ],
       "support": {
-        "fast": 144,
-        "balanced": 146,
-        "powerful": 89
+        "fast": 149,
+        "balanced": 150,
+        "powerful": 92
       },
       "counts": {
         "fast": {
-          "fast": 111,
-          "balanced": 31,
+          "fast": 112,
+          "balanced": 35,
           "powerful": 2
         },
         "balanced": {
           "fast": 69,
-          "balanced": 69,
-          "powerful": 8
+          "balanced": 72,
+          "powerful": 9
         },
         "powerful": {
           "fast": 20,
-          "balanced": 47,
-          "powerful": 22
+          "balanced": 49,
+          "powerful": 23
         }
       }
     },
@@ -7709,24 +8003,24 @@
         "powerful"
       ],
       "support": {
-        "fast": 144,
-        "balanced": 146,
-        "powerful": 89
+        "fast": 149,
+        "balanced": 150,
+        "powerful": 92
       },
       "counts": {
         "fast": {
-          "fast": 28,
-          "balanced": 116,
+          "fast": 29,
+          "balanced": 120,
           "powerful": 0
         },
         "balanced": {
           "fast": 30,
-          "balanced": 116,
+          "balanced": 120,
           "powerful": 0
         },
         "powerful": {
-          "fast": 17,
-          "balanced": 72,
+          "fast": 19,
+          "balanced": 73,
           "powerful": 0
         }
       }
@@ -7749,25 +8043,25 @@
         "powerful"
       ],
       "support": {
-        "fast": 144,
-        "balanced": 146,
-        "powerful": 89
+        "fast": 149,
+        "balanced": 150,
+        "powerful": 92
       },
       "counts": {
         "fast": {
-          "fast": 108,
-          "balanced": 33,
-          "powerful": 3
+          "fast": 113,
+          "balanced": 34,
+          "powerful": 2
         },
         "balanced": {
-          "fast": 23,
-          "balanced": 115,
-          "powerful": 8
+          "fast": 21,
+          "balanced": 119,
+          "powerful": 10
         },
         "powerful": {
-          "fast": 12,
-          "balanced": 39,
-          "powerful": 38
+          "fast": 8,
+          "balanced": 41,
+          "powerful": 43
         }
       }
     },
@@ -7789,25 +8083,25 @@
         "powerful"
       ],
       "support": {
-        "fast": 36,
-        "balanced": 37,
-        "powerful": 22
+        "fast": 37,
+        "balanced": 38,
+        "powerful": 23
       },
       "counts": {
         "fast": {
-          "fast": 27,
-          "balanced": 8,
+          "fast": 33,
+          "balanced": 3,
           "powerful": 1
         },
         "balanced": {
-          "fast": 2,
-          "balanced": 34,
-          "powerful": 1
+          "fast": 5,
+          "balanced": 31,
+          "powerful": 2
         },
         "powerful": {
-          "fast": 1,
-          "balanced": 12,
-          "powerful": 9
+          "fast": 2,
+          "balanced": 9,
+          "powerful": 12
         }
       }
     }
@@ -7816,186 +8110,186 @@
     "heuristic": {
       "confidence_level": 0.95,
       "overall": {
-        "n": 379,
-        "correct": 202,
-        "incorrect": 177,
-        "value": 0.532982,
+        "n": 391,
+        "correct": 207,
+        "incorrect": 184,
+        "value": 0.529412,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.482673,
-          "upper": 0.582628,
+          "lower": 0.479892,
+          "upper": 0.578359,
           "defined": true
         }
       },
       "clear": {
-        "n": 266,
-        "correct": 149,
-        "incorrect": 117,
-        "value": 0.56015,
+        "n": 277,
+        "correct": 153,
+        "incorrect": 124,
+        "value": 0.552347,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.500064,
-          "upper": 0.618524,
+          "lower": 0.49347,
+          "upper": 0.609791,
           "defined": true
         }
       },
       "ambiguous": {
-        "n": 113,
-        "correct": 53,
+        "n": 114,
+        "correct": 54,
         "incorrect": 60,
-        "value": 0.469027,
+        "value": 0.473684,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.379552,
-          "upper": 0.560537,
+          "lower": 0.384388,
+          "upper": 0.564696,
           "defined": true
         }
       },
-      "macro_f1": 0.493325
+      "macro_f1": 0.491889
     },
     "majority_class": {
       "confidence_level": 0.95,
       "overall": {
-        "n": 379,
-        "correct": 144,
-        "incorrect": 235,
-        "value": 0.379947,
+        "n": 391,
+        "correct": 149,
+        "incorrect": 242,
+        "value": 0.381074,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.332517,
-          "upper": 0.429787,
+          "lower": 0.334314,
+          "upper": 0.430148,
           "defined": true
         }
       },
       "clear": {
-        "n": 266,
-        "correct": 93,
-        "incorrect": 173,
-        "value": 0.349624,
+        "n": 277,
+        "correct": 94,
+        "incorrect": 183,
+        "value": 0.33935,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.294829,
-          "upper": 0.4087,
+          "lower": 0.286127,
+          "upper": 0.396968,
           "defined": true
         }
       },
       "ambiguous": {
-        "n": 113,
-        "correct": 51,
-        "incorrect": 62,
-        "value": 0.451327,
+        "n": 114,
+        "correct": 55,
+        "incorrect": 59,
+        "value": 0.482456,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.362683,
-          "upper": 0.543172,
+          "lower": 0.392806,
+          "upper": 0.57325,
           "defined": true
         }
       },
-      "macro_f1": 0.257088
+      "macro_f1": 0.257955
     },
     "tfidf_logistic_regression": {
       "confidence_level": 0.95,
       "overall": {
-        "n": 379,
-        "correct": 261,
-        "incorrect": 118,
-        "value": 0.688654,
+        "n": 391,
+        "correct": 275,
+        "incorrect": 116,
+        "value": 0.703325,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.64034,
-          "upper": 0.733183,
+          "lower": 0.656247,
+          "upper": 0.746446,
           "defined": true
         }
       },
       "clear": {
-        "n": 266,
-        "correct": 198,
-        "incorrect": 68,
-        "value": 0.744361,
+        "n": 277,
+        "correct": 207,
+        "incorrect": 70,
+        "value": 0.747292,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.688719,
-          "upper": 0.793046,
+          "lower": 0.692973,
+          "upper": 0.794847,
           "defined": true
         }
       },
       "ambiguous": {
-        "n": 113,
-        "correct": 63,
-        "incorrect": 50,
-        "value": 0.557522,
+        "n": 114,
+        "correct": 68,
+        "incorrect": 46,
+        "value": 0.596491,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.465552,
-          "upper": 0.64571,
+          "lower": 0.504712,
+          "upper": 0.68198,
           "defined": true
         }
       },
-      "macro_f1": 0.664676
+      "macro_f1": 0.684509
     },
     "tfidf_logistic_regression_holdout": {
       "confidence_level": 0.95,
       "overall": {
-        "n": 95,
-        "correct": 70,
-        "incorrect": 25,
-        "value": 0.736842,
+        "n": 98,
+        "correct": 76,
+        "incorrect": 22,
+        "value": 0.77551,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.64034,
-          "upper": 0.814935,
+          "lower": 0.683418,
+          "upper": 0.846818,
           "defined": true
         }
       },
       "clear": {
-        "n": 70,
-        "correct": 52,
-        "incorrect": 18,
-        "value": 0.742857,
+        "n": 77,
+        "correct": 61,
+        "incorrect": 16,
+        "value": 0.792208,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.629739,
-          "upper": 0.830707,
+          "lower": 0.688796,
+          "upper": 0.867849,
           "defined": true
         }
       },
       "ambiguous": {
-        "n": 25,
-        "correct": 18,
-        "incorrect": 7,
-        "value": 0.72,
+        "n": 21,
+        "correct": 15,
+        "incorrect": 6,
+        "value": 0.714286,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.524234,
-          "upper": 0.857161,
+          "lower": 0.500436,
+          "upper": 0.861861,
           "defined": true
         }
       },
-      "macro_f1": 0.70363
+      "macro_f1": 0.751385
     }
   },
   "comparisons": {
@@ -8005,69 +8299,69 @@
         "b": "majority_class",
         "both_correct": 80,
         "a_only_correct": 118,
-        "b_only_correct": 57,
-        "both_wrong": 110,
-        "discordant": 175,
-        "p_value": 4.66e-06,
+        "b_only_correct": 61,
+        "both_wrong": 106,
+        "discordant": 179,
+        "p_value": 2.454e-05,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 118, majority_class wins 57 on 175 discordant cases: significant (p=0.0000)",
+      "paired_description": "heuristic wins 118, majority_class wins 61 on 179 discordant cases: significant (p=0.0000)",
       "paired_cases_compared": 365,
       "compared_over_full_dataset": false,
-      "input_note": "restricted to cases where both systems received identical input; 14 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
+      "input_note": "restricted to cases where both systems received identical input; 26 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "majority_class",
-        "both_correct": 81,
-        "a_only_correct": 121,
-        "b_only_correct": 63,
-        "both_wrong": 114,
-        "discordant": 184,
-        "p_value": 2.286e-05,
+        "both_correct": 84,
+        "a_only_correct": 123,
+        "b_only_correct": 65,
+        "both_wrong": 119,
+        "discordant": 188,
+        "p_value": 2.812e-05,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 121, majority_class wins 63 on 184 discordant cases: significant (p=0.0000) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 123, majority_class wins 65 on 188 discordant cases: significant (p=0.0000) [input differed on some cases]",
       "clear_vs_clear": {
         "a": {
           "name": "heuristic.clear",
-          "n": 266,
-          "correct": 149,
-          "incorrect": 117,
-          "value": 0.56015,
+          "n": 277,
+          "correct": 153,
+          "incorrect": 124,
+          "value": 0.552347,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.500064,
-            "upper": 0.618524,
+            "lower": 0.49347,
+            "upper": 0.609791,
             "defined": true
           }
         },
         "b": {
           "name": "majority_class.clear",
-          "n": 266,
-          "correct": 93,
-          "incorrect": 173,
-          "value": 0.349624,
+          "n": 277,
+          "correct": 94,
+          "incorrect": 183,
+          "value": 0.33935,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.294829,
-            "upper": 0.4087,
+            "lower": 0.286127,
+            "upper": 0.396968,
             "defined": true
           }
         },
-        "difference": 0.210526,
-        "difference_ci_lower": 0.126262,
-        "difference_ci_upper": 0.290589,
-        "p_value": 1.08e-06,
+        "difference": 0.212996,
+        "difference_ci_lower": 0.130618,
+        "difference_ci_upper": 0.291307,
+        "p_value": 4.6e-07,
         "significant_at_95": true,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8075,38 +8369,38 @@
       "ambiguous_vs_ambiguous": {
         "a": {
           "name": "heuristic.ambiguous",
-          "n": 113,
-          "correct": 53,
+          "n": 114,
+          "correct": 54,
           "incorrect": 60,
-          "value": 0.469027,
+          "value": 0.473684,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.379552,
-            "upper": 0.560537,
+            "lower": 0.384388,
+            "upper": 0.564696,
             "defined": true
           }
         },
         "b": {
           "name": "majority_class.ambiguous",
-          "n": 113,
-          "correct": 51,
-          "incorrect": 62,
-          "value": 0.451327,
+          "n": 114,
+          "correct": 55,
+          "incorrect": 59,
+          "value": 0.482456,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.362683,
-            "upper": 0.543172,
+            "lower": 0.392806,
+            "upper": 0.57325,
             "defined": true
           }
         },
-        "difference": 0.017699,
-        "difference_ci_lower": -0.110524,
-        "difference_ci_upper": 0.145104,
-        "p_value": 0.78952767,
+        "difference": -0.008772,
+        "difference_ci_lower": -0.136119,
+        "difference_ci_upper": 0.118979,
+        "p_value": 0.8945249,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8116,71 +8410,71 @@
       "paired": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression",
-        "both_correct": 153,
-        "a_only_correct": 45,
-        "b_only_correct": 101,
-        "both_wrong": 66,
-        "discordant": 146,
-        "p_value": 4.11e-06,
+        "both_correct": 150,
+        "a_only_correct": 48,
+        "b_only_correct": 106,
+        "both_wrong": 61,
+        "discordant": 154,
+        "p_value": 3.39e-06,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 45, tfidf_logistic_regression wins 101 on 146 discordant cases: significant (p=0.0000)",
+      "paired_description": "heuristic wins 48, tfidf_logistic_regression wins 106 on 154 discordant cases: significant (p=0.0000)",
       "paired_cases_compared": 365,
       "compared_over_full_dataset": false,
-      "input_note": "restricted to cases where both systems received identical input; 14 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
+      "input_note": "restricted to cases where both systems received identical input; 26 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression",
-        "both_correct": 156,
-        "a_only_correct": 46,
-        "b_only_correct": 105,
-        "both_wrong": 72,
-        "discordant": 151,
-        "p_value": 1.77e-06,
+        "both_correct": 157,
+        "a_only_correct": 50,
+        "b_only_correct": 118,
+        "both_wrong": 66,
+        "discordant": 168,
+        "p_value": 1.6e-07,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 46, tfidf_logistic_regression wins 105 on 151 discordant cases: significant (p=0.0000) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 50, tfidf_logistic_regression wins 118 on 168 discordant cases: significant (p=0.0000) [input differed on some cases]",
       "clear_vs_clear": {
         "a": {
           "name": "heuristic.clear",
-          "n": 266,
-          "correct": 149,
-          "incorrect": 117,
-          "value": 0.56015,
+          "n": 277,
+          "correct": 153,
+          "incorrect": 124,
+          "value": 0.552347,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.500064,
-            "upper": 0.618524,
+            "lower": 0.49347,
+            "upper": 0.609791,
             "defined": true
           }
         },
         "b": {
           "name": "tfidf_logistic_regression.clear",
-          "n": 266,
-          "correct": 198,
-          "incorrect": 68,
-          "value": 0.744361,
+          "n": 277,
+          "correct": 207,
+          "incorrect": 70,
+          "value": 0.747292,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.688719,
-            "upper": 0.793046,
+            "lower": 0.692973,
+            "upper": 0.794847,
             "defined": true
           }
         },
-        "difference": -0.184211,
-        "difference_ci_lower": -0.261545,
-        "difference_ci_upper": -0.103566,
-        "p_value": 8.17e-06,
+        "difference": -0.194946,
+        "difference_ci_lower": -0.270628,
+        "difference_ci_upper": -0.115886,
+        "p_value": 1.51e-06,
         "significant_at_95": true,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8188,38 +8482,38 @@
       "ambiguous_vs_ambiguous": {
         "a": {
           "name": "heuristic.ambiguous",
-          "n": 113,
-          "correct": 53,
+          "n": 114,
+          "correct": 54,
           "incorrect": 60,
-          "value": 0.469027,
+          "value": 0.473684,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.379552,
-            "upper": 0.560537,
+            "lower": 0.384388,
+            "upper": 0.564696,
             "defined": true
           }
         },
         "b": {
           "name": "tfidf_logistic_regression.ambiguous",
-          "n": 113,
-          "correct": 63,
-          "incorrect": 50,
-          "value": 0.557522,
+          "n": 114,
+          "correct": 68,
+          "incorrect": 46,
+          "value": 0.596491,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.465552,
-            "upper": 0.64571,
+            "lower": 0.504712,
+            "upper": 0.68198,
             "defined": true
           }
         },
-        "difference": -0.088496,
-        "difference_ci_lower": -0.214125,
-        "difference_ci_upper": 0.041245,
-        "p_value": 0.1832386,
+        "difference": -0.122807,
+        "difference_ci_lower": -0.246428,
+        "difference_ci_upper": 0.006447,
+        "p_value": 0.06303732,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8230,78 +8524,78 @@
         "a": "heuristic",
         "b": "tfidf_logistic_regression_holdout",
         "both_correct": 44,
-        "a_only_correct": 11,
-        "b_only_correct": 23,
-        "both_wrong": 13,
-        "discordant": 34,
-        "p_value": 0.05761267,
-        "significant_at_95": false,
+        "a_only_correct": 8,
+        "b_only_correct": 28,
+        "both_wrong": 11,
+        "discordant": 36,
+        "p_value": 0.00119324,
+        "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 11, tfidf_logistic_regression_holdout wins 23 on 34 discordant cases: not significant (p=0.0576)",
+      "paired_description": "heuristic wins 8, tfidf_logistic_regression_holdout wins 28 on 36 discordant cases: significant (p=0.0012)",
       "paired_cases_compared": 91,
       "compared_over_full_dataset": false,
-      "input_note": "restricted to cases where both systems received identical input; 4 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
+      "input_note": "restricted to cases where both systems received identical input; 7 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression_holdout",
-        "both_correct": 45,
-        "a_only_correct": 12,
-        "b_only_correct": 25,
+        "both_correct": 46,
+        "a_only_correct": 9,
+        "b_only_correct": 30,
         "both_wrong": 13,
-        "discordant": 37,
-        "p_value": 0.04703103,
+        "discordant": 39,
+        "p_value": 0.00106502,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 12, tfidf_logistic_regression_holdout wins 25 on 37 discordant cases: significant (p=0.0470) [input differed on some cases]",
-      "proportion_comparisons_omitted": "tfidf_logistic_regression_holdout evaluates 95 of 379 cases, so its subsets are nested inside the heuristic's rather than independent. An unpaired proportion test on nested samples would overstate significance; the paired test above is the valid comparison."
+      "paired_all_cases_description": "heuristic wins 9, tfidf_logistic_regression_holdout wins 30 on 39 discordant cases: significant (p=0.0011) [input differed on some cases]",
+      "proportion_comparisons_omitted": "tfidf_logistic_regression_holdout evaluates 98 of 391 cases, so its subsets are nested inside the heuristic's rather than independent. An unpaired proportion test on nested samples would overstate significance; the paired test above is the valid comparison."
     },
     "heuristic.clear_vs_ambiguous": {
       "difference": {
         "a": {
           "name": "heuristic.clear",
-          "n": 266,
-          "correct": 149,
-          "incorrect": 117,
-          "value": 0.56015,
+          "n": 277,
+          "correct": 153,
+          "incorrect": 124,
+          "value": 0.552347,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.500064,
-            "upper": 0.618524,
+            "lower": 0.49347,
+            "upper": 0.609791,
             "defined": true
           }
         },
         "b": {
           "name": "heuristic.ambiguous",
-          "n": 113,
-          "correct": 53,
+          "n": 114,
+          "correct": 54,
           "incorrect": 60,
-          "value": 0.469027,
+          "value": 0.473684,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.379552,
-            "upper": 0.560537,
+            "lower": 0.384388,
+            "upper": 0.564696,
             "defined": true
           }
         },
-        "difference": 0.091124,
-        "difference_ci_lower": -0.01835,
-        "difference_ci_upper": 0.197956,
-        "p_value": 0.10383122,
+        "difference": 0.078662,
+        "difference_ci_lower": -0.029733,
+        "difference_ci_upper": 0.18484,
+        "p_value": 0.15668929,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
       },
-      "description": "heuristic.clear 56.0% vs heuristic.ambiguous 46.9%: difference +9.1% [-1.8%, +19.8%], not significant (p=0.1038)"
+      "description": "heuristic.clear 55.2% vs heuristic.ambiguous 47.4%: difference +7.9% [-3.0%, +18.5%], not significant (p=0.1567)"
     }
   },
   "gates": {

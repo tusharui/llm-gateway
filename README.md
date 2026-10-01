@@ -6,7 +6,7 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) Â· [API docs](h
 
 ## What it does
 
-- **Auto-routing** â€” classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`): 379 labelled cases, confidence intervals, a confusion matrix, a learned baseline for comparison, and CI gates. It scores 0.533 [0.483â€“0.583] â€” read the honesty note under Testing & quality before quoting that.
+- **Auto-routing** - classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`): 391 labelled cases, confidence intervals, a confusion matrix, a learned baseline for comparison, and CI gates. It scores 0.529 [0.480-0.578] - read the honesty note under Testing & quality before quoting that.
 - **Multi-provider failover** â€” circuit breakers + per-request failover chain, so a dead provider never breaks a request.
 - **Semantic + exact caching** â€” similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
 - **Auth + rate limiting** â€” per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware.
@@ -36,7 +36,7 @@ backend/
     providers/    Groq, Gemini, OpenRouter adapters
     routes/       chat, embeddings, batch, analytics, chat history
   evals/
-    golden/       379 labelled routing cases (clear / ambiguous, adversarial, multi-turn)
+    golden/       391 labelled routing cases (clear / ambiguous, adversarial, multi-turn)
     dataset.py    schema, fail-loud validation, content fingerprint
     metrics.py    Wilson intervals, subset/tier rollups, confusion matrix, significance
     baselines.py  heuristic + TF-IDF/logreg + majority floor, one interface
@@ -149,7 +149,7 @@ frontend lint + build on every push to `main`.
 ### What the routing eval measures
 
 `python -m evals.run` scores the `fast` / `balanced` / `powerful` classifier
-against 379 hand-labelled cases and writes `backend/evals/results.json`. It
+against 391 hand-labelled cases and writes `backend/evals/results.json`. It
 reports, for every system, accuracy with a Wilson 95% interval overall and per
 difficulty, per tier, per category and per adversarial tag, plus a
 machine-readable confusion matrix. Two systems are compared: the production
@@ -161,9 +161,9 @@ Current measurements, with intervals:
 
 | system | overall | clear | ambiguous | powerful tier |
 |---|---|---|---|---|
-| heuristic | 0.533 [0.483â€“0.583] | 0.560 [0.500â€“0.619] | 0.469 [0.380â€“0.561] | 0.247 |
-| TF-IDF + logreg | 0.689 [0.640-0.733] | 0.744 [0.689-0.793] | 0.558 [0.466-0.646] | 0.427 |
-| majority floor | 0.380 [0.333â€“0.430] | 0.350 | 0.451 | 0.000 |
+| heuristic | 0.529 [0.480-0.578] | 0.552 [0.494-0.610] | 0.474 [0.384-0.565] | 0.250 |
+| TF-IDF + logreg | 0.703 [0.656-0.746] | 0.747 [0.693-0.795] | 0.596 [0.505-0.682] | 0.467 |
+| majority floor | 0.379 [0.333-0.426] | 0.350 | 0.456 | 0.000 |
 
 **The heuristic is not good, and the previous CI floor was measuring the test
 set rather than the router.** The old gate was `--min-accuracy 0.9` against an
@@ -177,12 +177,12 @@ is worth doing.
 
 Three findings worth knowing before you touch the router:
 
-- **It fails open.** 136 of 177 errors are under-routes: genuinely hard prompts
-  sent to a cheaper model. It predicts `powerful` for 32 of 379 prompts when 89
+- **It fails open.** 138 of 184 errors are under-routes: genuinely hard prompts
+  sent to a cheaper model. It predicts `powerful` for 34 of 391 prompts when 92
   need it. Under-routing costs answer quality silently; over-routing costs
   money, which the cost tracker can already see.
 - **Clear and ambiguous are not significantly different** (0.560 vs 0.469,
-  p = 0.104). The assumption that a transparent rule works on obvious cases and
+  p = 0.157). The assumption that a transparent rule works on obvious cases and
   breaks on ambiguous ones is not supported by this data.
 - **Two of the five failure modes are bugs, not limits.**
   `\bplan\w*\b` matches "planet" and "plant", so every sentence containing

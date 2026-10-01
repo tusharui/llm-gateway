@@ -136,6 +136,8 @@ class BaselineReport:
                 k: v.to_dict() for k, v in sorted(self.rollup["by_adversarial_tag"].items())
             },
             "adversarial_any": self.rollup["adversarial_any"].to_dict(),
+            "multi_turn_any": self.rollup["multi_turn_any"].to_dict(),
+            "long_conversation": self.rollup["long_conversation"].to_dict(),
             "per_class": self.rollup["per_class"],
             "confusion_matrix": self.rollup["confusion_matrix"].to_dict(),
         }

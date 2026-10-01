@@ -367,7 +367,21 @@ def rollup(
     adversarial_correct: Counter[str] = Counter()
     adversarial_total_cases = 0
     adversarial_correct_cases = 0
+    # Conversation length is a signal the classifier actually uses
+    # (len(messages) > 10 and > 20 in auto_router), so it gets its own subset
+    # rather than being buried in by_category.
+    multi_turn_total = 0
+    multi_turn_correct = 0
+    long_conversation_total = 0
+    long_conversation_correct = 0
     for case, is_correct in zip(cases, correct_flags):
+        if case.messages:
+            multi_turn_total += 1
+            multi_turn_correct += int(is_correct)
+        message_count = len(case.chat_messages())
+        if message_count > 10:
+            long_conversation_total += 1
+            long_conversation_correct += int(is_correct)
         if case.adversarial:
             adversarial_total_cases += 1
             adversarial_correct_cases += int(is_correct)
@@ -396,6 +410,10 @@ def rollup(
         "adversarial_any": _proportion(
             adversarial_correct_cases, adversarial_total_cases, confidence
         ),
+        "multi_turn_any": _proportion(multi_turn_correct, multi_turn_total, confidence),
+        "long_conversation": _proportion(
+            long_conversation_correct, long_conversation_total, confidence
+        ),
         "confusion_matrix": matrix,
         "per_class": detail,
         "_correct_flags": correct_flags,
@@ -416,6 +434,8 @@ def serialise_rollup(result: Mapping[str, Any]) -> dict[str, Any]:
         "by_source": {k: v.to_dict() for k, v in sorted(result["by_source"].items())},
         "by_adversarial_tag": {k: v.to_dict() for k, v in sorted(result["by_adversarial_tag"].items())},
         "adversarial_any": result["adversarial_any"].to_dict(),
+        "multi_turn_any": result["multi_turn_any"].to_dict(),
+        "long_conversation": result["long_conversation"].to_dict(),
 "confusion_matrix": result["confusion_matrix"].to_dict(),
         "per_class": result["per_class"],
     }

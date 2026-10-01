@@ -131,6 +131,7 @@ def build_report(
     subsets: dict[str, Any] = {}
     tiers: dict[str, Any] = {}
     adversarial: dict[str, Any] = {}
+    conversation: dict[str, Any] = {}
     confusion: dict[str, Any] = {}
     intervals: dict[str, Any] = {}
 
@@ -148,6 +149,15 @@ def build_report(
             "by_tag": {k: v.to_dict() for k, v in sorted(report.rollup["by_adversarial_tag"].items())},
         }
         confusion[name] = report.rollup["confusion_matrix"].to_dict()
+        conversation[name] = {
+            "multi_turn": report.rollup["multi_turn_any"].to_dict(),
+            "over_ten_messages": report.rollup["long_conversation"].to_dict(),
+            "note": (
+                "classify_complexity adds a bonus above 10 and above 20 messages. "
+                "'over_ten_messages' is the only subset that exercises those branches, "
+                "and it is reported rather than gated until it has enough cases."
+            ),
+        }
         intervals[name] = {
             "confidence_level": configuration.get("confidence", 0.95),
             "overall": report.accuracy().to_dict(),
@@ -253,6 +263,7 @@ def build_report(
         "subsets": subsets,
         "tiers": tiers,
         "adversarial": adversarial,
+        "conversation": conversation,
         "confusion_matrix": confusion,
         "confidence_intervals": intervals,
         "comparisons": comparisons,
