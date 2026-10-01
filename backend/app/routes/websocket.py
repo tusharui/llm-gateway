@@ -80,6 +80,36 @@ MAX_CLOSE_REASON_BYTES = 123
 WS_SUBPROTOCOL = "bearer"
 _FORBIDDEN_QUERY_KEYS = ("token", "api_key", "apikey", "access_token")
 
+# api_key_id -> open connection count. In-process and therefore per worker,
+# like rate_limit_store: N workers means N times the cap. Moving either to
+# shared storage is the same problem and the same fix, and neither is worth
+# doing before there is more than one worker.
+_open_connections: dict[str, int] = {}
+
+
+def _acquire_connection_slot(api_key_id: str) -> bool:
+    """Reserve one of this key's connection slots. False when full."""
+    current = _open_connections.get(api_key_id, 0)
+    if current >= settings.ws_max_connections_per_key:
+        return False
+    _open_connections[api_key_id] = current + 1
+    return True
+
+
+def _release_connection_slot(api_key_id: str) -> None:
+    remaining = _open_connections.get(api_key_id, 1) - 1
+    if remaining <= 0:
+        _open_connections.pop(api_key_id, None)
+    else:
+        _open_connections[api_key_id] = remaining
+
+
+def open_connection_count(api_key_id: str | None = None) -> int:
+    """Currently open sockets, for one key or in total. Used by the tests."""
+    if api_key_id is None:
+        return sum(_open_connections.values())
+    return _open_connections.get(api_key_id, 0)
+
 
 def _truncate_reason(reason: str) -> str:
     encoded = reason.encode("utf-8")[:MAX_CLOSE_REASON_BYTES]
@@ -157,6 +187,32 @@ async def websocket_chat(websocket: WebSocket):
         return
 
     api_key_id = check.api_key_id or "gateway_admin"
+
+    if settings.ws_rate_limit:
+        # Charged at the handshake as well as per message. Without this a valid
+        # key can open sockets without ever sending anything, and a per-message
+        # budget never notices: the cost is an asyncio task and a buffered
+        # socket per connection, and none of it is metered.
+        handshake_verdict = consume_rate_limit(api_key_id)
+        if not handshake_verdict.allowed:
+            await _reject(
+                websocket,
+                CLOSE_TRY_AGAIN_LATER,
+                f"Rate limit exceeded. Retry after {handshake_verdict.retry_after_seconds}s",
+                subprotocol,
+            )
+            return
+
+    if not _acquire_connection_slot(api_key_id):
+        await _reject(
+            websocket,
+            CLOSE_POLICY_VIOLATION,
+            f"Too many open connections for this key "
+            f"(limit {settings.ws_max_connections_per_key}). Close one first.",
+            subprotocol,
+        )
+        return
+
     await websocket.accept(subprotocol=subprotocol)
 
     turns = 0
@@ -215,6 +271,11 @@ async def websocket_chat(websocket: WebSocket):
         except RuntimeError:
             pass
         return
+    finally:
+        # Every exit from here is a return, a break or an exception, and each of
+        # them ends the socket. Leaking the slot on any one of them would let a
+        # key exhaust its own connection budget permanently by tripping a limit.
+        _release_connection_slot(api_key_id)
 
 
 def _parse_turn(raw: str) -> dict[str, Any]:

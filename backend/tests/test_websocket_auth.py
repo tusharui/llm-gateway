@@ -26,9 +26,16 @@ def clean_state(monkeypatch):
     monkeypatch.setattr(settings, "ws_max_messages_per_request", 4)
     monkeypatch.setattr(settings, "ws_max_turns_per_connection", 3)
     monkeypatch.setattr(settings, "ws_rate_limit", False)
+    monkeypatch.setattr(settings, "ws_max_connections_per_key", 8)
     rate_limit_store.clear()
+
+    import app.routes.websocket as ws_module
+
+    ws_module._open_connections.clear()
+
     yield
     rate_limit_store.clear()
+    ws_module._open_connections.clear()
 
 
 class FakeSession:
@@ -112,13 +119,19 @@ def expect_close(session, limit=20):
     A server-initiated close is only observed on a read. Without this a test
     that sends an oversized frame and never receives would see the context
     manager exit cleanly and conclude the socket was still open.
+
+    Raises if nothing arrives, so a regression fails the suite instead of
+    hanging it: a socket that is accepted and then never closes would
+    otherwise block here forever.
     """
     for _ in range(limit):
         try:
-            session.receive_text()
+            message = session.receive()
         except WebSocketDisconnect as exc:
             return exc.code
-    raise AssertionError(f"no close frame after {limit} reads")
+        if message["type"] == "websocket.close":
+            return message.get("code", 1000)
+    raise AssertionError(f"no close frame after {limit} reads; the socket is still open")
 
 
 def drain(ws):
@@ -367,8 +380,9 @@ def test_turns_below_the_limit_stay_open(monkeypatch):
 
 
 def test_rate_limit_closes_with_1013(monkeypatch):
+    """The handshake is charged too, so the budget is 3: handshake, turn, turn."""
     monkeypatch.setattr(settings, "ws_rate_limit", True)
-    monkeypatch.setattr(settings, "rate_limit_max_requests", 2)
+    monkeypatch.setattr(settings, "rate_limit_max_requests", 3)
     patch_store(monkeypatch, None)
     stub_stream(monkeypatch)
     client = build_client()
@@ -380,6 +394,112 @@ def test_rate_limit_closes_with_1013(monkeypatch):
         assert drain(ws)["content"] == "hello"
         ws.send_text(turn())
         assert expect_close(ws) == 1013
+
+
+def test_the_handshake_is_charged_against_the_shared_budget(monkeypatch):
+    """Opening a socket is not free.
+
+    The per-message budget cannot see a connection that sends nothing, and a
+    socket costs an asyncio task and a buffered connection regardless. Asserted
+    on the store rather than by opening idle sockets and blocking on reads:
+    an accepted socket that sends nothing never closes, so a client read on it
+    waits forever.
+    """
+    monkeypatch.setattr(settings, "ws_rate_limit", True)
+    monkeypatch.setattr(settings, "rate_limit_max_requests", 10)
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+        ws.send_text(turn())
+        assert drain(ws)["content"] == "hello"
+        # One handshake plus one message.
+        assert rate_limit_store["gateway_admin"]["count"] == 2
+
+
+def test_an_exhausted_budget_refuses_the_handshake(monkeypatch):
+    monkeypatch.setattr(settings, "ws_rate_limit", True)
+    monkeypatch.setattr(settings, "rate_limit_max_requests", 1)
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    # The first connection spends the single unit on its handshake alone.
+    with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+        ws.send_text(turn())
+        assert expect_close(ws) == 1013
+
+
+def test_connection_cap_is_enforced_per_key(monkeypatch):
+    monkeypatch.setattr(settings, "ws_max_connections_per_key", 2)
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    first = client.websocket_connect("/ws/chat", headers=ADMIN)
+    second = client.websocket_connect("/ws/chat", headers=ADMIN)
+    with first, second:
+        with pytest.raises(WebSocketDisconnect) as exc:
+            with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+                ws.receive_text()
+        assert exc.value.code == 1008
+
+
+def test_closing_a_socket_returns_its_connection_slot(monkeypatch):
+    """The cap must be reusable, or a key can permanently exhaust its own budget
+    by tripping a limit once."""
+    monkeypatch.setattr(settings, "ws_max_connections_per_key", 1)
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    for _ in range(3):
+        with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+            ws.send_text(turn())
+            assert drain(ws)["content"] == "hello"
+
+    import app.routes.websocket as ws_module
+
+    assert ws_module.open_connection_count("gateway_admin") == 0
+
+
+def test_slot_is_released_when_a_limit_closes_the_socket(monkeypatch):
+    """A turn-limit close is still a closed socket, so the slot comes back."""
+    monkeypatch.setattr(settings, "ws_max_turns_per_connection", 1)
+    monkeypatch.setattr(settings, "ws_max_connections_per_key", 4)
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    for _ in range(2):
+        with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+            for _ in range(3):
+                try:
+                    ws.send_text(turn())
+                    drain(ws)
+                except WebSocketDisconnect:
+                    break
+
+    import app.routes.websocket as ws_module
+
+    assert ws_module.open_connection_count("gateway_admin") == 0
+
+
+def test_slot_is_not_taken_by_a_rejected_handshake(monkeypatch):
+    """A refused connection must not consume a slot it never held."""
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    for _ in range(5):
+        with pytest.raises(WebSocketDisconnect):
+            with client.websocket_connect("/ws/chat") as ws:
+                ws.receive_text()
+
+    import app.routes.websocket as ws_module
+
+    assert ws_module.open_connection_count() == 0
 
 
 def test_websocket_and_http_share_one_rate_limit_budget(monkeypatch):

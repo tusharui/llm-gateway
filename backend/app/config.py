@@ -73,6 +73,10 @@ class Settings(BaseSettings):
         default=True,
         description="Share the HTTP rate-limit budget with websockets. Off would let an exhausted key get a fresh budget by switching protocol.",
     )
+    ws_max_connections_per_key: int = Field(
+        default=8,
+        description="Max simultaneous websocket connections for one api_key_id. Per-message rate limiting does not bound sockets that never send anything.",
+    )
     log_level: str = Field(default="info")
 
     @property
