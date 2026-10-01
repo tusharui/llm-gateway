@@ -119,6 +119,62 @@ def parse_bearer(header_value: str | None) -> str | None:
     return parts[1]
 
 
+@dataclass(frozen=True)
+class RateLimitVerdict:
+    allowed: bool
+    remaining: int
+    retry_after_seconds: int
+    reset_at: float
+
+
+def consume_rate_limit(
+    api_key_id: str,
+    *,
+    window_ms: int | None = None,
+    max_requests: int | None = None,
+) -> RateLimitVerdict:
+    """Charge one request against the shared rate-limit budget.
+
+    Extracted from RateLimitMiddleware so the websocket can spend the same
+    budget. Two stores would mean an API key that is exhausted over /chat gets
+    a fresh allowance by opening a socket instead, which makes the HTTP limit
+    decorative.
+
+    The sliding-window logic is unchanged from the middleware: a new window
+    starts at count 1, a key is refused once count reaches the maximum, and the
+    counter is only incremented for requests that are allowed through.
+    """
+    now = time.time() * 1000
+    effective_window = settings.rate_limit_window_ms if window_ms is None else window_ms
+    effective_max = settings.rate_limit_max_requests if max_requests is None else max_requests
+
+    entry = rate_limit_store.get(api_key_id)
+    if not entry or now > entry["reset_at"]:
+        rate_limit_store[api_key_id] = {"count": 1, "reset_at": now + effective_window}
+        return RateLimitVerdict(
+            allowed=True,
+            remaining=effective_max - 1,
+            retry_after_seconds=0,
+            reset_at=now + effective_window,
+        )
+
+    if entry["count"] >= effective_max:
+        return RateLimitVerdict(
+            allowed=False,
+            remaining=0,
+            retry_after_seconds=int((entry["reset_at"] - now) / 1000) + 1,
+            reset_at=entry["reset_at"],
+        )
+
+    entry["count"] += 1
+    return RateLimitVerdict(
+        allowed=True,
+        remaining=effective_max - entry["count"],
+        retry_after_seconds=0,
+        reset_at=entry["reset_at"],
+    )
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if request.method == "OPTIONS":
@@ -162,32 +218,21 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         api_key_id = getattr(request.state, "api_key_id", "anonymous")
-        now = time.time() * 1000
-        window_ms = settings.rate_limit_window_ms
-        max_reqs = settings.rate_limit_max_requests
-
-        entry = rate_limit_store.get(api_key_id)
-        if not entry or now > entry["reset_at"]:
-            rate_limit_store[api_key_id] = {"count": 1, "reset_at": now + window_ms}
-            return await call_next(request)
-
-        if entry["count"] >= max_reqs:
-            retry_after = int((entry["reset_at"] - now) / 1000)
+        verdict = consume_rate_limit(api_key_id)
+        if not verdict.allowed:
             raise HTTPException(
                 status_code=429,
-                detail=f"Rate limit exceeded. Retry after {retry_after}s",
+                detail=f"Rate limit exceeded. Retry after {verdict.retry_after_seconds}s",
                 headers={
-                    "Retry-After": str(retry_after),
-                    "X-RateLimit-Limit": str(max_reqs),
+                    "Retry-After": str(verdict.retry_after_seconds),
+                    "X-RateLimit-Limit": str(settings.rate_limit_max_requests),
                     "X-RateLimit-Remaining": "0",
-                    "X-RateLimit-Reset": str(int(entry["reset_at"])),
+                    "X-RateLimit-Reset": str(int(verdict.reset_at)),
                 },
             )
 
-        entry["count"] += 1
-        remaining = max_reqs - entry["count"]
         response = await call_next(request)
-        response.headers["X-RateLimit-Limit"] = str(max_reqs)
-        response.headers["X-RateLimit-Remaining"] = str(remaining)
-        response.headers["X-RateLimit-Reset"] = str(int(entry["reset_at"]))
+        response.headers["X-RateLimit-Limit"] = str(settings.rate_limit_max_requests)
+        response.headers["X-RateLimit-Remaining"] = str(verdict.remaining)
+        response.headers["X-RateLimit-Reset"] = str(int(verdict.reset_at))
         return response

@@ -1,47 +1,278 @@
+"""Websocket chat transport.
+
+Authentication and resource bounds are enforced **in the handler**, not by
+AuthMiddleware, because BaseHTTPMiddleware only runs on ``http`` scope. It never
+sees a websocket connection. ``requires_auth("/ws/chat")`` is also false: the
+prefix list is /chat, /embeddings and /batch. Both facts are covered by tests,
+because either could change and silently reopen this route.
+
+## Credentials
+
+Browsers cannot set headers on a websocket handshake, so two sources are
+accepted:
+
+  ``Authorization: Bearer <token>``      server-side clients, and the tests
+  ``Sec-WebSocket-Protocol: bearer, <t>`` browsers
+
+Query parameters are **rejected**, not merely undocumented. A token in the URL
+lands in access logs, proxy logs, and Referer headers, and it survives in
+browser history. Since the frontend does not use this socket yet, there is
+nothing to break.
+
+When the client offers a subprotocol the server must echo one back or the
+browser fails the handshake outright, so ``accept(subprotocol="bearer")`` is
+mandatory and not cosmetic.
+
+## Close codes
+
+  1008 policy violation   auth failure, message-array cap, turn cap
+  1009 message too big    a frame over WS_MAX_MESSAGE_BYTES
+  1013 try again later    the shared HTTP rate-limit budget is exhausted
+  1011 internal error     a fault the client cannot act on
+
+1008 is the right code for authentication because it means "this will not
+change on retry". The limits use the codes that actually describe them, so a
+client can tell "your token is wrong" from "your frame is too big" from "back
+off" without parsing a reason string.
+
+## Why this fails closed when the key store is down, unlike HTTP
+
+``check_api_key`` returns STORE_UNAVAILABLE when the database cannot be
+consulted, and AuthMiddleware deliberately lets those requests through so a
+Postgres incident does not become a gateway outage. That trade is wrong for a
+socket. An HTTP request is one request that finishes; this socket stays open,
+streaming billable tokens, for as long as the client holds it -- so failing
+open here converts a transient database blip into indefinite free LLM access.
+
+The admin key (``sk-gateway-`` prefix) is resolved without touching the
+database, so an operator is never locked out.
+"""
+
 import json
+from typing import Any
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.engine.router import route_chat_stream
+from starlette.websockets import WebSocketState
+
+from app.config import settings
 from app.engine.failover import route_with_failover
-from app.schemas import ChatRequest, ChatMessage
+from app.engine.router import route_chat_stream
+from app.middleware.auth import TokenStatus, check_api_key, consume_rate_limit, parse_bearer
+from app.redact import redact_error
+from app.schemas import ChatMessage, ChatRequest
 
 router = APIRouter()
+
+CLOSE_NORMAL = 1000
+CLOSE_UNSUPPORTED_DATA = 1003
+CLOSE_POLICY_VIOLATION = 1008
+CLOSE_MESSAGE_TOO_BIG = 1009
+CLOSE_INTERNAL_ERROR = 1011
+CLOSE_TRY_AGAIN_LATER = 1013
+
+# RFC 6455 caps a close reason at 123 bytes. A longer one is a protocol error
+# and some clients drop the frame.
+MAX_CLOSE_REASON_BYTES = 123
+
+WS_SUBPROTOCOL = "bearer"
+_FORBIDDEN_QUERY_KEYS = ("token", "api_key", "apikey", "access_token")
+
+
+def _truncate_reason(reason: str) -> str:
+    encoded = reason.encode("utf-8")[:MAX_CLOSE_REASON_BYTES]
+    return encoded.decode("utf-8", errors="ignore")
+
+
+def extract_token(websocket: WebSocket) -> tuple[str | None, str | None]:
+    """Return ``(token, subprotocol_to_echo)`` from the handshake.
+
+    The subprotocol must be echoed whenever the client offered one, or the
+    browser refuses the connection before the application sees it.
+    """
+    token = parse_bearer(websocket.headers.get("authorization"))
+    if token:
+        return token, None
+
+    offered = websocket.headers.get("sec-websocket-protocol")
+    if offered:
+        for candidate in (part.strip() for part in offered.split(",")):
+            if candidate and candidate != WS_SUBPROTOCOL:
+                return candidate, WS_SUBPROTOCOL
+    return None, None
+
+
+async def _reject(websocket: WebSocket, code: int, reason: str, subprotocol: str | None = None) -> None:
+    """Close with a specific code rather than a bare handshake failure.
+
+    Starlette turns a ``close`` before ``accept`` into an HTTP 403 denial, which
+    the client cannot distinguish from any other refused connection. Accepting
+    first and closing immediately sends a real close frame carrying the code,
+    so the client can tell an expired key from a frame that was too big.
+    Nothing is read and no provider is called, so the accepted-then-closed
+    moment costs nothing.
+    """
+    if websocket.client_state == WebSocketState.CONNECTING:
+        await websocket.accept(subprotocol=subprotocol)
+    await websocket.close(code=code, reason=_truncate_reason(reason))
 
 
 @router.websocket("/ws/chat")
 async def websocket_chat(websocket: WebSocket):
-    await websocket.accept()
+    token, subprotocol = extract_token(websocket)
+
+    if not token:
+        await _reject(
+            websocket,
+            CLOSE_POLICY_VIOLATION,
+            "Authentication required: send Authorization: Bearer <token> or "
+            "Sec-WebSocket-Protocol: bearer, <token>",
+            subprotocol,
+        )
+        return
+
+    if any(key in websocket.query_params for key in _FORBIDDEN_QUERY_KEYS):
+        # Refused explicitly rather than ignored, so the client finds out why
+        # instead of silently getting an unauthenticated socket.
+        await _reject(
+            websocket,
+            CLOSE_POLICY_VIOLATION,
+            "Token in a query parameter is rejected: URLs are logged. "
+            "Send it as a header instead.",
+            subprotocol,
+        )
+        return
+
+    check = await check_api_key(token)
+    if check.status is not TokenStatus.VALID:
+        reason = (
+            "Authentication unavailable while the key store is unreachable. "
+            "Retry shortly."
+            if check.status is TokenStatus.STORE_UNAVAILABLE
+            else check.detail or "Invalid API key"
+        )
+        await _reject(websocket, CLOSE_POLICY_VIOLATION, reason, subprotocol)
+        return
+
+    api_key_id = check.api_key_id or "gateway_admin"
+    await websocket.accept(subprotocol=subprotocol)
+
+    turns = 0
     try:
         while True:
-            raw = await websocket.receive_text()
+            if websocket.client_state is not WebSocketState.CONNECTED:
+                break
+
             try:
-                data = json.loads(raw)
-                messages = [ChatMessage(**m) for m in data.get("messages", [])]
-                if not messages:
-                    await websocket.send_json({"error": "No messages provided"})
-                    continue
+                raw = await websocket.receive_text()
+            except (WebSocketDisconnect, RuntimeError):
+                break
 
-                req = ChatRequest(
-                    model=data.get("model", "auto"),
-                    messages=messages,
-                    stream=True,
-                    temperature=data.get("temperature", 0.7),
-                    max_tokens=data.get("max_tokens"),
-                    top_p=data.get("top_p"),
+            if len(raw.encode("utf-8")) > settings.ws_max_message_bytes:
+                await _reject(
+                    websocket,
+                    CLOSE_MESSAGE_TOO_BIG,
+                    f"Frame exceeds {settings.ws_max_message_bytes} bytes",
                 )
+                return
 
-                try:
-                    async for chunk in route_chat_stream(req):
-                        await websocket.send_json(chunk.model_dump())
-                except Exception:
-                    result, provider = await route_with_failover(req)
-                    await websocket.send_json(result.model_dump())
+            if settings.ws_rate_limit:
+                verdict = consume_rate_limit(api_key_id)
+                if not verdict.allowed:
+                    await _reject(
+                        websocket,
+                        CLOSE_TRY_AGAIN_LATER,
+                        f"Rate limit exceeded. Retry after {verdict.retry_after_seconds}s",
+                    )
+                    return
 
-                await websocket.send_json({"done": True})
+            turns += 1
+            if turns > settings.ws_max_turns_per_connection:
+                await _reject(
+                    websocket,
+                    CLOSE_POLICY_VIOLATION,
+                    f"Turn limit of {settings.ws_max_turns_per_connection} reached. "
+                    "Reconnect to continue.",
+                )
+                return
 
-            except json.JSONDecodeError:
-                await websocket.send_json({"error": "Invalid JSON"})
-            except Exception as e:
-                await websocket.send_json({"error": str(e)})
+            await _handle_turn(websocket, raw)
 
     except WebSocketDisconnect:
-        pass
+        return
+    except Exception as exc:  # noqa: BLE001 - a fault must close cleanly, not traceback
+        # redact_error before it reaches a client: provider exception text can
+        # contain API keys, and this message goes to whoever holds the socket.
+        try:
+            await websocket.close(
+                code=CLOSE_INTERNAL_ERROR, reason=_truncate_reason(redact_error(exc))
+            )
+        except RuntimeError:
+            pass
+        return
+
+
+def _parse_turn(raw: str) -> dict[str, Any]:
+    data = json.loads(raw)
+    if not isinstance(data, dict):
+        raise ValueError("Expected a JSON object")
+    return data
+
+
+async def _handle_turn(websocket: WebSocket, raw: str) -> None:
+    try:
+        data = _parse_turn(raw)
+    except json.JSONDecodeError:
+        await websocket.send_json({"error": "Invalid JSON"})
+        return
+    except ValueError as exc:
+        await websocket.send_json({"error": str(exc)})
+        return
+
+    raw_messages = data.get("messages", [])
+    if not isinstance(raw_messages, list):
+        await websocket.send_json({"error": "'messages' must be a list"})
+        return
+
+    if len(raw_messages) > settings.ws_max_messages_per_request:
+        # Not recoverable by sending a smaller frame on the same socket: the
+        # cap exists to bound what one frame can ask for, so the connection is
+        # the unit that has to go.
+        await _reject(
+            websocket,
+            CLOSE_POLICY_VIOLATION,
+            f"Frame carries {len(raw_messages)} messages, limit is "
+            f"{settings.ws_max_messages_per_request}",
+        )
+        return
+
+    if not raw_messages:
+        await websocket.send_json({"error": "No messages provided"})
+        return
+
+    try:
+        messages = [ChatMessage(**m) for m in raw_messages]
+    except Exception as exc:  # noqa: BLE001 - pydantic error text is client-facing
+        await websocket.send_json({"error": f"Invalid message: {exc}"})
+        return
+
+    try:
+        req = ChatRequest(
+            model=data.get("model", "auto"),
+            messages=messages,
+            stream=True,
+            temperature=data.get("temperature", 0.7),
+            max_tokens=data.get("max_tokens"),
+            top_p=data.get("top_p"),
+        )
+    except Exception as exc:  # noqa: BLE001 - pydantic error text is client-facing
+        await websocket.send_json({"error": f"Invalid request: {exc}"})
+        return
+
+    try:
+        async for chunk in route_chat_stream(req):
+            await websocket.send_json(chunk.model_dump())
+    except Exception:  # noqa: BLE001 - fallback below; the reason is logged upstream
+        result, _provider = await route_with_failover(req)
+        await websocket.send_json(result.model_dump())
+
+    await websocket.send_json({"done": True})
