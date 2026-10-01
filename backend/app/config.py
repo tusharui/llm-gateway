@@ -53,6 +53,26 @@ class Settings(BaseSettings):
     groq_api_key: str = Field(default="")
     gemini_api_key: str = Field(default="")
     openrouter_api_key: str = Field(default="")
+
+    # Websocket limits. The /ws/chat socket holds an open, billable LLM stream
+    # for as long as the client keeps it open, so "one request in, one response
+    # out" bounds nothing. Four limits, four different resources:
+    ws_max_message_bytes: int = Field(
+        default=65536,
+        description="Max bytes in one inbound websocket frame. A frame is buffered before the app sees it, so uvicorn --ws-max-size must match; this is the second line, not the first.",
+    )
+    ws_max_messages_per_request: int = Field(
+        default=64,
+        description="Max entries in a single frame's messages array. Bounds the pydantic model built from it.",
+    )
+    ws_max_turns_per_connection: int = Field(
+        default=200,
+        description="Max request/response cycles on one connection before closing it with 1008. Bounds socket lifetime.",
+    )
+    ws_rate_limit: bool = Field(
+        default=True,
+        description="Share the HTTP rate-limit budget with websockets. Off would let an exhausted key get a fresh budget by switching protocol.",
+    )
     log_level: str = Field(default="info")
 
     @property
