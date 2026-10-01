@@ -195,19 +195,33 @@ def _print_report(reports: dict[str, BaselineReport], dataset_warnings: Sequence
         print()
 
 
-def _print_table(reports: dict[str, BaselineReport], cases: Sequence[Any], predictions: dict[str, tuple[str, ...]]) -> None:
+def _print_table(
+    reports: dict[str, BaselineReport], cases: Sequence[Any], predictions: dict[str, tuple[str, ...]]
+) -> None:
+    """One row per case, one column per system, wrong answers marked.
+
+    A wrong cell is marked rather than coloured or dropped: the point of the
+    table is to make it obvious at a glance which cases every system gets wrong,
+    which is the input to a manual error-analysis pass.
+    """
     names = sorted(predictions)
-    width = min(70, max(len(case.input) for case in cases))
-    header = f"{'id':<34} {'expected':<10} " + " ".join(f"{name:<{max(len(n), 8)}}" for name in names)
+    widths = [max(len(name), 10) for name in names]
+    header = f"{'id':<34} {'expected':<10} " + " ".join(
+        f"{name:<{width}}" for name, width in zip(names, widths)
+    )
     print(header)
     print("-" * len(header))
+    disagreements = 0
     for index, case in enumerate(cases):
-        row = f"{case.id:<34} {case.expected_label:<10} "
-        row += " ".join(
-            f"{predictions[name][index]:<{max(len(name), 8)}}{'' if predictions[name][index] == case.expected_label else ' X'}"
-            for name in names
-        )
-        print(row[: 34 + 11 + sum(max(len(n), 8) + 3 for n in names)])
+        cells = []
+        for name, width in zip(names, widths):
+            predicted = predictions[name][index]
+            marker = " " if predicted == case.expected_label else "X"
+            if marker == "X":
+                disagreements += 1
+            cells.append(f"{predicted:<{width - 1}}{marker}")
+        print(f"{case.id:<34} {case.expected_label:<10} " + " ".join(cells))
+    print(f"\n{disagreements} disagreement(s) between the systems above.")
 
 
 # --- Baseline assembly --------------------------------------------------------
