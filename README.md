@@ -6,7 +6,7 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) · [API docs](htt
 
 ## What it does
 
-- **Auto-routing** — classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`) that scores routing accuracy in CI.
+- **Auto-routing** — classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`): 379 labelled cases, confidence intervals, a confusion matrix, a learned baseline for comparison, and CI gates. It scores 0.533 [0.483–0.583] — read the honesty note under Testing & quality before quoting that.
 - **Multi-provider failover** — circuit breakers + per-request failover chain, so a dead provider never breaks a request.
 - **Semantic + exact caching** — similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
 - **Auth + rate limiting** — per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware.
@@ -23,7 +23,7 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) · [API docs](htt
 | Database | Neon PostgreSQL (SQLAlchemy async + asyncpg) |
 | HTTP client | httpx (async) |
 | Cache | In-memory + persisted semantic cache (embedding similarity) |
-| Quality | pytest (25 tests) · routing eval harness · GitHub Actions CI · typed contract |
+| Quality | pytest (301 tests) · routing eval harness with Wilson intervals and CI gates · GitHub Actions CI · typed contract |
 
 ## Repository layout
 
@@ -35,7 +35,16 @@ backend/
     cache/        exact + semantic caching
     providers/    Groq, Gemini, OpenRouter adapters
     routes/       chat, embeddings, batch, analytics, chat history
-  evals/          golden prompts + routing accuracy scorer
+  evals/
+    golden/       379 labelled routing cases (clear / ambiguous, adversarial, multi-turn)
+    dataset.py    schema, fail-loud validation, content fingerprint
+    metrics.py    Wilson intervals, subset/tier rollups, confusion matrix, significance
+    baselines.py  heuristic + TF-IDF/logreg + majority floor, one interface
+    learned.py    out-of-fold training, holdout, leakage inspection
+    gates.py      CI quality gates, measured from the committed baseline
+    report.py     deterministic results.json, atomic write
+    production.py redaction + provenance for real traffic
+    ERROR_ANALYSIS.md, REVIEW.md, SCHEMA.md, baseline_gates.json
   tests/          pytest suite
   scripts/        OpenAPI contract export
 frontend/
@@ -125,14 +134,66 @@ Full interactive docs at `http://localhost:8000/docs`.
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-python -m pytest -q                       # 25 unit/integration tests
-python -m evals.run --report              # routing accuracy vs golden set
+python -m pytest -q                       # 301 unit/integration tests
+python -m evals.run                       # routing eval: both baselines + gates
+python -m evals.run --report              # + a per-case table
+python -m evals.run --load-baseline evals/baseline_gates.json   # CI behaviour, exit 1 on failure
 python -m scripts.export_openapi          # regenerate backend/openapi.json
 cd ../frontend
 npm run lint && npm run build
 ```
 
-CI (`.github/workflows/ci.yml`) runs the backend tests + routing eval (with a 90% accuracy floor) and frontend lint + build on every push to `main`.
+CI (`.github/workflows/ci.yml`) runs the backend tests + the routing eval +
+frontend lint + build on every push to `main`.
+
+### What the routing eval measures
+
+`python -m evals.run` scores the `fast` / `balanced` / `powerful` classifier
+against 379 hand-labelled cases and writes `backend/evals/results.json`. It
+reports, for every system, accuracy with a Wilson 95% interval overall and per
+difficulty, per tier, per category and per adversarial tag, plus a
+machine-readable confusion matrix. Two systems are compared: the production
+heuristic and a TF-IDF + logistic regression baseline scored from stratified
+out-of-fold predictions, alongside a majority-class floor so the headline has a
+reference point.
+
+Current measurements, with intervals:
+
+| system | overall | clear | ambiguous | powerful tier |
+|---|---|---|---|---|
+| heuristic | 0.533 [0.483–0.583] | 0.560 [0.500–0.619] | 0.469 [0.380–0.561] | 0.247 |
+| TF-IDF + logreg | 0.715 [0.668–0.758] | 0.748 [0.693–0.797] | 0.637 [0.545–0.720] | 0.461 |
+| majority floor | 0.380 [0.333–0.430] | 0.350 | 0.451 | 0.000 |
+
+**The heuristic is not good, and the previous CI floor was measuring the test
+set rather than the router.** The old gate was `--min-accuracy 0.9` against an
+18-case golden set that scored 18/18; six of those cases were near-copies of
+the router's own regexes and none exercised multi-turn input. The committed
+floors in `backend/evals/baseline_gates.json` are 0.49 / 0.52 / 0.40 / 0.40,
+each derived as `floor(observed − 1.3 × standard error)`, and each sitting next
+to the measurement it came from. Raising them back to 0.90 is possible two
+ways — make the router better, or make the dataset worse — and only the first
+is worth doing.
+
+Three findings worth knowing before you touch the router:
+
+- **It fails open.** 136 of 177 errors are under-routes: genuinely hard prompts
+  sent to a cheaper model. It predicts `powerful` for 32 of 379 prompts when 89
+  need it. Under-routing costs answer quality silently; over-routing costs
+  money, which the cost tracker can already see.
+- **Clear and ambiguous are not significantly different** (0.560 vs 0.469,
+  p = 0.104). The assumption that a transparent rule works on obvious cases and
+  breaks on ambiguous ones is not supported by this data.
+- **Two of the five failure modes are bugs, not limits.**
+  `\bplan\w*\b` matches "planet" and "plant", so every sentence containing
+  *planet* routes to a bigger model; and `summarise`, `how do I` and
+  `condense` are missing from the keyword list entirely, so all eight how-to
+  cases score zero.
+
+`backend/evals/ERROR_ANALYSIS.md` has the full analysis with case ids and
+recomputed scores, `backend/evals/REVIEW.md` has 23 manually reviewed
+misclassifications, and `backend/evals/SCHEMA.md` documents the dataset format
+and how to add a case.
 
 ## Deploy
 
