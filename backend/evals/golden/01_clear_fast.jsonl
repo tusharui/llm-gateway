@@ -1,0 +1,70 @@
+{"id": "greeting", "input": "Hi", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "greeting"}
+{"id": "thanks", "input": "Thanks a lot!", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "thanks"}
+{"id": "capital", "input": "What is the capital of France?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "define", "input": "Define gravity.", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "number", "input": "7", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "numeric"}
+{"id": "weather", "input": "What is the weather like today?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "weather"}
+{"id": "clear_fast_greet_02", "input": "hello", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "greeting"}
+{"id": "clear_fast_greet_03", "input": "Hey there!", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "greeting"}
+{"id": "clear_fast_greet_04", "input": "Good morning", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "greeting"}
+{"id": "clear_fast_greet_05", "input": "howdy", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "greeting"}
+{"id": "clear_fast_greet_06", "input": "yo", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "greeting"}
+{"id": "clear_fast_thanks_02", "input": "Thanks!", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "thanks"}
+{"id": "clear_fast_thanks_03", "input": "thank you so much", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "thanks"}
+{"id": "clear_fast_thanks_04", "input": "Thanks, that worked.", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "thanks"}
+{"id": "clear_fast_thanks_05", "input": "Great, appreciate it", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "thanks"}
+{"id": "clear_fast_bye_01", "input": "bye", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "small_talk"}
+{"id": "clear_fast_bye_02", "input": "see you later", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "small_talk"}
+{"id": "clear_fast_affirm_01", "input": "yes", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_affirm_02", "input": "yeah that is right", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_affirm_03", "input": "correct", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_deny_01", "input": "no", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_deny_02", "input": "nope, wrong", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_ack_01", "input": "ok", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_ack_02", "input": "got it", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_ack_03", "input": "understood", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_ack_04", "input": "sounds good", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_ack_05", "input": "cool", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "acknowledgement"}
+{"id": "clear_fast_factual_02", "input": "What is the capital of Italy?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_03", "input": "Who wrote Hamlet?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_04", "input": "When did the Berlin Wall fall?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_05", "input": "Where is the Taj Mahal?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_06", "input": "What is the largest ocean on Earth?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_07", "input": "How many continents are there?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_08", "input": "What is the chemical symbol for gold?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_09", "input": "Who painted the Mona Lisa?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_10", "input": "In what year did Apollo 11 land?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_11", "input": "Which planet is closest to the Sun?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_12", "input": "What is the tallest mountain in the world?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_factual_13", "input": "Who was the first person on the moon?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "factual_lookup"}
+{"id": "clear_fast_def_02", "input": "Define entropy.", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_def_03", "input": "Define photosynthesis.", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_def_04", "input": "What is inflation?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_def_05", "input": "What is a monad?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_def_06", "input": "What does DNS stand for?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_def_07", "input": "Who is Ada Lovelace?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_def_08", "input": "What is the difference between RAM and disk?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "definition"}
+{"id": "clear_fast_arith_01", "input": "What is 17 times 23?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_arith_02", "input": "What is 144 divided by 12?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_arith_03", "input": "What is 15 percent of 240?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_arith_04", "input": "How many seconds are in 3 hours?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_arith_05", "input": "What is the square root of 81?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_arith_06", "input": "What is 100 minus 37?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_time_01", "input": "What time is it?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "time"}
+{"id": "clear_fast_time_02", "input": "What is today's date?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "time"}
+{"id": "clear_fast_weather_02", "input": "Will it snow in Denver tomorrow?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "weather"}
+{"id": "clear_fast_convert_01", "input": "Convert 5 kilometers to miles.", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "unit_conversion"}
+{"id": "clear_fast_convert_02", "input": "How many ounces are in a pound?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "unit_conversion"}
+{"id": "clear_fast_translate_01", "input": "How do you say hello in Spanish?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "translation"}
+{"id": "clear_fast_translate_02", "input": "What does 'bonjour' mean in English?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "translation"}
+{"id": "clear_fast_yesno_01", "input": "Is Python a programming language?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "yes_no"}
+{"id": "clear_fast_yesno_02", "input": "Is the moon a planet?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "yes_no"}
+{"id": "clear_fast_yesno_03", "input": "Does the Earth orbit the Sun?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "yes_no"}
+{"id": "clear_fast_status_01", "input": "Is my order shipped?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "status_lookup"}
+{"id": "clear_fast_status_02", "input": "How many unread messages do I have?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "status_lookup"}
+{"id": "clear_fast_status_03", "input": "What's my current balance?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "status_lookup"}
+{"id": "clear_fast_short_01", "input": "How do you spell kilometre?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "short_utterance"}
+{"id": "clear_fast_short_02", "input": "What is 3 + 4?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "arithmetic"}
+{"id": "clear_fast_short_03", "input": "Say hi to her for me", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "short_utterance"}
+{"id": "clear_fast_short_04", "input": "Spell necessary out loud", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "short_utterance"}
+{"id": "clear_fast_short_05", "input": "Is it Monday tomorrow?", "expected_label": "fast", "difficulty": "clear", "source": "synthetic", "category": "time"}

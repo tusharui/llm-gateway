@@ -1,0 +1,58 @@
+{"id": "compare-frameworks", "input": "Compare React and Vue for a small project.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "pros-cons-remote", "input": "What are the pros and cons of remote work?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "resume-tips", "input": "Give me 3 tips to improve my resume.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_explain_02", "input": "Explain how a hash map works.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_03", "input": "Explain the difference between a process and a thread.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_04", "input": "Explain what a database index is and why it speeds up queries.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_05", "input": "Explain how HTTPS protects a request from interception.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_06", "input": "Explain what garbage collection does in a managed runtime.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_07", "input": "Explain how DNS resolves a hostname to an IP address.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_08", "input": "Explain what an event loop is in asynchronous programming.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_09", "input": "Explain how compound interest works with a short example.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_10", "input": "Explain the difference between latency and throughput.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_11", "input": "Explain how a queue absorbs a burst of traffic.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_explain_12", "input": "Explain what a circuit breaker protects a service from.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "explanation"}
+{"id": "clear_bal_compare_02", "input": "Compare SQL and NoSQL databases for an audit log use case.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_03", "input": "Compare REST and GraphQL for a mobile client.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_04", "input": "Compare Postgres and MySQL for a small team.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_05", "input": "Compare unit tests and integration tests.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_06", "input": "Compare vertical and horizontal scaling.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_07", "input": "Compare optimistic and pessimistic locking.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_08", "input": "Compare cookies and localStorage for storing a login session.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_09", "input": "Compare server-side rendering with client-side rendering.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_compare_10", "input": "What are the pros and cons of microservices for a team of three engineers?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "comparison"}
+{"id": "clear_bal_summarise_01", "input": "Summarise this paragraph in one sentence: the meeting ran long and ended without a decision on the launch date.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "summarization"}
+{"id": "clear_bal_summarise_02", "input": "Summarise the plot of Romeo and Juliet in three sentences.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "summarization"}
+{"id": "clear_bal_summarise_03", "input": "Summarise the main points of the Declaration of Independence.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "summarization"}
+{"id": "clear_bal_summarise_04", "input": "Give me a one-paragraph summary of what an API gateway does.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "summarization"}
+{"id": "clear_bal_summarise_05", "input": "Condense these release notes into a single bullet list for a changelog.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "summarization"}
+{"id": "clear_bal_summarise_06", "input": "Summarise what a circuit breaker does in two sentences.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "summarization"}
+{"id": "clear_bal_advice_02", "input": "Give me tips for onboarding a new engineer in week one.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_03", "input": "What advice do you have for reducing my monthly grocery bill?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_04", "input": "Suggest three habits to improve my sleep.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_05", "input": "Any tips for writing a good bug report?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_06", "input": "What should I look for when renting my first apartment?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_07", "input": "Recommend a few books on statistics for beginners.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_08", "input": "How can I improve my public speaking without hiring a coach?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_advice_09", "input": "Give me a checklist before deploying to production on a Friday.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "advice"}
+{"id": "clear_bal_trouble_01", "input": "My Docker container exits immediately with code 0. What should I check first?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_trouble_02", "input": "My laptop fans spin up whenever I open a spreadsheet. What is going on?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_trouble_03", "input": "My Wi-Fi keeps dropping on the second floor. How do I narrow that down?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_trouble_04", "input": "My Python script takes 40 seconds to start. How can I find out why?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_trouble_05", "input": "Why is my Python script slow to start? How do I profile it?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_trouble_06", "input": "My test suite passes locally but fails in CI. How should I debug this?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_trouble_07", "input": "My email client cannot authenticate. What should I verify first?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "troubleshooting"}
+{"id": "clear_bal_howto_01", "input": "How do I set up a virtual environment in Python?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_02", "input": "How do I reset a forgotten password on my laptop?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_03", "input": "How do I make a simple pasta sauce from canned tomatoes?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_04", "input": "How do I change the default branch on GitHub?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_05", "input": "How do I export a CSV from a Postgres table?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_06", "input": "How do I schedule a cron job on a Linux server?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_07", "input": "How do I check whether a port is open on a remote host?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_howto_08", "input": "How do I rotate an API key without downtime?", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "howto"}
+{"id": "clear_bal_rewrite_01", "input": "Rewrite this sentence to be more concise: due to the fact that it was raining we cancelled.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "rewriting"}
+{"id": "clear_bal_rewrite_02", "input": "Rewrite my apology to sound less formal: sorry for the late reply.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "rewriting"}
+{"id": "clear_bal_rewrite_03", "input": "Rewrite this bug report so it is easier for a new contributor to act on.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "rewriting"}
+{"id": "clear_bal_draft_01", "input": "Draft a two-sentence Slack update announcing the release went out.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "drafting"}
+{"id": "clear_bal_draft_02", "input": "Write a short out-of-office reply for next Tuesday.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "drafting"}
+{"id": "clear_bal_draft_03", "input": "Write a polite email declining a meeting invitation.", "expected_label": "balanced", "difficulty": "clear", "source": "synthetic", "category": "drafting"}

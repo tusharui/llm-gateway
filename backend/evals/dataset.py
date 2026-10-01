@@ -637,11 +637,62 @@ def load_dataset(path: str | Path) -> tuple[list[EvalCase], list[ValidationIssue
     parse failures, :class:`DatasetValidationError` for content failures.
     """
     resolved = Path(path)
+    if resolved.is_dir():
+        return load_dataset_dir(resolved)
     text = _read_text(resolved)
     raw_cases = parse_dataset_text(text, path=str(resolved))
     cases, issues = validate_cases(raw_cases)
     if not cases:
         raise DatasetError(f"Dataset {resolved} contains zero usable cases")
+    return cases, issues
+
+
+def find_dataset_shards(directory: str | Path) -> list[Path]:
+    """JSONL shards in a directory, in deterministic filename order.
+
+    Sorted by name so shard order never depends on filesystem enumeration
+    order, which differs between Windows, Linux and containers.
+    """
+    root = Path(directory)
+    try:
+        entries = sorted(
+            (p for p in root.iterdir() if p.is_file() and p.suffix in (".jsonl", ".json")),
+            key=lambda p: p.name,
+        )
+    except FileNotFoundError as exc:
+        raise DatasetError(f"Dataset directory not found: {root}") from exc
+    except PermissionError as exc:
+        raise DatasetError(f"Dataset directory is not readable (permissions): {root}") from exc
+    except OSError as exc:
+        raise DatasetError(f"Could not list dataset directory {root}: {exc.strerror or exc}") from exc
+    if not entries:
+        raise DatasetError(f"Dataset directory {root} contains no .json/.jsonl shards")
+    return entries
+
+
+def load_dataset_dir(directory: str | Path) -> tuple[list[EvalCase], list[ValidationIssue]]:
+    """Load every shard in a directory and validate them as one dataset.
+
+    Cross-shard duplicate ids and duplicate inputs are caught because all
+    records are validated together, not shard by shard. A case is labelled by
+    which shard it came from only through its own ``category``, so shard
+    placement never becomes a hidden feature.
+    """
+    root = Path(directory)
+    shards = find_dataset_shards(root)
+    collected: list[Any] = []
+    for shard in shards:
+        text = _read_text(shard)
+        records = parse_dataset_text(text, path=f"{root.name}/{shard.name}")
+        if not isinstance(records, list):
+            raise DatasetError(f"Shard {shard} did not parse to a list of cases")
+        if not records:
+            raise DatasetError(f"Shard {shard.name} parsed to zero records; check the file")
+        collected.extend(records)
+
+    cases, issues = validate_cases(collected)
+    if not cases:
+        raise DatasetError(f"Dataset directory {root} contains zero usable cases")
     return cases, issues
 
 
@@ -696,7 +747,9 @@ __all__ = [
     "ValidationIssue",
     "dataset_fingerprint",
     "dataset_summary",
+    "find_dataset_shards",
     "load_dataset",
+    "load_dataset_dir",
     "normalize_for_duplicates",
     "parse_dataset_text",
     "validate_cases",

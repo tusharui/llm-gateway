@@ -19,13 +19,24 @@ sys.path.insert(0, str(ROOT))
 
 from app.engine.auto_router import classify_complexity  # noqa: E402
 
-GOLDEN = Path(__file__).parent / "golden.json"
+GOLDEN_DIR = Path(__file__).parent / "golden"
+GOLDEN_FILE = Path(__file__).parent / "golden.json"
+# The dataset now lives in a directory of shards so that adding cases to one
+# concern produces a reviewable diff, and so production-derived cases have
+# their own file. Fall back to the single-file form for older checkouts.
+GOLDEN = GOLDEN_DIR if GOLDEN_DIR.is_dir() else GOLDEN_FILE
 RESULTS = Path(__file__).parent / "results.json"
 TIERS = ["fast", "balanced", "powerful"]
 
 
 def load_golden() -> list[dict]:
-    return json.loads(GOLDEN.read_text(encoding="utf-8"))
+    from evals.dataset import load_dataset
+
+    cases, _ = load_dataset(GOLDEN)
+    return [
+        {"id": case.id, "prompt": case.input, "expected_tier": case.expected_label}
+        for case in cases
+    ]
 
 
 def run_case(case: dict) -> dict:
