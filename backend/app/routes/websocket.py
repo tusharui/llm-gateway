@@ -49,6 +49,7 @@ database, so an operator is never locked out.
 """
 
 import json
+import logging
 from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -60,6 +61,8 @@ from app.engine.router import route_chat_stream
 from app.middleware.auth import TokenStatus, check_api_key, consume_rate_limit, parse_bearer
 from app.redact import redact_error
 from app.schemas import ChatMessage, ChatRequest
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -200,11 +203,14 @@ async def websocket_chat(websocket: WebSocket):
     except WebSocketDisconnect:
         return
     except Exception as exc:  # noqa: BLE001 - a fault must close cleanly, not traceback
-        # redact_error before it reaches a client: provider exception text can
-        # contain API keys, and this message goes to whoever holds the socket.
+        # The client gets a generic reason. The detail goes to the server log
+        # through redact_error, so it is diagnosable without reflecting an
+        # exception message to whoever happens to hold the socket.
+        logger.error("websocket turn failed for api_key_id=%s: %s", api_key_id, redact_error(exc))
         try:
             await websocket.close(
-                code=CLOSE_INTERNAL_ERROR, reason=_truncate_reason(redact_error(exc))
+                code=CLOSE_INTERNAL_ERROR,
+                reason="Internal error. Check the server logs.",
             )
         except RuntimeError:
             pass
@@ -216,6 +222,77 @@ def _parse_turn(raw: str) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("Expected a JSON object")
     return data
+
+
+def _validation_error(prefix: str, exc: Exception, *, index_offset: int | None = None) -> dict[str, Any]:
+    """A client-safe validation error.
+
+    pydantic's ``str(exc)`` includes ``input_value=<the offending value>``, so
+    sending it verbatim reflects arbitrary caller-supplied text straight back
+    over the socket. A client that puts a credential in ``temperature`` gets
+    that credential echoed to it, and into whatever it logs.
+
+    Only the field path, the error type and the static message template are
+    returned. ``msg`` is a fixed string like "Input should be a valid float";
+    it never contains the input. The full detail is logged server-side through
+    ``redact_error`` so the failure is still diagnosable.
+
+    ``index_offset`` prefixes the field path with the array position, so a
+    client with four messages is told *which* one is wrong rather than being
+    left to guess.
+    """
+    from pydantic import ValidationError
+
+    errors: list[dict[str, Any]] = []
+    if isinstance(exc, ValidationError):
+        for item in exc.errors():
+            loc = [str(part) for part in item.get("loc", ())]
+            if index_offset is not None:
+                loc = [str(index_offset), *loc]
+            errors.append(
+                {"field": ".".join(loc), "type": item.get("type"), "message": item.get("msg")}
+            )
+    if not errors:
+        # A non-pydantic failure reached the same branch. Redact it rather than
+        # trusting that it happens to be safe.
+        errors = [{"field": "", "type": type(exc).__name__, "message": redact_error(exc)}]
+
+    logger.warning(
+        "%s rejected: %s | %s",
+        prefix,
+        json.dumps(errors, ensure_ascii=False),
+        redact_error(exc),
+    )
+    return {"error": prefix, "details": errors}
+
+
+def _build_messages(raw_messages: list[Any]) -> list[ChatMessage]:
+    """Validate each message so a failure names its position.
+
+    Validating the list in one comprehension produces a ValidationError whose
+    ``loc`` is relative to the individual model, so a client with four messages
+    is told "content" and has to find the offending one itself.
+    """
+    from pydantic import ValidationError
+
+    messages: list[ChatMessage] = []
+    for index, raw in enumerate(raw_messages):
+        try:
+            messages.append(ChatMessage(**raw))
+        except ValidationError as exc:
+            raise _IndexedValidationError(exc, index) from exc
+        except (TypeError, ValueError) as exc:
+            raise _IndexedValidationError(exc, index) from exc
+    return messages
+
+
+class _IndexedValidationError(Exception):
+    """Carries the offending array index alongside the validation failure."""
+
+    def __init__(self, cause: Exception, index: int) -> None:
+        super().__init__(str(cause))
+        self.cause = cause
+        self.index = index
 
 
 async def _handle_turn(websocket: WebSocket, raw: str) -> None:
@@ -250,9 +327,14 @@ async def _handle_turn(websocket: WebSocket, raw: str) -> None:
         return
 
     try:
-        messages = [ChatMessage(**m) for m in raw_messages]
-    except Exception as exc:  # noqa: BLE001 - pydantic error text is client-facing
-        await websocket.send_json({"error": f"Invalid message: {exc}"})
+        messages = _build_messages(raw_messages)
+    except _IndexedValidationError as exc:
+        await websocket.send_json(
+            _validation_error("Invalid message", exc.cause, index_offset=exc.index)
+        )
+        return
+    except Exception as exc:  # noqa: BLE001 - projected into a safe shape below
+        await websocket.send_json(_validation_error("Invalid message", exc))
         return
 
     try:
@@ -264,15 +346,20 @@ async def _handle_turn(websocket: WebSocket, raw: str) -> None:
             max_tokens=data.get("max_tokens"),
             top_p=data.get("top_p"),
         )
-    except Exception as exc:  # noqa: BLE001 - pydantic error text is client-facing
-        await websocket.send_json({"error": f"Invalid request: {exc}"})
+    except Exception as exc:  # noqa: BLE001 - projected into a safe shape below
+        await websocket.send_json(_validation_error("Invalid request", exc))
         return
 
     try:
         async for chunk in route_chat_stream(req):
             await websocket.send_json(chunk.model_dump())
-    except Exception:  # noqa: BLE001 - fallback below; the reason is logged upstream
-        result, _provider = await route_with_failover(req)
-        await websocket.send_json(result.model_dump())
+    except Exception as exc:  # noqa: BLE001 - the stream fails, then failover runs
+        logger.warning("stream failed, attempting failover: %s", redact_error(exc))
+        try:
+            result, _provider = await route_with_failover(req)
+            await websocket.send_json(result.model_dump())
+        except Exception as failover_exc:  # noqa: BLE001 - reported, not swallowed
+            logger.error("failover also failed: %s", redact_error(failover_exc))
+            raise
 
     await websocket.send_json({"done": True})

@@ -445,25 +445,120 @@ def test_messages_must_be_a_list(monkeypatch):
         assert "must be a list" in ws.receive_json()["error"]
 
 
-def test_provider_failure_does_not_leak_credentials_to_the_client(monkeypatch):
-    """The previous handler sent str(exception) straight to the socket.
+def test_validation_errors_do_not_echo_the_offending_value(monkeypatch):
+    """pydantic's str(exc) carries input_value=<the value>.
 
-    Provider exception text routinely contains the request URL and the API key
-    it failed with, and this message goes to whoever holds the socket.
+    Sent verbatim, that reflects arbitrary caller-supplied text straight back
+    over the socket. Verified against the real schema rather than assumed.
     """
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    secret = "sk-LEAKED0123456789abcdef"
+    with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+        ws.send_text(
+            json.dumps(
+                {
+                    "messages": [{"role": "user", "content": "hi"}],
+                    "temperature": secret,
+                }
+            )
+        )
+        payload = ws.receive_json()
+
+    serialised = json.dumps(payload)
+    assert secret not in serialised
+    assert payload["error"] == "Invalid request"
+    assert payload["details"][0]["field"] == "temperature"
+    assert payload["details"][0]["type"]
+
+
+def test_validation_error_names_the_field_without_the_value(monkeypatch):
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+        ws.send_text(
+            json.dumps({"messages": [{"role": "user", "content": 12345}]})
+        )
+        payload = ws.receive_json()
+
+    assert payload["error"] == "Invalid message"
+    assert payload["details"][0]["field"] == "0.content"
+    assert "12345" not in json.dumps(payload)
+
+
+def test_a_rejected_validation_does_not_close_the_socket(monkeypatch):
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+        ws.send_text(json.dumps({"messages": [{"role": "user", "content": 1}], "temperature": "nope"}))
+        assert ws.receive_json()["error"] == "Invalid message"
+
+        ws.send_text(turn())
+        assert ws.receive_json()["content"] == "hello"
+
+
+def test_validation_detail_is_logged_server_side(monkeypatch, caplog):
+    """A client-safe error has to still be diagnosable by an operator."""
+    import logging
+
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch)
+    client = build_client()
+
+    with caplog.at_level(logging.WARNING, logger="app.routes.websocket"):
+        with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+            ws.send_text(json.dumps({"messages": [{"role": "user", "content": 1}]}))
+            ws.receive_json()
+
+    assert caplog.records
+    assert any("Invalid message" in r.getMessage() for r in caplog.records)
+
+
+def test_logged_detail_is_redacted(monkeypatch, caplog):
+    import logging
+
     patch_store(monkeypatch, None)
     stub_stream(monkeypatch, boom=True)
 
     import app.routes.websocket as ws_module
 
-    async def boom(req):
-        raise RuntimeError(
-            "request to https://generativelanguage.googleapis.com/v1beta/models"
-            "?key=sk-abcdef0123456789abcdef failed"
-        )
+    async def failing_failover(req):
+        raise RuntimeError("failed with https://x/?key=sk-abcdef0123456789abcdef")
 
-    monkeypatch.setattr(ws_module, "route_with_failover", lambda req: boom(req))
+    monkeypatch.setattr(ws_module, "route_with_failover", failing_failover)
+    client = build_client()
 
+    with caplog.at_level(logging.WARNING, logger="app.routes.websocket"):
+        try:
+            with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
+                ws.send_text(turn())
+                ws.receive_json()
+        except WebSocketDisconnect:
+            pass
+
+    logged = "\n".join(r.getMessage() for r in caplog.records)
+    assert "sk-abcdef0123456789abcdef" not in logged
+    assert "failover also failed" in logged
+
+
+def test_provider_failure_gives_the_client_a_generic_reason(monkeypatch):
+    """Not the redacted exception text: a reason the client cannot act on and
+    cannot mine for internal structure."""
+    patch_store(monkeypatch, None)
+    stub_stream(monkeypatch, boom=True)
+
+    import app.routes.websocket as ws_module
+
+    async def failing_failover(req):
+        raise RuntimeError("provider https://internal.example/?key=sk-abcdef0123456789abcdef")
+
+    monkeypatch.setattr(ws_module, "route_with_failover", failing_failover)
     client = build_client()
 
     with pytest.raises(WebSocketDisconnect) as exc:
@@ -471,9 +566,10 @@ def test_provider_failure_does_not_leak_credentials_to_the_client(monkeypatch):
             ws.send_text(turn())
             ws.receive_json()
 
-    # The failover path raised too, so the socket closes rather than leaking.
-    assert close_code_of(exc.value) == 1011
-    assert "sk-abcdef" not in str(exc.value)
+    reason = getattr(exc.value, "reason", "") or ""
+    assert "sk-abcdef" not in reason
+    assert "internal.example" not in reason
+    assert "Internal error" in reason
 
 
 def test_streaming_error_falls_back_to_failover(monkeypatch):
