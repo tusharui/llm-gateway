@@ -55,14 +55,12 @@ def _build_query_text(messages: list) -> str:
 async def semantic_get(model: str, messages: list, similarity_threshold: float = 0.92):
     now_ms = time.time() * 1000
 
-    # Check memory store first
-    for entry in _memory_store:
-        if entry["expires_at"] < now_ms:
-            continue
-        if entry["model"] != model:
-            continue
-        # Already have embedding from DB — check against it
-        pass
+    # A loop over _memory_store used to sit here. It filtered on expiry and
+    # model and then did nothing -- three `continue`s and a `pass` -- so it
+    # cost time and decided nothing. It is removed rather than "completed",
+    # because completing it properly means the memory store has to be keyed
+    # and searched, and that is a different design with a different
+    # invalidation story. See the module note on _memory_store below.
 
     # DB lookup
     try:
@@ -87,22 +85,34 @@ async def semantic_get(model: str, messages: list, similarity_threshold: float =
 
             best_match = None
             best_sim = 0.0
+            best_row = None
 
+            # Pure scan: find the closest live entry. Nothing is written from
+            # inside this loop.
             for row in rows:
                 stored_embedding = json.loads(row.embedding_json)
                 sim = cosine_similarity(query_embedding, stored_embedding)
                 if sim > best_sim and sim >= similarity_threshold:
                     best_sim = sim
                     best_match = json.loads(row.response_json)
+                    best_row = row
 
-                    _memory_store.append({
-                        "embedding": stored_embedding,
-                        "response": best_match,
-                        "model": model,
-                        "expires_at": row.expires_at.timestamp() * 1000,
-                    })
-                    if len(_memory_store) > MAX_MEMORY_ENTRIES:
-                        _memory_store.pop(0)
+            if best_match is not None:
+                # One append per request, after the scan.
+                #
+                # This used to sit inside the loop body, so a request that
+                # cleared the threshold against five rows appended five
+                # entries -- near-duplicates of each other -- and evicted
+                # older, genuinely distinct entries by FIFO. The store filled
+                # with copies of whatever was hottest.
+                _memory_store.append({
+                    "embedding": json.loads(best_row.embedding_json),
+                    "response": best_match,
+                    "model": model,
+                    "expires_at": best_row.expires_at.timestamp() * 1000,
+                })
+                if len(_memory_store) > MAX_MEMORY_ENTRIES:
+                    _memory_store.pop(0)
 
             return (best_match, best_sim) if best_match else (None, 0.0)
         finally:

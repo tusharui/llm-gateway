@@ -1,4 +1,3 @@
-import random
 from typing import AsyncGenerator
 from app.providers.interface import AIProvider
 from app.providers.registry import get_available_providers
@@ -11,6 +10,27 @@ from app.redact import redact_error
 
 
 def pick_provider(model: str, preferred_provider: str | None = None) -> AIProvider:
+    """Choose a provider for `model`.
+
+    Deterministic by design. This function used to finish with
+
+        weighted = []
+        for p in candidates:
+            weighted.extend([p] * cfg[p.name].weight)
+        return random.choice(weighted)
+
+    Every provider has weight=1 in config.py, so the draw was uniform, and
+    the branch is only reached when `preferred_provider` is None or was
+    rejected -- which routes/chat.py never does, because it always supplies
+    one. So it was non-determinism in the routing path with no weighting
+    behind it: two identical requests could pick different providers, and no
+    test could assert which without patching random.choice.
+
+    Order is the configured provider order, so the same inputs always give
+    the same answer. If weighted routing is ever wanted it should be an
+    explicit, configurable policy with a test, not an accident of every
+    weight defaulting to 1.
+    """
     available = get_available_providers()
     if not available:
         raise Exception("No providers available")
@@ -33,11 +53,7 @@ def pick_provider(model: str, preferred_provider: str | None = None) -> AIProvid
     if not candidates:
         raise Exception("All providers are in cooldown")
 
-    weighted = []
-    for p in candidates:
-        weighted.extend([p] * cfg[p.name].weight)
-
-    return random.choice(weighted)
+    return candidates[0]
 
 
 def failover_chain(
@@ -58,10 +74,21 @@ def failover_chain(
     plan: list[tuple[AIProvider, str]] = []
     for p in ordered:
         if p.name == preferred:
-            plan.append((p, model))
+            # Only lead with the preferred provider if it actually hosts the
+            # model. This branch used to append unconditionally, so a caller
+            # that named a provider which does not serve the model got a chain
+            # that opened with a guaranteed 404 and burned the first failover
+            # attempt before reaching anyone who could have answered.
+            if model in cfg[p.name].models:
+                plan.append((p, model))
             continue
-        substitute = alternate_model(model, preferred)
-        if substitute and substitute in cfg[p.name].models:
+
+        # Ask for a substitute that THIS provider can serve. Passing the target
+        # provider is what stops the chain from proposing, say,
+        # gemini-2.5-flash to OpenRouter (which lists it as
+        # google/gemini-2.5-flash and would 404).
+        substitute = alternate_model(model, preferred, target_provider=p.name)
+        if substitute:
             plan.append((p, substitute))
 
     # Unknown/unmapped model: fall back to providers that serve the id verbatim.
@@ -81,17 +108,32 @@ async def route_chat(
     cfg = settings.get_providers()[provider.name]
 
     async def _call():
-        try:
-            result = await provider.chat(req)
-            record_success(provider.name)
-            return result
-        except Exception:
-            record_failure(provider.name, cfg.failure_threshold, cfg.cooldown_ms)
-            raise
+        # Deliberately does NOT touch the circuit breaker.
+        #
+        # This closure is what with_retry re-invokes, so recording breaker
+        # state here counted every retry as an independent failure. With
+        # retry_count=3 a single client request produced four upstream calls
+        # and four failures, against a configured threshold of five -- so two
+        # client requests ejected a provider. That makes failure_threshold
+        # mean "1.25 requests", which is neither what the config says nor
+        # what an operator tuning it would expect, and it ejects a provider
+        # off one blip rather than a sustained outage.
+        #
+        # Retry accounting belongs to the retry layer. The breaker answers a
+        # different question: is this provider healthy right now?
+        return await provider.chat(req)
 
-    return await with_retry(
-        _call, retries=cfg.retry_count, base_delay_ms=cfg.retry_delay_ms
-    ), provider.name
+    try:
+        result = await with_retry(
+            _call, retries=cfg.retry_count, base_delay_ms=cfg.retry_delay_ms
+        )
+    except Exception:
+        # One failure per client request, no matter how many attempts it took.
+        record_failure(provider.name, cfg.failure_threshold, cfg.cooldown_ms)
+        raise
+
+    record_success(provider.name)
+    return result, provider.name
 
 
 async def route_chat_stream(

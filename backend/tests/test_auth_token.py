@@ -184,7 +184,12 @@ def test_missing_session_is_store_unavailable_not_invalid(monkeypatch):
 
     A key store that cannot be reached is not the same fact as a bad token, and
     collapsing them means either a 401 storm during an incident or a bypass.
-    HTTP fails open on this; the websocket handshake fails closed.
+
+    Both transports resolve this to "closed". HTTP used to fail open, which
+    meant a typo in DATABASE_URL handed anyone who typed a random string into
+    an Authorization header the owner's provider spend. The middleware-level
+    behaviour is pinned in tests/test_authz.py; this test only asserts that
+    the three outcomes stay distinct at the source.
     """
     patch_session(monkeypatch, None)
 
@@ -225,16 +230,22 @@ def test_hash_string_is_deterministic():
     assert hash_string("a") != hash_string("b")
 
 
-def test_requires_auth_still_excludes_the_websocket_path():
+def test_requires_auth_covers_every_privileged_prefix():
     """Documents why handler-level auth is required for /ws/chat.
 
-    BaseHTTPMiddleware only runs on http scope, and this prefix list does not
-    match /ws anyway. Neither fact is going to change.
+    BaseHTTPMiddleware only runs on http scope, and no prefix here matches
+    /ws anyway. Neither fact is going to change.
+
+    /chat-history is now authenticated too. It was deliberately excluded
+    before, to carve out the "/chat-history".startswith("/chat") collision,
+    which is what left conversation transcripts public.
     """
     assert requires_auth("/chat")
     assert requires_auth("/chat/abc")
+    assert requires_auth("/chat-history/sessions")
+    assert requires_auth("/api-keys")
     assert not requires_auth("/health")
-    assert not requires_auth("/chat-history/sessions")
+    assert not requires_auth("/ready")
     assert not requires_auth("/ws/chat")
     assert not requires_auth("/ws")
 

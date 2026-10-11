@@ -43,7 +43,9 @@ def test_missing_auth_is_401_json():
     client = TestClient(build_app())
     r = client.post("/chat")
     assert r.status_code == 401
-    assert "detail" in r.json()
+    # Every error uses one envelope. See tests/test_authz.py for the full
+    # boundary; this only asserts the shape a client will parse.
+    assert r.json()["error"]["type"] == "AUTHENTICATION_ERROR"
 
 
 def test_valid_gateway_key_passes():
@@ -80,12 +82,21 @@ def test_401_echoes_request_id():
 
 
 def test_requires_auth_paths():
+    # /chat-history is authenticated. It used to be carved out of the /chat
+    # prefix because "/chat-history".startswith("/chat") is True, which left
+    # every conversation transcript reachable with no credential.
+    # /api-keys and /analytics are authenticated for the same reason: key
+    # management and aggregate spend are not public data.
     assert requires_auth("/chat")
     assert requires_auth("/chat/abc")
     assert requires_auth("/embeddings")
     assert requires_auth("/batch")
+    assert requires_auth("/chat-history/sessions")
+    assert requires_auth("/api-keys")
+    assert requires_auth("/analytics/summary")
+
     assert not requires_auth("/health")
-    assert not requires_auth("/chat-history/sessions")
+    assert not requires_auth("/ready")
     assert not requires_auth("/models")
 
 

@@ -7,11 +7,12 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) Â· [API docs](h
 ## What it does
 
 - **Auto-routing** - classifies each prompt (`fast` / `balanced` / `powerful`) and picks the cheapest model tier that can handle it. Backed by a golden-set eval harness (`backend/evals`): 391 labelled cases, confidence intervals, a confusion matrix, a learned baseline for comparison, and CI gates. It scores 0.529 [0.480-0.578] - read the honesty note under Testing & quality before quoting that.
-- **Multi-provider failover** â€” circuit breakers + per-request failover chain, so a dead provider never breaks a request.
+- **Multi-provider failover** â€” circuit breakers + per-request failover chain, so a dead provider never breaks a request. Every `(provider, model)` pair in a chain is checked against that provider's configured model list, so failover never spends a round-trip on a guaranteed 404.
 - **Semantic + exact caching** â€” similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
-- **Auth + rate limiting** â€” per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware.
+- **Auth + rate limiting** â€” per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware. Key management (`/api-keys`) and billing (`/analytics`) require the **operator** key specifically, not merely any valid key. Authentication **fails closed** when the key store is unreachable.
 - **Cost analytics** â€” per-model / per-provider usage, spend, cache savings, latency, and request history.
 - **Observability** â€” every request carries a correlatable `X-Request-ID` and structured JSON logs.
+- **One error envelope** â€” every failure, including validation, 404 and 405, returns `{"error": {...}}` in the OpenAI error shape.
 - **Next.js dashboard** â€” chat UI with streaming, session history, model picker, Markdown export, and an analytics page.
 
 ## Tech stack
@@ -23,7 +24,7 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) Â· [API docs](h
 | Database | Neon PostgreSQL (SQLAlchemy async + asyncpg) |
 | HTTP client | httpx (async) |
 | Cache | In-memory + persisted semantic cache (embedding similarity) |
-| Quality | pytest (351 tests) | routing eval harness with Wilson intervals and CI gates | GitHub Actions CI | typed contract |
+| Quality | pytest (508 tests) | routing eval harness with Wilson intervals and CI gates | GitHub Actions CI | typed contract checked in CI |
 
 ## Repository layout
 
@@ -70,7 +71,7 @@ copy .env.example .env.local                      # NEXT_PUBLIC_BACKEND_URL, GAT
 npm run dev
 ```
 
-Tables auto-create on startup. The default dev gateway key is `sk-gateway-dev-key` â€” set a real `GATEWAY_API_KEY` in production.
+Tables are **not** created by the app. Alembic owns the schema: run `python -m alembic upgrade head` before starting, and the app refuses to serve database-backed routes until the expected tables are present. `render.yaml` does this as a `preDeployCommand`. The default dev gateway key is `sk-gateway-dev-key` â€” set a real `GATEWAY_API_KEY` in production.
 
 ## Environment variables
 
@@ -79,12 +80,16 @@ Tables auto-create on startup. The default dev gateway key is `sk-gateway-dev-ke
 | Variable | Default | Description |
 |---|---|---|
 | `DATABASE_URL` | â€” | Neon/PostgreSQL async connection string |
-| `GATEWAY_API_KEY` | `sk-gateway-dev-key` | Admin bypass key (`sk-gateway-*` format) |
+| `DATABASE_SSL` | `require` | TLS to Postgres. `require` or `disable`; no `auto` (probing would send the password in cleartext) |
+| `GATEWAY_API_KEY` | `sk-gateway-dev-key` | Admin bypass key (`sk-gateway-*` format). Also the only key that can reach `/api-keys` and `/analytics` |
 | `GROQ_API_KEY` | â€” | Groq API key |
 | `GEMINI_API_KEY` | â€” | Google Gemini API key |
 | `OPENROUTER_API_KEY` | â€” | OpenRouter API key |
 | `PORT` | `8000` | API server port |
 | `LOG_LEVEL` | `info` | Logging level |
+| `CORS_ALLOW_ORIGINS` | *(empty)* | Comma-separated browser origins. Empty = CORS disabled, which is correct when the dashboard calls the API server-side |
+| `WS_MAX_MESSAGE_BYTES` | `65536` | Max inbound websocket frame; keep in sync with uvicorn `--ws-max-size` |
+| `WS_MAX_CONNECTIONS_PER_KEY` | `8` | Max simultaneous websocket connections per key |
 
 ### Frontend (`frontend/.env.local`)
 
@@ -134,7 +139,7 @@ Full interactive docs at `http://localhost:8000/docs`.
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-python -m pytest -q                       # 351 unit/integration tests
+python -m pytest -q                       # 508 unit/integration tests
 python -m evals.run                       # routing eval: both baselines + gates
 python -m evals.run --report              # + a per-case table
 python -m evals.run --load-baseline evals/baseline_gates.json   # CI behaviour, exit 1 on failure

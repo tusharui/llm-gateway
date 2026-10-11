@@ -79,6 +79,22 @@ class Settings(BaseSettings):
     )
     log_level: str = Field(default="info")
 
+    # CORS. The gateway authenticates with a bearer token, never a cookie, so
+    # it has no business reflecting arbitrary origins with credentials
+    # enabled. Starlette treats allow_origins=["*"] together with
+    # allow_credentials=True as "echo whatever Origin arrives and allow
+    # cookies with it", which is the combination browsers warn about.
+    #
+    # Empty by default: an unset list means no browser origin is allowed, and
+    # the frontend reaches the API server-side (Next.js route handlers), where
+    # CORS does not apply. Set a comma-separated allowlist only if a browser
+    # is expected to call the API directly.
+    cors_allow_origins: str = Field(default="")
+
+    @property
+    def cors_origin_list(self) -> List[str]:
+        return [o.strip() for o in self.cors_allow_origins.split(",") if o.strip()]
+
     @property
     def is_dev(self) -> bool:
         return self.node_env == "development"

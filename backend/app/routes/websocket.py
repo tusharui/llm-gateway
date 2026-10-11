@@ -35,17 +35,26 @@ change on retry". The limits use the codes that actually describe them, so a
 client can tell "your token is wrong" from "your frame is too big" from "back
 off" without parsing a reason string.
 
-## Why this fails closed when the key store is down, unlike HTTP
+## Why this fails closed when the key store is down
 
 ``check_api_key`` returns STORE_UNAVAILABLE when the database cannot be
-consulted, and AuthMiddleware deliberately lets those requests through so a
-Postgres incident does not become a gateway outage. That trade is wrong for a
-socket. An HTTP request is one request that finishes; this socket stays open,
-streaming billable tokens, for as long as the client holds it -- so failing
-open here converts a transient database blip into indefinite free LLM access.
+consulted. Both transports now answer that the same way -- closed -- but for
+different reasons worth keeping separate.
+
+For a socket the argument is about duration: the connection stays open,
+streaming billable tokens, for as long as the client holds it, so accepting
+one during a database blip converts a transient failure into indefinite
+access.
+
+For an HTTP request the argument is about cost rather than duration, and it
+is the stronger of the two. Accepting a token the store could not verify means
+accepting a string an attacker chose: a typo in DATABASE_URL or thirty
+seconds of database trouble would otherwise hand anyone who typed a random
+value into an Authorization header the owner's provider spend. The earlier
+fail-open behaviour is recorded in ``AuthMiddleware``, where it was removed.
 
 The admin key (``sk-gateway-`` prefix) is resolved without touching the
-database, so an operator is never locked out.
+database, so an operator is never locked out by either decision.
 """
 
 import json
@@ -58,8 +67,16 @@ from starlette.websockets import WebSocketState
 from app.config import settings
 from app.engine.failover import route_with_failover
 from app.engine.router import route_chat_stream
-from app.middleware.auth import TokenStatus, check_api_key, consume_rate_limit, parse_bearer
+from app.middleware.auth import (
+    ADMIN_KEY_ID,
+    TokenStatus,
+    check_api_key,
+    consume_rate_limit,
+    parse_bearer,
+)
+from app.providers.registry import get_available_providers
 from app.redact import redact_error
+from app.routes.chat import resolve_route
 from app.schemas import ChatMessage, ChatRequest
 
 logger = logging.getLogger(__name__)
@@ -186,7 +203,7 @@ async def websocket_chat(websocket: WebSocket):
         await _reject(websocket, CLOSE_POLICY_VIOLATION, reason, subprotocol)
         return
 
-    api_key_id = check.api_key_id or "gateway_admin"
+    api_key_id = check.api_key_id or ADMIN_KEY_ID
 
     if settings.ws_rate_limit:
         # Charged at the handshake as well as per message. Without this a valid
@@ -411,6 +428,24 @@ async def _handle_turn(websocket: WebSocket, raw: str) -> None:
         await websocket.send_json(_validation_error("Invalid request", exc))
         return
 
+    # Route before dispatch, exactly as the HTTP path does.
+    #
+    # The provider adapters send req.model verbatim, so "auto" reaches the
+    # provider as the literal string "auto" and 404s. routes/chat.py rewrites
+    # it with an explicit comment about exactly this; this handler did not,
+    # so every default-configuration socket turn failed against the upstream
+    # API. The fix is not to duplicate the routing logic but to call the same
+    # helper the HTTP path calls, so the two transports cannot disagree about
+    # which model a prompt gets.
+    routing_reasoning: str | None = None
+    try:
+        available = get_available_providers()
+        provider_name, model_id, routing_reasoning = resolve_route(req, available)
+        req.model = model_id
+    except Exception as exc:  # noqa: BLE001 - reported to the client, not swallowed
+        await websocket.send_json(_validation_error("Cannot route request", exc))
+        return
+
     try:
         async for chunk in route_chat_stream(req):
             await websocket.send_json(chunk.model_dump())
@@ -423,4 +458,4 @@ async def _handle_turn(websocket: WebSocket, raw: str) -> None:
             logger.error("failover also failed: %s", redact_error(failover_exc))
             raise
 
-    await websocket.send_json({"done": True})
+    await websocket.send_json({"done": True, "routing_decision": routing_reasoning})

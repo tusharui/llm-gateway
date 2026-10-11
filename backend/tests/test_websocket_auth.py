@@ -142,7 +142,10 @@ def drain(ws):
             message = ws.receive_json()
         except WebSocketDisconnect:
             return first
-        if message == {"done": True}:
+        # The terminal frame carries a routing_decision alongside `done`, so a
+        # socket client can see which model tier the prompt was classified
+        # into without opening a second connection to /routing/classify.
+        if message.get("done") is True:
             return first
 
 
@@ -190,7 +193,9 @@ def test_valid_admin_key_connects_and_streams(monkeypatch):
     with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
         ws.send_text(turn())
         assert ws.receive_json()["content"] == "hello"
-        assert ws.receive_json() == {"done": True}
+        terminal = ws.receive_json()
+        assert terminal["done"] is True
+        assert "routing_decision" in terminal
 
 
 def test_valid_database_key_connects(monkeypatch):
@@ -711,7 +716,7 @@ def test_streaming_error_falls_back_to_failover(monkeypatch):
     with client.websocket_connect("/ws/chat", headers=ADMIN) as ws:
         ws.send_text(turn())
         assert ws.receive_json()["content"] == "from failover"
-        assert ws.receive_json() == {"done": True}
+        assert ws.receive_json()["done"] is True
 
 
 # --- invariants ---------------------------------------------------------------

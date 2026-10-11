@@ -50,6 +50,19 @@ jobs:
         run: |
           DATABASE_URL="$TEST_DATABASE_URL" python -m alembic upgrade head
           DATABASE_URL="$TEST_DATABASE_URL" python -m alembic check
+      - name: Check committed OpenAPI contract is current
+        # openapi.json is the source of truth for frontend/src/types/backend.d.ts.
+        # It was missing /ready and nothing noticed, so the drift check is now a
+        # build step rather than a convention. Refresh with
+        # `cd backend && python -m scripts.export_openapi`.
+        run: |
+          cp openapi.json /tmp/openapi.before.json
+          python -m scripts.export_openapi
+          if ! diff -q /tmp/openapi.before.json openapi.json >/dev/null; then
+            echo "::error::openapi.json is stale. Run: cd backend && python -m scripts.export_openapi"
+            git --no-pager diff --stat openapi.json || true
+            exit 1
+          fi
       - name: Run routing quality eval
         # Thresholds live in backend/evals/baseline_gates.json, not here, so
         # that every number they were derived from sits in one reviewable file

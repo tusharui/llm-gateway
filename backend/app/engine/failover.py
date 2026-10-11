@@ -31,10 +31,24 @@ async def route_with_failover(
 
         provider_cfg = settings.get_providers()[provider.name]
         if provider.name == preferred_provider:
-            req.model = original_model
+            if original_model in provider_cfg.models:
+                req.model = original_model
+            else:
+                # The preferred provider does not serve this model. Asking it
+                # anyway would spend the whole failover budget on a guaranteed
+                # 404, so skip it and let a provider that can serve the model
+                # take the request.
+                continue
         else:
-            substitute = alternate_model(original_model, preferred_provider or "")
-            if substitute and substitute in provider_cfg.models:
+            # Ask for a substitute this provider can actually serve. The old
+            # call omitted the target provider, so the substitute was picked
+            # for a different provider and then filtered away here -- leaving
+            # this provider with no usable entry and silently shortening the
+            # chain.
+            substitute = alternate_model(
+                original_model, preferred_provider or "", target_provider=provider.name
+            )
+            if substitute:
                 req.model = substitute
             elif original_model in provider_cfg.models:
                 req.model = original_model

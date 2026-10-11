@@ -174,21 +174,50 @@ def tier_for_model(model: str) -> str | None:
     return None
 
 
-def alternate_model(model: str, exclude_provider: str) -> str | None:
-    """Same-tier model on a provider other than `exclude_provider`.
+def alternate_model(
+    model: str, exclude_provider: str, target_provider: str | None = None
+) -> str | None:
+    """Same-tier model that `target_provider` actually hosts.
 
-    Model ids are provider-specific, so failing over to another provider with the
-    same id always 404s. Pick an equivalent model from the same tier instead.
+    Model ids are provider-specific, so failing over to another provider with
+    the same id always 404s. Pick an equivalent model from the same tier
+    instead.
+
+    ``target_provider`` is what makes this correct. Without it the function
+    returned the first tier entry that was not on ``exclude_provider``, and
+    the caller filtered afterwards on whether the provider it happened to be
+    looking at hosted that id. The consequence was silent: failover_chain
+    would ask Gemini for ``openai/gpt-oss-120b`` and burn an upstream
+    round-trip on a guaranteed 404 before reaching a provider that could have
+    served the request. Verified against the shipped config:
+
+        alternate_model('openai/gpt-oss-120b', 'gemini')  -> 'openai/gpt-oss-120b'
+        # Gemini hosts no powerful-tier id at all, so the old signature
+        # returned a Groq model and the chain opened with a 404.
+
+    Passing ``target_provider`` makes "can this provider serve this model"
+    part of the search rather than a filter applied afterwards. With no
+    ``target_provider`` the old behaviour is preserved for callers that only
+    want some other model.
     """
     tier = tier_for_model(model)
     if tier is None:
         return None
 
     cfg = settings.get_providers()
+    # An unknown target provider must yield None, not fall through to "return
+    # whatever comes first". Silently degrading to the old behaviour is how an
+    # unconfigured or misspelled provider name reintroduces the 404 this
+    # function exists to prevent.
+    target_cfg = cfg.get(target_provider) if target_provider else None
+    if target_provider and target_cfg is None:
+        return None
+
     for provider_name, model_id in MODEL_TIERS[tier]["models"]:
         if provider_name == exclude_provider:
             continue
-        provider_cfg = cfg.get(provider_name)
-        if provider_cfg and model_id in provider_cfg.models:
+        if target_cfg is None:
+            return model_id
+        if model_id in target_cfg.models:
             return model_id
     return None

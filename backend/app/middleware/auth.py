@@ -19,17 +19,54 @@ def hash_string(input_str: str) -> str:
     return hashlib.sha256(input_str.encode()).hexdigest()
 
 
+# Prefixes that need a valid bearer token.
+#
+# /api-keys is here because minting a credential is strictly more powerful than
+# using one: an unauthenticated POST /api-keys hands an attacker a working key
+# and therefore the owner's provider spend.
+#
+# /chat-history is listed explicitly and matched exactly rather than by the
+# /chat prefix, because "/chat-history".startswith("/chat") is True and an
+# unauthenticated prefix match would otherwise either miss it or capture it by
+# accident. Conversation transcripts are user data and need a key like any
+# other stored data.
+AUTH_PREFIXES = ("/chat", "/embeddings", "/batch", "/api-keys", "/analytics")
+
+# Prefixes that need the *operator* key rather than any valid key. Key
+# management and billing data are administrative: a tenant key must not be able
+# to create, list, disable or delete other keys, nor read aggregate spend.
+ADMIN_PREFIXES = ("/api-keys", "/analytics")
+
+# Paths inside AUTH_PREFIXES that are matched exactly instead of by prefix.
+# Kept as a set of (path, ...) tuples so a future "/chat-anything" route cannot
+# be captured by the "/chat" prefix by accident.
+EXACT_AUTH_PATHS = frozenset({"/chat-history", "/chat-history/sessions"})
+
+
 def requires_auth(path: str) -> bool:
-    return (
-        any(path.startswith(p) for p in ["/chat", "/embeddings", "/batch"])
-        and not path.startswith("/chat-history")
-    )
+    if path in EXACT_AUTH_PATHS:
+        return True
+    if path.startswith("/chat-history/"):
+        return True
+    return any(path.startswith(p) for p in AUTH_PREFIXES)
+
+
+def requires_admin(path: str) -> bool:
+    """True when the route needs the operator key rather than any valid key."""
+    return any(path.startswith(p) for p in ADMIN_PREFIXES)
 
 
 class TokenStatus(str, Enum):
     VALID = "valid"
     INVALID = "invalid"
     STORE_UNAVAILABLE = "store_unavailable"
+
+
+# The api_key_id recorded for a request authenticated by the operator key.
+# Named as a constant because two places now have to agree on the exact
+# string: check_api_key mints it, and requires_admin compares against it.
+# A literal in both places would drift silently and quietly reopen /api-keys.
+ADMIN_KEY_ID = "gateway_admin"
 
 
 @dataclass(frozen=True)
@@ -71,7 +108,7 @@ async def check_api_key(token: str) -> TokenCheck:
         # secret comparison against attacker-supplied input.
         if not hmac.compare_digest(token, settings.gateway_api_key):
             return TokenCheck(TokenStatus.INVALID, detail="Invalid API key")
-        return TokenCheck(TokenStatus.VALID, api_key_id="gateway_admin")
+        return TokenCheck(TokenStatus.VALID, api_key_id=ADMIN_KEY_ID)
 
     key_hash = hash_string(token)
 
@@ -191,21 +228,50 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         check = await check_api_key(token)
         if check.status is TokenStatus.VALID:
+            if requires_admin(path) and check.api_key_id != ADMIN_KEY_ID:
+                # A tenant key reached an administrative route. Answering 403
+                # rather than 404 is deliberate: the caller is already
+                # authenticated, so hiding the route's existence protects
+                # nothing and only makes the incident harder to diagnose.
+                raise HTTPException(
+                    status_code=403,
+                    detail="This endpoint requires the gateway admin key",
+                )
             request.state.api_key_id = check.api_key_id
             return await call_next(request)
 
         if check.status is TokenStatus.STORE_UNAVAILABLE:
-            # Fail open, deliberately and unchanged: this gateway is designed
-            # to keep serving LLM traffic when Postgres is unreachable, and a
-            # 401 storm during an incident would be worse than the risk. The
-            # admin key still has to be correct, because it is checked without
-            # the database at all.
+            # Fail CLOSED.
             #
-            # The websocket handshake does NOT inherit this: see
-            # app/routes/websocket.py for why a long-lived streaming socket
-            # fails closed on an unavailable key store.
-            request.state.api_key_id = "db_unavailable"
-            return await call_next(request)
+            # This used to fail open and it was the worst single decision in
+            # the repository. When the key store is unreachable,
+            # check_api_key cannot tell a valid tenant token from garbage, and
+            # it reported that honestly as STORE_UNAVAILABLE -- the old
+            # handler then treated "cannot verify" as "allow". A typo in
+            # DATABASE_URL, a rotated password or thirty seconds of Neon
+            # trouble therefore turned the gateway into an open proxy that
+            # spends the owner's provider credentials on behalf of anyone who
+            # types a random string into an Authorization header.
+            #
+            # The availability argument does not survive contact with the
+            # billing boundary. A 401 during a database incident is an
+            # operational cost; unbounded metered LLM spend by an
+            # unauthenticated caller is not recoverable.
+            #
+            # The operator is not locked out: the admin key is compared in
+            # constant time without touching the database at all
+            # (check_api_key, above), so break-glass access survives
+            # exactly the failure this branch handles.
+            #
+            # 503 rather than 401 because the caller's credential is not what
+            # is wrong. A 401 tells a well-behaved client its key is bad,
+            # which invites a retry loop with fresh credentials against a
+            # server that is already in trouble.
+            raise HTTPException(
+                status_code=503,
+                detail="Authentication is temporarily unavailable: the API key store cannot be reached",
+                headers={"Retry-After": "5"},
+            )
 
         raise HTTPException(status_code=401, detail=check.detail)
 

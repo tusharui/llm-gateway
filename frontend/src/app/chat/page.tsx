@@ -295,8 +295,16 @@ export default function ChatPage() {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: "Request failed" }));
-        throw new Error(err.detail || `HTTP ${res.status}`);
+        // The gateway returns one envelope, `{"error": {...}}`, for every
+        // failure including validation and 404. Older responses and any
+        // intermediate proxy may still surface `detail`, so read both rather
+        // than rendering "HTTP 500" to the user.
+        const err = await res.json().catch(() => null);
+        const message =
+          err?.error?.message ??
+          (typeof err?.detail === "string" ? err.detail : null) ??
+          `HTTP ${res.status}`;
+        throw new Error(message);
       }
 
       const reader = res.body?.getReader();
