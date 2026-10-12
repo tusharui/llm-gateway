@@ -1,5 +1,23 @@
 # Error analysis: the routing classifier
 
+> **Superseded in part (2026-10-12).** Every number below was measured against
+> the router as it stood at commit `f4bff76`, which scored **0.529**. The
+> router now scores **0.678** (`265/391`, [0.630-0.722]) with powerful recall
+> at **0.728** rather than 0.250, after the fixes recorded in commits
+> `ed68e0f`..`360da6f`. The failure *mechanisms* documented here are still
+> accurate and still the right diagnosis; the specific scores are not. Two
+> conclusions in particular have been overtaken:
+>
+> - "Per-tier recall for `powerful` is 0.250 heuristic versus 0.467 learned.
+>   Both are bad; the learned one is less bad" — the router is now 0.728 and
+>   is the better of the two on that tier.
+> - "I am not recommending the swap" — still correct, and now for a much
+>   stronger reason. See [ROUTING_MODEL_DECISION.md](ROUTING_MODEL_DECISION.md):
+>   on comparable input the two systems are 1.1 points apart at p = 0.80.
+>
+> As the file says at the bottom: if a number here disagrees with
+> `results.json`, `results.json` is right.
+
 Dataset `backend/evals/golden`, 391 cases, fingerprint
 `ac1428bab827856b7fbd08f3e43020761996a1769cc840a5bb0a82ecd9deb8d7`.
 Commit `f4bff76`. Reproduce with:
