@@ -477,10 +477,17 @@ class ProportionDifference:
         if self.difference is None:
             return f"{self.label_a} vs {self.label_b}: not comparable ({self.note})"
         verdict = "significant" if self.significant else "not significant"
+        # compare_proportions returns p_value=None for a degenerate case where
+        # both proportions sit at 0 or 1 and a z-test is undefined, and
+        # to_dict() already renders that as null. describe() has to as well:
+        # a router that classifies every case in a small dataset correctly
+        # produces exactly that comparison, so this was reachable rather than
+        # theoretical, and it crashed the run with exit 4.
+        p_text = "p=undefined" if self.p_value is None else f"p={self.p_value:.4f}"
         return (
             f"{self.label_a} {self.a.value:.1%} vs {self.label_b} {self.b.value:.1%}: "
             f"difference {self.difference:+.1%} "
-            f"[{self.ci_lower:+.1%}, {self.ci_upper:+.1%}], {verdict} (p={self.p_value:.4f})"
+            f"[{self.ci_lower:+.1%}, {self.ci_upper:+.1%}], {verdict} ({p_text})"
         )
 
 
