@@ -98,6 +98,17 @@ CONSTRUCTION_PATTERNS = [
 ]
 CONSTRUCTION_WEIGHT = 4
 
+# A prompt that states how much output it wants is doing work whose size is
+# written down, and every length signal in the score measures the *input*.
+# "Write a 1,200-word essay" is 71 characters and scores 1. Failure mode 4
+# in evals/ERROR_ANALYSIS.md, where 4 of 4 such cases were misclassified.
+# Weighted like CONSTRUCTION_PATTERNS because it is the same kind of claim:
+# one unambiguous statement of intent, not a hint.
+OUTPUT_LENGTH_PATTERNS = [
+    r"\b\d[\d,]{0,5}\s*[- ]?\s*(?:word|line|paragraph|page)s?\b",
+]
+OUTPUT_LENGTH_WEIGHT = 4
+
 # Score at or above which a prompt goes to the most capable tier.
 POWERFUL_THRESHOLD = 5
 BALANCED_THRESHOLD = 2
@@ -165,6 +176,10 @@ def complexity_score(messages: list) -> int:
     for pattern in CONSTRUCTION_PATTERNS:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
             score += CONSTRUCTION_WEIGHT
+
+    for pattern in OUTPUT_LENGTH_PATTERNS:
+        if re.search(pattern, last_user_msg, re.IGNORECASE):
+            score += OUTPUT_LENGTH_WEIGHT
 
     for pattern in SIMPLE_PATTERNS:
         if re.match(pattern, last_user_msg.strip(), re.IGNORECASE):
