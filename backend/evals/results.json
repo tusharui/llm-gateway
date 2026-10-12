@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-12T05:42:47.129817+00:00",
+  "generated_at": "2026-10-12T05:48:25.459113+00:00",
   "environment": {
     "python_version": "3.12.7",
     "python_implementation": "CPython",
     "platform": "windows",
     "executable_name": "python.exe",
-    "git_commit": "bcd540d5fe85a4a153ccb04a921f56cd872ee761",
+    "git_commit": "2337fcbb6dc4e3e59d128a6182813ee2d945ae21",
     "sklearn_version": "1.9.0"
   },
   "dataset": {
@@ -125,9 +125,7 @@
     "warning_count": 2
   },
   "configuration": {
-    "argv": [
-      "--quiet"
-    ],
+    "argv": [],
     "confidence": 0.95,
     "dataset": "evals/golden",
     "difficulties": [
@@ -153,44 +151,44 @@
       "kind": "rule_based",
       "overall": {
         "n": 391,
-        "correct": 242,
-        "incorrect": 149,
-        "value": 0.618926,
+        "correct": 265,
+        "incorrect": 126,
+        "value": 0.677749,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.569852,
-          "upper": 0.665686,
+          "lower": 0.629891,
+          "upper": 0.722149,
           "defined": true
         }
       },
       "by_difficulty": {
         "ambiguous": {
           "n": 114,
-          "correct": 57,
-          "incorrect": 57,
-          "value": 0.5,
+          "correct": 59,
+          "incorrect": 55,
+          "value": 0.517544,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.409725,
-            "upper": 0.590275,
+            "lower": 0.42675,
+            "upper": 0.607194,
             "defined": true
           }
         },
         "clear": {
           "n": 277,
-          "correct": 185,
-          "incorrect": 92,
-          "value": 0.66787,
+          "correct": 206,
+          "incorrect": 71,
+          "value": 0.743682,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.610443,
-            "upper": 0.720705,
+            "lower": 0.689178,
+            "upper": 0.79152,
             "defined": true
           }
         }
@@ -198,15 +196,15 @@
       "by_expected_label": {
         "balanced": {
           "n": 150,
-          "correct": 88,
-          "incorrect": 62,
-          "value": 0.586667,
+          "correct": 83,
+          "incorrect": 67,
+          "value": 0.553333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.506659,
-            "upper": 0.662347,
+            "lower": 0.473431,
+            "upper": 0.630572,
             "defined": true
           }
         },
@@ -226,15 +224,15 @@
         },
         "powerful": {
           "n": 92,
-          "correct": 39,
-          "incorrect": 53,
-          "value": 0.423913,
+          "correct": 67,
+          "incorrect": 25,
+          "value": 0.728261,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.32798,
-            "upper": 0.525946,
+            "lower": 0.629581,
+            "upper": 0.808642,
             "defined": true
           }
         }
@@ -243,15 +241,15 @@
         "ambiguous": {
           "balanced": {
             "n": 61,
-            "correct": 27,
-            "incorrect": 34,
-            "value": 0.442623,
+            "correct": 26,
+            "incorrect": 35,
+            "value": 0.42623,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.325078,
-              "upper": 0.566966,
+              "lower": 0.310152,
+              "upper": 0.551048,
               "defined": true
             }
           },
@@ -271,15 +269,15 @@
           },
           "powerful": {
             "n": 24,
-            "correct": 10,
-            "incorrect": 14,
-            "value": 0.416667,
+            "correct": 13,
+            "incorrect": 11,
+            "value": 0.541667,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.244676,
-              "upper": 0.611653,
+              "lower": 0.350749,
+              "upper": 0.721087,
               "defined": true
             }
           }
@@ -287,15 +285,15 @@
         "clear": {
           "balanced": {
             "n": 89,
-            "correct": 61,
-            "incorrect": 28,
-            "value": 0.685393,
+            "correct": 57,
+            "incorrect": 32,
+            "value": 0.640449,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.582955,
-              "upper": 0.77249,
+              "lower": 0.536854,
+              "upper": 0.732422,
               "defined": true
             }
           },
@@ -315,15 +313,15 @@
           },
           "powerful": {
             "n": 68,
-            "correct": 29,
-            "incorrect": 39,
-            "value": 0.426471,
+            "correct": 54,
+            "incorrect": 14,
+            "value": 0.794118,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.315972,
-              "upper": 0.544832,
+              "lower": 0.683577,
+              "upper": 0.873204,
               "defined": true
             }
           }
@@ -360,29 +358,29 @@
         },
         "analysis": {
           "n": 9,
-          "correct": 4,
-          "incorrect": 5,
-          "value": 0.444444,
+          "correct": 7,
+          "incorrect": 2,
+          "value": 0.777778,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.188779,
-            "upper": 0.733349,
+            "lower": 0.452589,
+            "upper": 0.936775,
             "defined": true
           }
         },
         "architecture": {
           "n": 10,
-          "correct": 3,
-          "incorrect": 7,
-          "value": 0.3,
+          "correct": 9,
+          "incorrect": 1,
+          "value": 0.9,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.107791,
-            "upper": 0.603222,
+            "lower": 0.59585,
+            "upper": 0.982124,
             "defined": true
           }
         },
@@ -416,29 +414,29 @@
         },
         "casing": {
           "n": 6,
-          "correct": 3,
-          "incorrect": 3,
-          "value": 0.5,
+          "correct": 4,
+          "incorrect": 2,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.187616,
-            "upper": 0.812384,
+            "lower": 0.299993,
+            "upper": 0.903229,
             "defined": true
           }
         },
         "code": {
           "n": 22,
-          "correct": 13,
-          "incorrect": 9,
-          "value": 0.590909,
+          "correct": 20,
+          "incorrect": 2,
+          "value": 0.909091,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.387348,
-            "upper": 0.767442,
+            "lower": 0.721851,
+            "upper": 0.974705,
             "defined": true
           }
         },
@@ -458,29 +456,29 @@
         },
         "conflicting_signals": {
           "n": 10,
-          "correct": 7,
-          "incorrect": 3,
-          "value": 0.7,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.396778,
-            "upper": 0.892209,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
         "contradiction": {
           "n": 6,
-          "correct": 3,
-          "incorrect": 3,
-          "value": 0.5,
+          "correct": 4,
+          "incorrect": 2,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.187616,
-            "upper": 0.812384,
+            "lower": 0.299993,
+            "upper": 0.903229,
             "defined": true
           }
         },
@@ -654,15 +652,15 @@
         },
         "long_conversation": {
           "n": 12,
-          "correct": 5,
-          "incorrect": 7,
-          "value": 0.416667,
+          "correct": 7,
+          "incorrect": 5,
+          "value": 0.583333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.19326,
-            "upper": 0.680489,
+            "lower": 0.319511,
+            "upper": 0.80674,
             "defined": true
           }
         },
@@ -682,15 +680,15 @@
         },
         "mathematics": {
           "n": 7,
-          "correct": 1,
-          "incorrect": 6,
-          "value": 0.142857,
+          "correct": 5,
+          "incorrect": 2,
+          "value": 0.714286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.02568,
-            "upper": 0.513128,
+            "lower": 0.358934,
+            "upper": 0.917781,
             "defined": true
           }
         },
@@ -710,15 +708,15 @@
         },
         "multi_intent": {
           "n": 10,
-          "correct": 4,
-          "incorrect": 6,
-          "value": 0.4,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.16818,
-            "upper": 0.687326,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
@@ -850,15 +848,15 @@
         },
         "planning": {
           "n": 6,
-          "correct": 2,
-          "incorrect": 4,
-          "value": 0.333333,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.096771,
-            "upper": 0.700007,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
@@ -892,15 +890,15 @@
         },
         "quoted_text": {
           "n": 6,
-          "correct": 2,
-          "incorrect": 4,
-          "value": 0.333333,
+          "correct": 1,
+          "incorrect": 5,
+          "value": 0.166667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.096771,
-            "upper": 0.700007,
+            "lower": 0.030053,
+            "upper": 0.563503,
             "defined": true
           }
         },
@@ -1060,15 +1058,15 @@
         },
         "troubleshooting": {
           "n": 7,
-          "correct": 4,
-          "incorrect": 3,
-          "value": 0.571429,
+          "correct": 2,
+          "incorrect": 5,
+          "value": 0.285714,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.250458,
-            "upper": 0.84178,
+            "lower": 0.082219,
+            "upper": 0.641066,
             "defined": true
           }
         },
@@ -1160,43 +1158,43 @@
       "by_source": {
         "adversarial": {
           "n": 97,
-          "correct": 49,
-          "incorrect": 48,
-          "value": 0.505155,
+          "correct": 50,
+          "incorrect": 47,
+          "value": 0.515464,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.407375,
-            "upper": 0.602542,
+            "lower": 0.417331,
+            "upper": 0.612418,
             "defined": true
           }
         },
         "manually_created": {
           "n": 105,
-          "correct": 49,
-          "incorrect": 56,
-          "value": 0.466667,
+          "correct": 52,
+          "incorrect": 53,
+          "value": 0.495238,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.374111,
-            "upper": 0.561575,
+            "lower": 0.401477,
+            "upper": 0.589336,
             "defined": true
           }
         },
         "synthetic": {
           "n": 189,
-          "correct": 144,
-          "incorrect": 45,
-          "value": 0.761905,
+          "correct": 163,
+          "incorrect": 26,
+          "value": 0.862434,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.696348,
-            "upper": 0.817027,
+            "lower": 0.806066,
+            "upper": 0.904362,
             "defined": true
           }
         }
@@ -1204,29 +1202,29 @@
       "by_adversarial_tag": {
         "casing": {
           "n": 7,
-          "correct": 3,
-          "incorrect": 4,
-          "value": 0.428571,
+          "correct": 4,
+          "incorrect": 3,
+          "value": 0.571429,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.15822,
-            "upper": 0.749542,
+            "lower": 0.250458,
+            "upper": 0.84178,
             "defined": true
           }
         },
         "contradiction": {
           "n": 6,
-          "correct": 3,
-          "incorrect": 3,
-          "value": 0.5,
+          "correct": 4,
+          "incorrect": 2,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.187616,
-            "upper": 0.812384,
+            "lower": 0.299993,
+            "upper": 0.903229,
             "defined": true
           }
         },
@@ -1330,15 +1328,15 @@
         },
         "quoted_text": {
           "n": 7,
-          "correct": 3,
-          "incorrect": 4,
-          "value": 0.428571,
+          "correct": 2,
+          "incorrect": 5,
+          "value": 0.285714,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.15822,
-            "upper": 0.749542,
+            "lower": 0.082219,
+            "upper": 0.641066,
             "defined": true
           }
         },
@@ -1415,43 +1413,43 @@
       },
       "adversarial_any": {
         "n": 97,
-        "correct": 49,
-        "incorrect": 48,
-        "value": 0.505155,
+        "correct": 50,
+        "incorrect": 47,
+        "value": 0.515464,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.407375,
-          "upper": 0.602542,
+          "lower": 0.417331,
+          "upper": 0.612418,
           "defined": true
         }
       },
       "multi_turn_any": {
         "n": 26,
-        "correct": 9,
-        "incorrect": 17,
-        "value": 0.346154,
+        "correct": 11,
+        "incorrect": 15,
+        "value": 0.423077,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.194122,
-          "upper": 0.537794,
+          "lower": 0.255444,
+          "upper": 0.610514,
           "defined": true
         }
       },
       "long_conversation": {
         "n": 12,
-        "correct": 5,
-        "incorrect": 7,
-        "value": 0.416667,
+        "correct": 7,
+        "incorrect": 5,
+        "value": 0.583333,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.19326,
-          "upper": 0.680489,
+          "lower": 0.319511,
+          "upper": 0.80674,
           "defined": true
         }
       },
@@ -1467,23 +1465,23 @@
           },
           "balanced": {
             "support": 150,
-            "predicted": 167,
-            "true_positives": 88,
-            "precision": 0.526946,
-            "recall": 0.586667,
-            "f1": 0.555205
+            "predicted": 128,
+            "true_positives": 83,
+            "precision": 0.648438,
+            "recall": 0.553333,
+            "f1": 0.597122
           },
           "powerful": {
             "support": 92,
-            "predicted": 50,
-            "true_positives": 39,
-            "precision": 0.78,
-            "recall": 0.423913,
-            "f1": 0.549296
+            "predicted": 89,
+            "true_positives": 67,
+            "precision": 0.752809,
+            "recall": 0.728261,
+            "f1": 0.740331
           }
         },
-        "macro_f1": 0.605525,
-        "micro_f1": 0.618926,
+        "macro_f1": 0.683176,
+        "micro_f1": 0.677749,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -1511,18 +1509,18 @@
         "counts": {
           "fast": {
             "fast": 115,
-            "balanced": 32,
-            "powerful": 2
+            "balanced": 26,
+            "powerful": 8
           },
           "balanced": {
             "fast": 53,
-            "balanced": 88,
-            "powerful": 9
+            "balanced": 83,
+            "powerful": 14
           },
           "powerful": {
             "fast": 6,
-            "balanced": 47,
-            "powerful": 39
+            "balanced": 19,
+            "powerful": 67
           }
         }
       }
@@ -6566,43 +6564,43 @@
     "heuristic": {
       "ambiguous": {
         "n": 114,
-        "correct": 57,
-        "incorrect": 57,
-        "value": 0.5,
+        "correct": 59,
+        "incorrect": 55,
+        "value": 0.517544,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.409725,
-          "upper": 0.590275,
+          "lower": 0.42675,
+          "upper": 0.607194,
           "defined": true
         }
       },
       "clear": {
         "n": 277,
-        "correct": 185,
-        "incorrect": 92,
-        "value": 0.66787,
+        "correct": 206,
+        "incorrect": 71,
+        "value": 0.743682,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.610443,
-          "upper": 0.720705,
+          "lower": 0.689178,
+          "upper": 0.79152,
           "defined": true
         }
       },
       "all": {
         "n": 391,
-        "correct": 242,
-        "incorrect": 149,
-        "value": 0.618926,
+        "correct": 265,
+        "incorrect": 126,
+        "value": 0.677749,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.569852,
-          "upper": 0.665686,
+          "lower": 0.629891,
+          "upper": 0.722149,
           "defined": true
         }
       }
@@ -6744,15 +6742,15 @@
     "heuristic": {
       "balanced": {
         "n": 150,
-        "correct": 88,
-        "incorrect": 62,
-        "value": 0.586667,
+        "correct": 83,
+        "incorrect": 67,
+        "value": 0.553333,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.506659,
-          "upper": 0.662347,
+          "lower": 0.473431,
+          "upper": 0.630572,
           "defined": true
         }
       },
@@ -6772,15 +6770,15 @@
       },
       "powerful": {
         "n": 92,
-        "correct": 39,
-        "incorrect": 53,
-        "value": 0.423913,
+        "correct": 67,
+        "incorrect": 25,
+        "value": 0.728261,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.32798,
-          "upper": 0.525946,
+          "lower": 0.629581,
+          "upper": 0.808642,
           "defined": true
         }
       }
@@ -6922,44 +6920,44 @@
     "heuristic": {
       "any": {
         "n": 97,
-        "correct": 49,
-        "incorrect": 48,
-        "value": 0.505155,
+        "correct": 50,
+        "incorrect": 47,
+        "value": 0.515464,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.407375,
-          "upper": 0.602542,
+          "lower": 0.417331,
+          "upper": 0.612418,
           "defined": true
         }
       },
       "by_tag": {
         "casing": {
           "n": 7,
-          "correct": 3,
-          "incorrect": 4,
-          "value": 0.428571,
+          "correct": 4,
+          "incorrect": 3,
+          "value": 0.571429,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.15822,
-            "upper": 0.749542,
+            "lower": 0.250458,
+            "upper": 0.84178,
             "defined": true
           }
         },
         "contradiction": {
           "n": 6,
-          "correct": 3,
-          "incorrect": 3,
-          "value": 0.5,
+          "correct": 4,
+          "incorrect": 2,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.187616,
-            "upper": 0.812384,
+            "lower": 0.299993,
+            "upper": 0.903229,
             "defined": true
           }
         },
@@ -7063,15 +7061,15 @@
         },
         "quoted_text": {
           "n": 7,
-          "correct": 3,
-          "incorrect": 4,
-          "value": 0.428571,
+          "correct": 2,
+          "incorrect": 5,
+          "value": 0.285714,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.15822,
-            "upper": 0.749542,
+            "lower": 0.082219,
+            "upper": 0.641066,
             "defined": true
           }
         },
@@ -7822,29 +7820,29 @@
     "heuristic": {
       "multi_turn": {
         "n": 26,
-        "correct": 9,
-        "incorrect": 17,
-        "value": 0.346154,
+        "correct": 11,
+        "incorrect": 15,
+        "value": 0.423077,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.194122,
-          "upper": 0.537794,
+          "lower": 0.255444,
+          "upper": 0.610514,
           "defined": true
         }
       },
       "over_ten_messages": {
         "n": 12,
-        "correct": 5,
-        "incorrect": 7,
-        "value": 0.416667,
+        "correct": 7,
+        "incorrect": 5,
+        "value": 0.583333,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.19326,
-          "upper": 0.680489,
+          "lower": 0.319511,
+          "upper": 0.80674,
           "defined": true
         }
       },
@@ -7970,18 +7968,18 @@
       "counts": {
         "fast": {
           "fast": 115,
-          "balanced": 32,
-          "powerful": 2
+          "balanced": 26,
+          "powerful": 8
         },
         "balanced": {
           "fast": 53,
-          "balanced": 88,
-          "powerful": 9
+          "balanced": 83,
+          "powerful": 14
         },
         "powerful": {
           "fast": 6,
-          "balanced": 47,
-          "powerful": 39
+          "balanced": 19,
+          "powerful": 67
         }
       }
     },
@@ -8111,47 +8109,47 @@
       "confidence_level": 0.95,
       "overall": {
         "n": 391,
-        "correct": 242,
-        "incorrect": 149,
-        "value": 0.618926,
+        "correct": 265,
+        "incorrect": 126,
+        "value": 0.677749,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.569852,
-          "upper": 0.665686,
+          "lower": 0.629891,
+          "upper": 0.722149,
           "defined": true
         }
       },
       "clear": {
         "n": 277,
-        "correct": 185,
-        "incorrect": 92,
-        "value": 0.66787,
+        "correct": 206,
+        "incorrect": 71,
+        "value": 0.743682,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.610443,
-          "upper": 0.720705,
+          "lower": 0.689178,
+          "upper": 0.79152,
           "defined": true
         }
       },
       "ambiguous": {
         "n": 114,
-        "correct": 57,
-        "incorrect": 57,
-        "value": 0.5,
+        "correct": 59,
+        "incorrect": 55,
+        "value": 0.517544,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.409725,
-          "upper": 0.590275,
+          "lower": 0.42675,
+          "upper": 0.607194,
           "defined": true
         }
       },
-      "macro_f1": 0.605525
+      "macro_f1": 0.683176
     },
     "majority_class": {
       "confidence_level": 0.95,
@@ -8297,49 +8295,49 @@
       "paired": {
         "a": "heuristic",
         "b": "majority_class",
-        "both_correct": 93,
-        "a_only_correct": 140,
-        "b_only_correct": 48,
-        "both_wrong": 84,
-        "discordant": 188,
+        "both_correct": 88,
+        "a_only_correct": 166,
+        "b_only_correct": 53,
+        "both_wrong": 58,
+        "discordant": 219,
         "p_value": 0.0,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 140, majority_class wins 48 on 188 discordant cases: significant (p=<1e-8)",
+      "paired_description": "heuristic wins 166, majority_class wins 53 on 219 discordant cases: significant (p=<1e-8)",
       "paired_cases_compared": 365,
       "compared_over_full_dataset": false,
       "input_note": "restricted to cases where both systems received identical input; 26 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "majority_class",
-        "both_correct": 97,
-        "a_only_correct": 145,
-        "b_only_correct": 52,
-        "both_wrong": 97,
-        "discordant": 197,
+        "both_correct": 92,
+        "a_only_correct": 173,
+        "b_only_correct": 57,
+        "both_wrong": 69,
+        "discordant": 230,
         "p_value": 0.0,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 145, majority_class wins 52 on 197 discordant cases: significant (p=<1e-8) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 173, majority_class wins 57 on 230 discordant cases: significant (p=<1e-8) [input differed on some cases]",
       "clear_vs_clear": {
         "a": {
           "name": "heuristic.clear",
           "n": 277,
-          "correct": 185,
-          "incorrect": 92,
-          "value": 0.66787,
+          "correct": 206,
+          "incorrect": 71,
+          "value": 0.743682,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.610443,
-            "upper": 0.720705,
+            "lower": 0.689178,
+            "upper": 0.79152,
             "defined": true
           }
         },
@@ -8358,9 +8356,9 @@
             "defined": true
           }
         },
-        "difference": 0.32852,
-        "difference_ci_lower": 0.247171,
-        "difference_ci_upper": 0.403514,
+        "difference": 0.404332,
+        "difference_ci_lower": 0.325019,
+        "difference_ci_upper": 0.475894,
         "p_value": 0.0,
         "significant_at_95": true,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
@@ -8370,15 +8368,15 @@
         "a": {
           "name": "heuristic.ambiguous",
           "n": 114,
-          "correct": 57,
-          "incorrect": 57,
-          "value": 0.5,
+          "correct": 59,
+          "incorrect": 55,
+          "value": 0.517544,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.409725,
-            "upper": 0.590275,
+            "lower": 0.42675,
+            "upper": 0.607194,
             "defined": true
           }
         },
@@ -8397,10 +8395,10 @@
             "defined": true
           }
         },
-        "difference": 0.017544,
-        "difference_ci_lower": -0.110492,
-        "difference_ci_upper": 0.144771,
-        "p_value": 0.7910501,
+        "difference": 0.035088,
+        "difference_ci_lower": -0.093314,
+        "difference_ci_upper": 0.161871,
+        "p_value": 0.59624163,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8410,49 +8408,49 @@
       "paired": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression",
-        "both_correct": 177,
-        "a_only_correct": 56,
-        "b_only_correct": 81,
-        "both_wrong": 51,
-        "discordant": 137,
-        "p_value": 0.03992818,
-        "significant_at_95": true,
+        "both_correct": 187,
+        "a_only_correct": 67,
+        "b_only_correct": 71,
+        "both_wrong": 40,
+        "discordant": 138,
+        "p_value": 0.79854453,
+        "significant_at_95": false,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 56, tfidf_logistic_regression wins 81 on 137 discordant cases: significant (p=0.0399)",
+      "paired_description": "heuristic wins 67, tfidf_logistic_regression wins 71 on 138 discordant cases: not significant (p=0.7985)",
       "paired_cases_compared": 365,
       "compared_over_full_dataset": false,
       "input_note": "restricted to cases where both systems received identical input; 26 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression",
-        "both_correct": 184,
-        "a_only_correct": 58,
-        "b_only_correct": 92,
-        "both_wrong": 57,
-        "discordant": 150,
-        "p_value": 0.00685164,
-        "significant_at_95": true,
+        "both_correct": 196,
+        "a_only_correct": 69,
+        "b_only_correct": 80,
+        "both_wrong": 46,
+        "discordant": 149,
+        "p_value": 0.41274256,
+        "significant_at_95": false,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 58, tfidf_logistic_regression wins 92 on 150 discordant cases: significant (p=0.0069) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 69, tfidf_logistic_regression wins 80 on 149 discordant cases: not significant (p=0.4127) [input differed on some cases]",
       "clear_vs_clear": {
         "a": {
           "name": "heuristic.clear",
           "n": 277,
-          "correct": 185,
-          "incorrect": 92,
-          "value": 0.66787,
+          "correct": 206,
+          "incorrect": 71,
+          "value": 0.743682,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.610443,
-            "upper": 0.720705,
+            "lower": 0.689178,
+            "upper": 0.79152,
             "defined": true
           }
         },
@@ -8471,11 +8469,11 @@
             "defined": true
           }
         },
-        "difference": -0.097473,
-        "difference_ci_lower": -0.171094,
-        "difference_ci_upper": -0.022405,
-        "p_value": 0.01091205,
-        "significant_at_95": true,
+        "difference": -0.021661,
+        "difference_ci_lower": -0.093025,
+        "difference_ci_upper": 0.049978,
+        "p_value": 0.5536435,
+        "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
       },
@@ -8483,15 +8481,15 @@
         "a": {
           "name": "heuristic.ambiguous",
           "n": 114,
-          "correct": 57,
-          "incorrect": 57,
-          "value": 0.5,
+          "correct": 59,
+          "incorrect": 55,
+          "value": 0.517544,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.409725,
-            "upper": 0.590275,
+            "lower": 0.42675,
+            "upper": 0.607194,
             "defined": true
           }
         },
@@ -8510,10 +8508,10 @@
             "defined": true
           }
         },
-        "difference": -0.061404,
-        "difference_ci_lower": -0.187203,
-        "difference_ci_upper": 0.067217,
-        "p_value": 0.35292769,
+        "difference": -0.04386,
+        "difference_ci_lower": -0.170032,
+        "difference_ci_upper": 0.084322,
+        "p_value": 0.5064729,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8523,36 +8521,36 @@
       "paired": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression_holdout",
-        "both_correct": 53,
-        "a_only_correct": 9,
-        "b_only_correct": 19,
-        "both_wrong": 10,
+        "both_correct": 56,
+        "a_only_correct": 12,
+        "b_only_correct": 16,
+        "both_wrong": 7,
         "discordant": 28,
-        "p_value": 0.08715855,
+        "p_value": 0.57158819,
         "significant_at_95": false,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 9, tfidf_logistic_regression_holdout wins 19 on 28 discordant cases: not significant (p=0.0872)",
+      "paired_description": "heuristic wins 12, tfidf_logistic_regression_holdout wins 16 on 28 discordant cases: not significant (p=0.5716)",
       "paired_cases_compared": 91,
       "compared_over_full_dataset": false,
       "input_note": "restricted to cases where both systems received identical input; 7 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression_holdout",
-        "both_correct": 55,
-        "a_only_correct": 10,
-        "b_only_correct": 21,
-        "both_wrong": 12,
-        "discordant": 31,
-        "p_value": 0.07075555,
+        "both_correct": 58,
+        "a_only_correct": 14,
+        "b_only_correct": 18,
+        "both_wrong": 8,
+        "discordant": 32,
+        "p_value": 0.5966149,
         "significant_at_95": false,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 10, tfidf_logistic_regression_holdout wins 21 on 31 discordant cases: not significant (p=0.0708) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 14, tfidf_logistic_regression_holdout wins 18 on 32 discordant cases: not significant (p=0.5966) [input differed on some cases]",
       "proportion_comparisons_omitted": "tfidf_logistic_regression_holdout evaluates 98 of 391 cases, so its subsets are nested inside the heuristic's rather than independent. An unpaired proportion test on nested samples would overstate significance; the paired test above is the valid comparison."
     },
     "heuristic.clear_vs_ambiguous": {
@@ -8560,42 +8558,42 @@
         "a": {
           "name": "heuristic.clear",
           "n": 277,
-          "correct": 185,
-          "incorrect": 92,
-          "value": 0.66787,
+          "correct": 206,
+          "incorrect": 71,
+          "value": 0.743682,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.610443,
-            "upper": 0.720705,
+            "lower": 0.689178,
+            "upper": 0.79152,
             "defined": true
           }
         },
         "b": {
           "name": "heuristic.ambiguous",
           "n": 114,
-          "correct": 57,
-          "incorrect": 57,
-          "value": 0.5,
+          "correct": 59,
+          "incorrect": 55,
+          "value": 0.517544,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.409725,
-            "upper": 0.590275,
+            "lower": 0.42675,
+            "upper": 0.607194,
             "defined": true
           }
         },
-        "difference": 0.16787,
-        "difference_ci_lower": 0.060877,
-        "difference_ci_upper": 0.27247,
-        "p_value": 0.001894,
+        "difference": 0.226138,
+        "difference_ci_lower": 0.121221,
+        "difference_ci_upper": 0.328764,
+        "p_value": 1.37e-05,
         "significant_at_95": true,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
       },
-      "description": "heuristic.clear 66.8% vs heuristic.ambiguous 50.0%: difference +16.8% [+6.1%, +27.2%], significant (p=0.0019)"
+      "description": "heuristic.clear 74.4% vs heuristic.ambiguous 51.8%: difference +22.6% [+12.1%, +32.9%], significant (p=0.0000)"
     }
   },
   "gates": {

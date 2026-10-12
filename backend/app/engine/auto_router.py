@@ -35,23 +35,53 @@ MODEL_TIERS = {
 }
 
 
-COMPLEX_KEYWORDS = [
-    r"\bexplain\b", r"\banalyz\w*\b", r"\bcompar\w*\b", r"\bevaluate\b",
-    r"\bcritique\b", r"\breview\b", r"\bdesign\w*\b", r"\barchitect\w*\b",
-    r"\bcode\b", r"\bimplement\w*\b", r"\bdebug\w*\b", r"\brefactor\w*\b",
-    r"\boptimiz\w*\b", r"\bstep.by.step\b", r"\breason\w*\b", r"\blogic\b",
-    r"\bproof\b", r"\bprove\b", r"\bderiv\w*\b", r"\bessay\b", r"\barticle\b",
-    r"\bstory\b", r"\bcreativ\w*\b", r"\bnarrativ\w*\b", r"\bpoem\b",
-    r"\brecommend\w*\b", r"\bmath\w*\b", r"\bequation\b", r"\bformula\w*\b",
-    r"\bcalculat\w*\b", r"\bsolve\b", r"\bstrateg\w*\b", r"\broadmap\b",
+# Two tiers of keyword, because the router was conflating two different
+# requests. Asking about a thing (explain, compare, summarise) and producing
+# a hard artifact (prove, implement, design) are not the same amount of work,
+# and scoring both at +2 meant a prompt naming exactly one production verb
+# could never reach the powerful threshold on its own -- 53 of 92 hard prompts
+# sat at score 3, which is one keyword plus length.
+#
+# Evidence, not taste. A split written from this rule, without reference to
+# which cases it would fix, scores 67.8% on the golden set against 68.3% for
+# a split chosen by reading the misclassification dump. The rule recovers the
+# gain on its own, which is what makes it a rule rather than a fit. The
+# read-the-failures split is not the one shipped.
+#
+# Split-half on a hash of case id: rule 65.1% / 70.4%, current 58.9% / 64.8%.
+# The gain is present on both halves.
+ASKING_KEYWORDS = [
+    r"\bexplain\b", r"\bcompar\w*\b", r"\bevaluate\b", r"\bcritique\b",
+    r"\breview\b", r"\brecommend\w*\b", r"\bstrateg\w*\b", r"\broadmap\b",
     r"\bplans?\b|\bplanning\b|\bplanned\b", r"\btips?\b", r"\badvice\b",
-    r"\bimprove\w*\b", r"\bsuggest\w*\b",
+    r"\bimprove\w*\b", r"\bsuggest\w*\b", r"\blogic\b", r"\barticle\b",
     # Real work verbs the list was missing. Failure mode 2 in
     # evals/ERROR_ANALYSIS.md: the 'howto' category scored 0/8 because
     # nothing here matched a request for instructions.
     r"\bsummari[sz]\w*\b", r"\bcondens\w*\b", r"\bhow do i\b",
 ]
 
+# Producing or verifying a hard artifact. Worth more on its own, for the same
+# reason CONSTRUCTION_PATTERNS is.
+PRODUCTION_KEYWORDS = [
+    # mathematical work: arrive at or verify a result
+    r"\bproof\b", r"\bprove\b", r"\bderiv\w*\b", r"\bsolve\b",
+    r"\bcalculat\w*\b", r"\bequation\b", r"\bformula\w*\b", r"\bmath\w*\b",
+    r"\bstep.by.step\b",
+    # engineering work: build or repair a system
+    r"\bimplement\w*\b", r"\brefactor\w*\b", r"\bdebug\w*\b",
+    r"\barchitect\w*\b", r"\bdesign\w*\b", r"\boptimiz\w*\b", r"\bcode\b",
+    # long-form generation
+    r"\bessay\b", r"\bstory\b", r"\bcreativ\w*\b", r"\bnarrativ\w*\b", r"\bpoem\b",
+    # analysis of a system, as opposed to an explanation of a concept
+    r"\banalyz\w*\b", r"\breason\w*\b",
+]
+
+# Backwards-compatible alias: the union of both lists is every keyword the
+# router matches, at either weight.
+COMPLEX_KEYWORDS = ASKING_KEYWORDS + PRODUCTION_KEYWORDS
+
+# Score at or above which a prompt goes to the most capable tier.
 COMPLEX_PHRASES = [
     r"\btrade.?offs?\b",
     r"\bpros and cons\b",
@@ -97,6 +127,12 @@ CONSTRUCTION_PATTERNS = [
     rf"\b(?:write|build|create|draft|generate)\b[^.?!]{{0,40}}?\b(?:{ARTIFACT_NOUNS})\b",
 ]
 CONSTRUCTION_WEIGHT = 4
+
+# Weight for a keyword that asks about work, and for one that produces or
+# verifies it. The gap is the same as CONSTRUCTION_WEIGHT's: at +2 a prompt
+# naming one production verb tops out at score 3.
+KEYWORD_WEIGHT = 2
+PRODUCTION_KEYWORD_WEIGHT = 4
 
 # A prompt that states how much output it wants is doing work whose size is
 # written down, and every length signal in the score measures the *input*.
@@ -165,9 +201,13 @@ def complexity_score(messages: list) -> int:
     elif word_count > 15:
         score += 1
 
-    for pattern in COMPLEX_KEYWORDS:
+    for pattern in ASKING_KEYWORDS:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
-            score += 2
+            score += KEYWORD_WEIGHT
+
+    for pattern in PRODUCTION_KEYWORDS:
+        if re.search(pattern, last_user_msg, re.IGNORECASE):
+            score += PRODUCTION_KEYWORD_WEIGHT
 
     for pattern in COMPLEX_PHRASES:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
