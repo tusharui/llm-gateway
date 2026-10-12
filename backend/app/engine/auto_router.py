@@ -35,20 +35,77 @@ MODEL_TIERS = {
 }
 
 
-def classify_complexity(messages: list) -> str:
-    if not messages:
-        return "fast"
+COMPLEX_KEYWORDS = [
+    r"\bexplain\b", r"\banalyz\w*\b", r"\bcompar\w*\b", r"\bevaluate\b",
+    r"\bcritique\b", r"\breview\b", r"\bdesign\w*\b", r"\barchitect\w*\b",
+    r"\bcode\b", r"\bimplement\w*\b", r"\bdebug\w*\b", r"\brefactor\w*\b",
+    r"\boptimiz\w*\b", r"\bstep.by.step\b", r"\breason\w*\b", r"\blogic\b",
+    r"\bproof\b", r"\bprove\b", r"\bderiv\w*\b", r"\bessay\b", r"\barticle\b",
+    r"\bstory\b", r"\bcreativ\w*\b", r"\bnarrativ\w*\b", r"\bpoem\b",
+    r"\brecommend\w*\b", r"\bmath\w*\b", r"\bequation\b", r"\bformula\w*\b",
+    r"\bcalculat\w*\b", r"\bsolve\b", r"\bstrateg\w*\b", r"\broadmap\b",
+    r"\bplans?\b|\bplanning\b|\bplanned\b", r"\btips?\b", r"\badvice\b",
+    r"\bimprove\w*\b", r"\bsuggest\w*\b",
+    # Real work verbs the list was missing. Failure mode 2 in
+    # evals/ERROR_ANALYSIS.md: the 'howto' category scored 0/8 because
+    # nothing here matched a request for instructions.
+    r"\bsummari[sz]\w*\b", r"\bcondens\w*\b", r"\bhow do i\b",
+]
 
-    last_user_msg = ""
+COMPLEX_PHRASES = [
+    r"\btrade.?offs?\b",
+    r"\bpros and cons\b",
+    r"\balternatives\b",
+    r"\bsystem design\b",
+    r"\bhow does .+ work\b",
+    r"\bwhy does\b",
+    r"\bwhat are the implications\b",
+    r"\bwrite a program\b",
+]
+
+SIMPLE_PATTERNS = [
+    r"^(hi|hello|hey|thanks|thank you|ok|yes|no|sure|cool|great)\s*[!.?]*$",
+    r"^(what is|who is|when did|where is|define)\s+\w+\s*\??$",
+    r"^\w+\s*\?$",
+    r"^(1|2|3|4|5|6|7|8|9|10)\s*$",
+]
+
+# Score at or above which a prompt goes to the most capable tier.
+POWERFUL_THRESHOLD = 5
+BALANCED_THRESHOLD = 2
+
+
+def _last_user_message(messages: list) -> str:
     for m in reversed(messages):
         content = m.content if hasattr(m, "content") else (m.get("content", "") if isinstance(m, dict) else "")
         role = m.role if hasattr(m, "role") else (m.get("role", "") if isinstance(m, dict) else "")
         if role == "user":
-            last_user_msg = content
-            break
+            return content
+    return ""
 
+
+def _tier_for_score(score: int) -> str:
+    if score >= POWERFUL_THRESHOLD:
+        return "powerful"
+    elif score >= BALANCED_THRESHOLD:
+        return "balanced"
+    return "fast"
+
+
+def complexity_score(messages: list) -> int:
+    """The number `classify_complexity` thresholds, exposed on its own.
+
+    Extracted so the score can be inspected and tested without going through
+    the tier, and so there is exactly one copy of the rule: a duplicate in a
+    test or an analysis script would drift from the one the gateway runs, and
+    the whole value is that this *is* the production number.
+    """
+    if not messages:
+        return 0
+
+    last_user_msg = _last_user_message(messages)
     if not last_user_msg:
-        return "fast"
+        return 0
 
     word_count = len(last_user_msg.split())
     char_count = len(last_user_msg)
@@ -69,47 +126,15 @@ def classify_complexity(messages: list) -> str:
     elif word_count > 15:
         score += 1
 
-    complex_keywords = [
-        r"\bexplain\b", r"\banalyz\w*\b", r"\bcompar\w*\b", r"\bevaluate\b",
-        r"\bcritique\b", r"\breview\b", r"\bdesign\w*\b", r"\barchitect\w*\b",
-        r"\bcode\b", r"\bimplement\w*\b", r"\bdebug\w*\b", r"\brefactor\w*\b",
-        r"\boptimiz\w*\b", r"\bstep.by.step\b", r"\breason\w*\b", r"\blogic\b",
-        r"\bproof\b", r"\bprove\b", r"\bderiv\w*\b", r"\bessay\b", r"\barticle\b",
-        r"\bstory\b", r"\bcreativ\w*\b", r"\bnarrativ\w*\b", r"\bpoem\b",
-        r"\brecommend\w*\b", r"\bmath\w*\b", r"\bequation\b", r"\bformula\w*\b",
-        r"\bcalculat\w*\b", r"\bsolve\b", r"\bstrateg\w*\b", r"\broadmap\b",
-        r"\bplans?\b|\bplanning\b|\bplanned\b", r"\btips?\b", r"\badvice\b", r"\bimprove\w*\b",
-        r"\bsuggest\w*\b",
-        # Real work verbs the list was missing. Failure mode 2 in
-        # evals/ERROR_ANALYSIS.md: 'howto' scored 0/8 because nothing here
-        # matched a request for instructions.
-        r"\bsummari[sz]\w*\b", r"\bcondens\w*\b", r"\bhow do i\b",
-    ]
-    for pattern in complex_keywords:
+    for pattern in COMPLEX_KEYWORDS:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
             score += 2
 
-    complex_phrases = [
-        r"\btrade.?offs?\b",
-        r"\bpros and cons\b",
-        r"\balternatives\b",
-        r"\bsystem design\b",
-        r"\bhow does .+ work\b",
-        r"\bwhy does\b",
-        r"\bwhat are the implications\b",
-        r"\bwrite a program\b",
-    ]
-    for pattern in complex_phrases:
+    for pattern in COMPLEX_PHRASES:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
             score += 2
 
-    simple_patterns = [
-        r"^(hi|hello|hey|thanks|thank you|ok|yes|no|sure|cool|great)\s*[!.?]*$",
-        r"^(what is|who is|when did|where is|define)\s+\w+\s*\??$",
-        r"^\w+\s*\?$",
-        r"^(1|2|3|4|5|6|7|8|9|10)\s*$",
-    ]
-    for pattern in simple_patterns:
+    for pattern in SIMPLE_PATTERNS:
         if re.match(pattern, last_user_msg.strip(), re.IGNORECASE):
             score -= 3
 
@@ -126,12 +151,17 @@ def classify_complexity(messages: list) -> str:
     if has_system:
         score += 1
 
-    if score >= 5:
-        return "powerful"
-    elif score >= 2:
-        return "balanced"
-    else:
+    return score
+
+
+def classify_complexity(messages: list) -> str:
+    if not messages:
         return "fast"
+
+    if not _last_user_message(messages):
+        return "fast"
+
+    return _tier_for_score(complexity_score(messages))
 
 
 def select_model_for_tier(tier: str, available_providers: list) -> tuple[str, str]:
