@@ -1,13 +1,13 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-01T10:46:50.433544+00:00",
+  "generated_at": "2026-10-12T05:34:43.122361+00:00",
   "environment": {
     "python_version": "3.12.7",
     "python_implementation": "CPython",
     "platform": "windows",
     "executable_name": "python.exe",
-    "git_commit": "0474f232e95627d3add7ab68f7640ebbc17b5883",
-    "sklearn_version": "1.7.0"
+    "git_commit": "5b52277a8181f744de1d34f6272775ea76797a71",
+    "sklearn_version": "1.9.0"
   },
   "dataset": {
     "total_cases": 391,
@@ -125,9 +125,7 @@
     "warning_count": 2
   },
   "configuration": {
-    "argv": [
-      "--quiet"
-    ],
+    "argv": [],
     "confidence": 0.95,
     "dataset": "evals/golden",
     "difficulties": [
@@ -153,15 +151,15 @@
       "kind": "rule_based",
       "overall": {
         "n": 391,
-        "correct": 207,
-        "incorrect": 184,
-        "value": 0.529412,
+        "correct": 210,
+        "incorrect": 181,
+        "value": 0.537084,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.479892,
-          "upper": 0.578359,
+          "lower": 0.48754,
+          "upper": 0.585907,
           "defined": true
         }
       },
@@ -182,15 +180,15 @@
         },
         "clear": {
           "n": 277,
-          "correct": 153,
-          "incorrect": 124,
-          "value": 0.552347,
+          "correct": 156,
+          "incorrect": 121,
+          "value": 0.563177,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.49347,
-            "upper": 0.609791,
+            "lower": 0.504298,
+            "upper": 0.620328,
             "defined": true
           }
         }
@@ -212,15 +210,15 @@
         },
         "fast": {
           "n": 149,
-          "correct": 112,
-          "incorrect": 37,
-          "value": 0.751678,
+          "correct": 115,
+          "incorrect": 34,
+          "value": 0.771812,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.676567,
-            "upper": 0.814138,
+            "lower": 0.698099,
+            "upper": 0.831862,
             "defined": true
           }
         },
@@ -301,15 +299,15 @@
           },
           "fast": {
             "n": 120,
-            "correct": 92,
-            "incorrect": 28,
-            "value": 0.766667,
+            "correct": 95,
+            "incorrect": 25,
+            "value": 0.791667,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.683446,
-              "upper": 0.833344,
+              "lower": 0.710523,
+              "upper": 0.854716,
               "defined": true
             }
           },
@@ -556,15 +554,15 @@
         },
         "factual_lookup": {
           "n": 13,
-          "correct": 12,
-          "incorrect": 1,
-          "value": 0.923077,
+          "correct": 13,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.66686,
-            "upper": 0.98629,
+            "lower": 0.771905,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -626,15 +624,15 @@
         },
         "irrelevant_context": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 6,
+          "incorrect": 2,
+          "value": 0.75,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.409275,
+            "upper": 0.928521,
             "defined": true
           }
         },
@@ -1144,15 +1142,15 @@
         },
         "yes_no": {
           "n": 3,
-          "correct": 2,
-          "incorrect": 1,
-          "value": 0.666667,
+          "correct": 3,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.438503,
+            "upper": 1.0,
             "defined": true
           }
         }
@@ -1160,15 +1158,15 @@
       "by_source": {
         "adversarial": {
           "n": 97,
-          "correct": 46,
-          "incorrect": 51,
-          "value": 0.474227,
+          "correct": 47,
+          "incorrect": 50,
+          "value": 0.484536,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.377745,
-            "upper": 0.572672,
+            "lower": 0.387582,
+            "upper": 0.582669,
             "defined": true
           }
         },
@@ -1188,15 +1186,15 @@
         },
         "synthetic": {
           "n": 189,
-          "correct": 115,
-          "incorrect": 74,
-          "value": 0.608466,
+          "correct": 117,
+          "incorrect": 72,
+          "value": 0.619048,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.537382,
-            "upper": 0.675228,
+            "lower": 0.548095,
+            "upper": 0.685257,
             "defined": true
           }
         }
@@ -1232,15 +1230,15 @@
         },
         "irrelevant_context": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 6,
+          "incorrect": 2,
+          "value": 0.75,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.409275,
+            "upper": 0.928521,
             "defined": true
           }
         },
@@ -1415,15 +1413,15 @@
       },
       "adversarial_any": {
         "n": 97,
-        "correct": 46,
-        "incorrect": 51,
-        "value": 0.474227,
+        "correct": 47,
+        "incorrect": 50,
+        "value": 0.484536,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.377745,
-          "upper": 0.572672,
+          "lower": 0.387582,
+          "upper": 0.582669,
           "defined": true
         }
       },
@@ -1459,19 +1457,19 @@
         "per_class": {
           "fast": {
             "support": 149,
-            "predicted": 201,
-            "true_positives": 112,
-            "precision": 0.557214,
-            "recall": 0.751678,
-            "f1": 0.64
+            "predicted": 204,
+            "true_positives": 115,
+            "precision": 0.563725,
+            "recall": 0.771812,
+            "f1": 0.651558
           },
           "balanced": {
             "support": 150,
-            "predicted": 156,
+            "predicted": 153,
             "true_positives": 72,
-            "precision": 0.461538,
+            "precision": 0.470588,
             "recall": 0.48,
-            "f1": 0.470588
+            "f1": 0.475248
           },
           "powerful": {
             "support": 92,
@@ -1482,8 +1480,8 @@
             "f1": 0.365079
           }
         },
-        "macro_f1": 0.491889,
-        "micro_f1": 0.529412,
+        "macro_f1": 0.497295,
+        "micro_f1": 0.537084,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -1510,8 +1508,8 @@
         },
         "counts": {
           "fast": {
-            "fast": 112,
-            "balanced": 35,
+            "fast": 115,
+            "balanced": 32,
             "powerful": 2
           },
           "balanced": {
@@ -3368,7 +3366,7 @@
           "floor reference: anything at or below this has learned nothing about complexity"
         ],
         "versions": {
-          "sklearn": "1.7.0"
+          "sklearn": "1.9.0"
         }
       }
     },
@@ -3377,44 +3375,44 @@
       "kind": "learned",
       "overall": {
         "n": 391,
-        "correct": 275,
-        "incorrect": 116,
-        "value": 0.703325,
+        "correct": 276,
+        "incorrect": 115,
+        "value": 0.705882,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.656247,
-          "upper": 0.746446,
+          "lower": 0.658892,
+          "upper": 0.748867,
           "defined": true
         }
       },
       "by_difficulty": {
         "ambiguous": {
           "n": 114,
-          "correct": 68,
-          "incorrect": 46,
-          "value": 0.596491,
+          "correct": 64,
+          "incorrect": 50,
+          "value": 0.561404,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.504712,
-            "upper": 0.68198,
+            "lower": 0.469787,
+            "upper": 0.649016,
             "defined": true
           }
         },
         "clear": {
           "n": 277,
-          "correct": 207,
-          "incorrect": 70,
-          "value": 0.747292,
+          "correct": 212,
+          "incorrect": 65,
+          "value": 0.765343,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.692973,
-            "upper": 0.794847,
+            "lower": 0.712017,
+            "upper": 0.81141,
             "defined": true
           }
         }
@@ -3422,15 +3420,15 @@
       "by_expected_label": {
         "balanced": {
           "n": 150,
-          "correct": 119,
-          "incorrect": 31,
-          "value": 0.793333,
+          "correct": 115,
+          "incorrect": 35,
+          "value": 0.766667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.721606,
-            "upper": 0.850411,
+            "lower": 0.692842,
+            "upper": 0.827174,
             "defined": true
           }
         },
@@ -3450,15 +3448,15 @@
         },
         "powerful": {
           "n": 92,
-          "correct": 43,
-          "incorrect": 49,
-          "value": 0.467391,
+          "correct": 48,
+          "incorrect": 44,
+          "value": 0.521739,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.368801,
-            "upper": 0.568595,
+            "lower": 0.420857,
+            "upper": 0.620879,
             "defined": true
           }
         }
@@ -3467,15 +3465,15 @@
         "ambiguous": {
           "balanced": {
             "n": 61,
-            "correct": 45,
-            "incorrect": 16,
-            "value": 0.737705,
+            "correct": 40,
+            "incorrect": 21,
+            "value": 0.655738,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.615633,
-              "upper": 0.831612,
+              "lower": 0.530497,
+              "upper": 0.762525,
               "defined": true
             }
           },
@@ -3495,15 +3493,15 @@
           },
           "powerful": {
             "n": 24,
-            "correct": 4,
-            "incorrect": 20,
-            "value": 0.166667,
+            "correct": 5,
+            "incorrect": 19,
+            "value": 0.208333,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.066787,
-              "upper": 0.358531,
+              "lower": 0.092448,
+              "upper": 0.404705,
               "defined": true
             }
           }
@@ -3511,15 +3509,15 @@
         "clear": {
           "balanced": {
             "n": 89,
-            "correct": 74,
-            "incorrect": 15,
-            "value": 0.831461,
+            "correct": 75,
+            "incorrect": 14,
+            "value": 0.842697,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.740374,
-              "upper": 0.895117,
+              "lower": 0.753112,
+              "upper": 0.903922,
               "defined": true
             }
           },
@@ -3539,15 +3537,15 @@
           },
           "powerful": {
             "n": 68,
-            "correct": 39,
-            "incorrect": 29,
-            "value": 0.573529,
+            "correct": 43,
+            "incorrect": 25,
+            "value": 0.632353,
             "defined": true,
             "wilson_95": {
               "confidence": 0.95,
               "z": 1.959964,
-              "lower": 0.455168,
-              "upper": 0.684028,
+              "lower": 0.513556,
+              "upper": 0.736995,
               "defined": true
             }
           }
@@ -3626,15 +3624,15 @@
         },
         "borderline_length": {
           "n": 8,
-          "correct": 3,
-          "incorrect": 5,
-          "value": 0.375,
+          "correct": 2,
+          "incorrect": 6,
+          "value": 0.25,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.136844,
-            "upper": 0.694258,
+            "lower": 0.071479,
+            "upper": 0.590725,
             "defined": true
           }
         },
@@ -3654,15 +3652,15 @@
         },
         "code": {
           "n": 22,
-          "correct": 17,
-          "incorrect": 5,
-          "value": 0.772727,
+          "correct": 18,
+          "incorrect": 4,
+          "value": 0.818182,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.5656,
-            "upper": 0.89877,
+            "lower": 0.614834,
+            "upper": 0.926931,
             "defined": true
           }
         },
@@ -3682,29 +3680,29 @@
         },
         "conflicting_signals": {
           "n": 10,
-          "correct": 7,
-          "incorrect": 3,
-          "value": 0.7,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.396778,
-            "upper": 0.892209,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
         "contradiction": {
           "n": 6,
-          "correct": 2,
-          "incorrect": 4,
-          "value": 0.333333,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.096771,
-            "upper": 0.700007,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
@@ -3822,29 +3820,29 @@
         },
         "indirect_wording": {
           "n": 10,
-          "correct": 5,
-          "incorrect": 5,
-          "value": 0.5,
+          "correct": 4,
+          "incorrect": 6,
+          "value": 0.4,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.236593,
-            "upper": 0.763407,
+            "lower": 0.16818,
+            "upper": 0.687326,
             "defined": true
           }
         },
         "insufficient_context": {
           "n": 9,
-          "correct": 6,
-          "incorrect": 3,
-          "value": 0.666667,
+          "correct": 5,
+          "incorrect": 4,
+          "value": 0.555556,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.354202,
-            "upper": 0.879416,
+            "lower": 0.266651,
+            "upper": 0.811221,
             "defined": true
           }
         },
@@ -3892,29 +3890,29 @@
         },
         "long_distractor": {
           "n": 10,
-          "correct": 6,
-          "incorrect": 4,
-          "value": 0.6,
+          "correct": 7,
+          "incorrect": 3,
+          "value": 0.7,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.312674,
-            "upper": 0.83182,
+            "lower": 0.396778,
+            "upper": 0.892209,
             "defined": true
           }
         },
         "mathematics": {
           "n": 7,
-          "correct": 2,
-          "incorrect": 5,
-          "value": 0.285714,
+          "correct": 3,
+          "incorrect": 4,
+          "value": 0.428571,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.082219,
-            "upper": 0.641066,
+            "lower": 0.15822,
+            "upper": 0.749542,
             "defined": true
           }
         },
@@ -3990,15 +3988,15 @@
         },
         "multi_turn_short_history": {
           "n": 5,
-          "correct": 3,
-          "incorrect": 2,
-          "value": 0.6,
+          "correct": 2,
+          "incorrect": 3,
+          "value": 0.4,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.230724,
-            "upper": 0.882379,
+            "lower": 0.117621,
+            "upper": 0.769276,
             "defined": true
           }
         },
@@ -4060,33 +4058,19 @@
         },
         "overlapping_categories": {
           "n": 10,
-          "correct": 7,
-          "incorrect": 3,
-          "value": 0.7,
+          "correct": 6,
+          "incorrect": 4,
+          "value": 0.6,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.396778,
-            "upper": 0.892209,
+            "lower": 0.312674,
+            "upper": 0.83182,
             "defined": true
           }
         },
         "planning": {
-          "n": 6,
-          "correct": 3,
-          "incorrect": 3,
-          "value": 0.5,
-          "defined": true,
-          "wilson_95": {
-            "confidence": 0.95,
-            "z": 1.959964,
-            "lower": 0.187616,
-            "upper": 0.812384,
-            "defined": true
-          }
-        },
-        "prompt_injection": {
           "n": 6,
           "correct": 5,
           "incorrect": 1,
@@ -4097,6 +4081,20 @@
             "z": 1.959964,
             "lower": 0.436497,
             "upper": 0.969947,
+            "defined": true
+          }
+        },
+        "prompt_injection": {
+          "n": 6,
+          "correct": 4,
+          "incorrect": 2,
+          "value": 0.666667,
+          "defined": true,
+          "wilson_95": {
+            "confidence": 0.95,
+            "z": 1.959964,
+            "lower": 0.299993,
+            "upper": 0.903229,
             "defined": true
           }
         },
@@ -4130,15 +4128,15 @@
         },
         "repetition": {
           "n": 6,
-          "correct": 4,
-          "incorrect": 2,
-          "value": 0.666667,
+          "correct": 5,
+          "incorrect": 1,
+          "value": 0.833333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.299993,
-            "upper": 0.903229,
+            "lower": 0.436497,
+            "upper": 0.969947,
             "defined": true
           }
         },
@@ -4172,15 +4170,15 @@
         },
         "short_utterance": {
           "n": 3,
-          "correct": 1,
-          "incorrect": 2,
-          "value": 0.333333,
+          "correct": 2,
+          "incorrect": 1,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.061492,
-            "upper": 0.79234,
+            "lower": 0.20766,
+            "upper": 0.938508,
             "defined": true
           }
         },
@@ -4200,15 +4198,15 @@
         },
         "status_lookup": {
           "n": 3,
-          "correct": 2,
-          "incorrect": 1,
-          "value": 0.666667,
+          "correct": 1,
+          "incorrect": 2,
+          "value": 0.333333,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.20766,
-            "upper": 0.938508,
+            "lower": 0.061492,
+            "upper": 0.79234,
             "defined": true
           }
         },
@@ -4270,29 +4268,29 @@
         },
         "translation": {
           "n": 2,
-          "correct": 1,
-          "incorrect": 1,
-          "value": 0.5,
+          "correct": 0,
+          "incorrect": 2,
+          "value": 0.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.094531,
-            "upper": 0.905469,
+            "lower": 0.0,
+            "upper": 0.65762,
             "defined": true
           }
         },
         "troubleshooting": {
           "n": 7,
-          "correct": 6,
-          "incorrect": 1,
-          "value": 0.857143,
+          "correct": 7,
+          "incorrect": 0,
+          "value": 1.0,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.486872,
-            "upper": 0.97432,
+            "lower": 0.64567,
+            "upper": 1.0,
             "defined": true
           }
         },
@@ -4368,15 +4366,15 @@
         },
         "yes_no": {
           "n": 3,
-          "correct": 1,
-          "incorrect": 2,
-          "value": 0.333333,
+          "correct": 2,
+          "incorrect": 1,
+          "value": 0.666667,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.061492,
-            "upper": 0.79234,
+            "lower": 0.20766,
+            "upper": 0.938508,
             "defined": true
           }
         }
@@ -4384,43 +4382,43 @@
       "by_source": {
         "adversarial": {
           "n": 97,
-          "correct": 66,
-          "incorrect": 31,
-          "value": 0.680412,
+          "correct": 67,
+          "incorrect": 30,
+          "value": 0.690722,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.582266,
-            "upper": 0.764813,
+            "lower": 0.592954,
+            "upper": 0.773958,
             "defined": true
           }
         },
         "manually_created": {
           "n": 105,
-          "correct": 66,
-          "incorrect": 39,
-          "value": 0.628571,
+          "correct": 61,
+          "incorrect": 44,
+          "value": 0.580952,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.533145,
-            "upper": 0.714922,
+            "lower": 0.485357,
+            "upper": 0.670834,
             "defined": true
           }
         },
         "synthetic": {
           "n": 189,
-          "correct": 143,
-          "incorrect": 46,
-          "value": 0.756614,
+          "correct": 148,
+          "incorrect": 41,
+          "value": 0.783069,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.69072,
-            "upper": 0.812284,
+            "lower": 0.718986,
+            "upper": 0.835874,
             "defined": true
           }
         }
@@ -4442,15 +4440,15 @@
         },
         "contradiction": {
           "n": 6,
-          "correct": 2,
-          "incorrect": 4,
-          "value": 0.333333,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.096771,
-            "upper": 0.700007,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
@@ -4498,15 +4496,15 @@
         },
         "negation": {
           "n": 10,
-          "correct": 4,
-          "incorrect": 6,
-          "value": 0.4,
+          "correct": 5,
+          "incorrect": 5,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.16818,
-            "upper": 0.687326,
+            "lower": 0.236593,
+            "upper": 0.763407,
             "defined": true
           }
         },
@@ -4526,15 +4524,15 @@
         },
         "prompt_injection": {
           "n": 7,
-          "correct": 6,
-          "incorrect": 1,
-          "value": 0.857143,
+          "correct": 5,
+          "incorrect": 2,
+          "value": 0.714286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.486872,
-            "upper": 0.97432,
+            "lower": 0.358934,
+            "upper": 0.917781,
             "defined": true
           }
         },
@@ -4568,15 +4566,15 @@
         },
         "repetition": {
           "n": 14,
-          "correct": 9,
-          "incorrect": 5,
-          "value": 0.642857,
+          "correct": 10,
+          "incorrect": 4,
+          "value": 0.714286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.387644,
-            "upper": 0.836553,
+            "lower": 0.453509,
+            "upper": 0.882786,
             "defined": true
           }
         },
@@ -4639,29 +4637,29 @@
       },
       "adversarial_any": {
         "n": 97,
-        "correct": 66,
-        "incorrect": 31,
-        "value": 0.680412,
+        "correct": 67,
+        "incorrect": 30,
+        "value": 0.690722,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.582266,
-          "upper": 0.764813,
+          "lower": 0.592954,
+          "upper": 0.773958,
           "defined": true
         }
       },
       "multi_turn_any": {
         "n": 26,
-        "correct": 19,
-        "incorrect": 7,
-        "value": 0.730769,
+        "correct": 18,
+        "incorrect": 8,
+        "value": 0.692308,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.53917,
-          "upper": 0.862956,
+          "lower": 0.500117,
+          "upper": 0.834987,
           "defined": true
         }
       },
@@ -4683,31 +4681,31 @@
         "per_class": {
           "fast": {
             "support": 149,
-            "predicted": 142,
+            "predicted": 145,
             "true_positives": 113,
-            "precision": 0.795775,
+            "precision": 0.77931,
             "recall": 0.758389,
-            "f1": 0.776632
+            "f1": 0.768707
           },
           "balanced": {
             "support": 150,
-            "predicted": 194,
-            "true_positives": 119,
-            "precision": 0.613402,
-            "recall": 0.793333,
-            "f1": 0.69186
+            "predicted": 186,
+            "true_positives": 115,
+            "precision": 0.61828,
+            "recall": 0.766667,
+            "f1": 0.684524
           },
           "powerful": {
             "support": 92,
-            "predicted": 55,
-            "true_positives": 43,
-            "precision": 0.781818,
-            "recall": 0.467391,
-            "f1": 0.585034
+            "predicted": 60,
+            "true_positives": 48,
+            "precision": 0.8,
+            "recall": 0.521739,
+            "f1": 0.631579
           }
         },
-        "macro_f1": 0.684509,
-        "micro_f1": 0.703325,
+        "macro_f1": 0.694937,
+        "micro_f1": 0.705882,
         "macro_f1_convention": "unweighted mean of per-label F1 over every label in the universe, with an undefined F1 (a label that is never predicted) counted as 0.0 rather than excluded from the average"
       },
       "confusion_matrix": {
@@ -4739,14 +4737,14 @@
             "powerful": 2
           },
           "balanced": {
-            "fast": 21,
-            "balanced": 119,
+            "fast": 25,
+            "balanced": 115,
             "powerful": 10
           },
           "powerful": {
-            "fast": 8,
-            "balanced": 41,
-            "powerful": 43
+            "fast": 7,
+            "balanced": 37,
+            "powerful": 48
           }
         }
       },
@@ -4756,8 +4754,8 @@
         "n_evaluated": 391,
         "seed": 20250101,
         "n_splits": 5,
-        "vocabulary_size": 3371,
-        "train_accuracy": 0.98977,
+        "vocabulary_size": 3396,
+        "train_accuracy": 0.990409,
         "evaluated_ids": [
           "greeting",
           "thanks",
@@ -5154,88 +5152,88 @@
         "folds": [
           {
             "fold": 0,
-            "n_train": 314,
-            "n_test": 77,
+            "n_train": 313,
+            "n_test": 78,
             "train_label_counts": {
-              "balanced": 121,
-              "fast": 121,
-              "powerful": 72
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 74
             },
             "test_label_counts": {
-              "balanced": 29,
-              "fast": 28,
-              "powerful": 20
+              "balanced": 30,
+              "fast": 30,
+              "powerful": 18
             },
-            "test_correct": 57,
-            "vocabulary_size": 3267
+            "test_correct": 56,
+            "vocabulary_size": 3170
           },
           {
             "fold": 1,
-            "n_train": 314,
-            "n_test": 77,
+            "n_train": 313,
+            "n_test": 78,
             "train_label_counts": {
-              "balanced": 117,
-              "fast": 120,
-              "powerful": 77
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 74
             },
             "test_label_counts": {
-              "balanced": 33,
-              "fast": 29,
-              "powerful": 15
+              "balanced": 30,
+              "fast": 30,
+              "powerful": 18
             },
-            "test_correct": 55,
-            "vocabulary_size": 3371
+            "test_correct": 53,
+            "vocabulary_size": 3396
           },
           {
             "fold": 2,
             "n_train": 312,
             "n_test": 79,
             "train_label_counts": {
-              "balanced": 119,
-              "fast": 117,
-              "powerful": 76
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 73
             },
             "test_label_counts": {
-              "balanced": 31,
-              "fast": 32,
-              "powerful": 16
+              "balanced": 30,
+              "fast": 30,
+              "powerful": 19
             },
-            "test_correct": 56,
-            "vocabulary_size": 3304
+            "test_correct": 58,
+            "vocabulary_size": 3281
           },
           {
             "fold": 3,
-            "n_train": 312,
-            "n_test": 79,
+            "n_train": 313,
+            "n_test": 78,
             "train_label_counts": {
-              "balanced": 121,
-              "fast": 117,
-              "powerful": 74
+              "balanced": 120,
+              "fast": 120,
+              "powerful": 73
             },
             "test_label_counts": {
-              "balanced": 29,
-              "fast": 32,
-              "powerful": 18
+              "balanced": 30,
+              "fast": 29,
+              "powerful": 19
             },
-            "test_correct": 58,
-            "vocabulary_size": 3316
+            "test_correct": 54,
+            "vocabulary_size": 3348
           },
           {
             "fold": 4,
-            "n_train": 312,
-            "n_test": 79,
+            "n_train": 313,
+            "n_test": 78,
             "train_label_counts": {
-              "balanced": 122,
-              "fast": 121,
-              "powerful": 69
+              "balanced": 120,
+              "fast": 119,
+              "powerful": 74
             },
             "test_label_counts": {
-              "balanced": 28,
-              "fast": 28,
-              "powerful": 23
+              "balanced": 30,
+              "fast": 30,
+              "powerful": 18
             },
-            "test_correct": 49,
-            "vocabulary_size": 3278
+            "test_correct": 55,
+            "vocabulary_size": 3307
           }
         ],
         "leakage": {
@@ -5275,7 +5273,7 @@
         ],
         "versions": {
           "python_implementation": "evals.learned",
-          "sklearn": "1.7.0"
+          "sklearn": "1.9.0"
         }
       }
     },
@@ -6557,7 +6555,7 @@
           "reported separately from the out-of-fold score; it evaluates 98 case(s) and must not be used for tuning"
         ],
         "versions": {
-          "sklearn": "1.7.0"
+          "sklearn": "1.9.0"
         }
       }
     }
@@ -6580,29 +6578,29 @@
       },
       "clear": {
         "n": 277,
-        "correct": 153,
-        "incorrect": 124,
-        "value": 0.552347,
+        "correct": 156,
+        "incorrect": 121,
+        "value": 0.563177,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.49347,
-          "upper": 0.609791,
+          "lower": 0.504298,
+          "upper": 0.620328,
           "defined": true
         }
       },
       "all": {
         "n": 391,
-        "correct": 207,
-        "incorrect": 184,
-        "value": 0.529412,
+        "correct": 210,
+        "incorrect": 181,
+        "value": 0.537084,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.479892,
-          "upper": 0.578359,
+          "lower": 0.48754,
+          "upper": 0.585907,
           "defined": true
         }
       }
@@ -6654,43 +6652,43 @@
     "tfidf_logistic_regression": {
       "ambiguous": {
         "n": 114,
-        "correct": 68,
-        "incorrect": 46,
-        "value": 0.596491,
+        "correct": 64,
+        "incorrect": 50,
+        "value": 0.561404,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.504712,
-          "upper": 0.68198,
+          "lower": 0.469787,
+          "upper": 0.649016,
           "defined": true
         }
       },
       "clear": {
         "n": 277,
-        "correct": 207,
-        "incorrect": 70,
-        "value": 0.747292,
+        "correct": 212,
+        "incorrect": 65,
+        "value": 0.765343,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.692973,
-          "upper": 0.794847,
+          "lower": 0.712017,
+          "upper": 0.81141,
           "defined": true
         }
       },
       "all": {
         "n": 391,
-        "correct": 275,
-        "incorrect": 116,
-        "value": 0.703325,
+        "correct": 276,
+        "incorrect": 115,
+        "value": 0.705882,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.656247,
-          "upper": 0.746446,
+          "lower": 0.658892,
+          "upper": 0.748867,
           "defined": true
         }
       }
@@ -6758,15 +6756,15 @@
       },
       "fast": {
         "n": 149,
-        "correct": 112,
-        "incorrect": 37,
-        "value": 0.751678,
+        "correct": 115,
+        "incorrect": 34,
+        "value": 0.771812,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.676567,
-          "upper": 0.814138,
+          "lower": 0.698099,
+          "upper": 0.831862,
           "defined": true
         }
       },
@@ -6832,15 +6830,15 @@
     "tfidf_logistic_regression": {
       "balanced": {
         "n": 150,
-        "correct": 119,
-        "incorrect": 31,
-        "value": 0.793333,
+        "correct": 115,
+        "incorrect": 35,
+        "value": 0.766667,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.721606,
-          "upper": 0.850411,
+          "lower": 0.692842,
+          "upper": 0.827174,
           "defined": true
         }
       },
@@ -6860,15 +6858,15 @@
       },
       "powerful": {
         "n": 92,
-        "correct": 43,
-        "incorrect": 49,
-        "value": 0.467391,
+        "correct": 48,
+        "incorrect": 44,
+        "value": 0.521739,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.368801,
-          "upper": 0.568595,
+          "lower": 0.420857,
+          "upper": 0.620879,
           "defined": true
         }
       }
@@ -6922,15 +6920,15 @@
     "heuristic": {
       "any": {
         "n": 97,
-        "correct": 46,
-        "incorrect": 51,
-        "value": 0.474227,
+        "correct": 47,
+        "incorrect": 50,
+        "value": 0.484536,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.377745,
-          "upper": 0.572672,
+          "lower": 0.387582,
+          "upper": 0.582669,
           "defined": true
         }
       },
@@ -6965,15 +6963,15 @@
         },
         "irrelevant_context": {
           "n": 8,
-          "correct": 5,
-          "incorrect": 3,
-          "value": 0.625,
+          "correct": 6,
+          "incorrect": 2,
+          "value": 0.75,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.305742,
-            "upper": 0.863156,
+            "lower": 0.409275,
+            "upper": 0.928521,
             "defined": true
           }
         },
@@ -7378,15 +7376,15 @@
     "tfidf_logistic_regression": {
       "any": {
         "n": 97,
-        "correct": 66,
-        "incorrect": 31,
-        "value": 0.680412,
+        "correct": 67,
+        "incorrect": 30,
+        "value": 0.690722,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.582266,
-          "upper": 0.764813,
+          "lower": 0.592954,
+          "upper": 0.773958,
           "defined": true
         }
       },
@@ -7407,15 +7405,15 @@
         },
         "contradiction": {
           "n": 6,
-          "correct": 2,
-          "incorrect": 4,
-          "value": 0.333333,
+          "correct": 3,
+          "incorrect": 3,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.096771,
-            "upper": 0.700007,
+            "lower": 0.187616,
+            "upper": 0.812384,
             "defined": true
           }
         },
@@ -7463,15 +7461,15 @@
         },
         "negation": {
           "n": 10,
-          "correct": 4,
-          "incorrect": 6,
-          "value": 0.4,
+          "correct": 5,
+          "incorrect": 5,
+          "value": 0.5,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.16818,
-            "upper": 0.687326,
+            "lower": 0.236593,
+            "upper": 0.763407,
             "defined": true
           }
         },
@@ -7491,15 +7489,15 @@
         },
         "prompt_injection": {
           "n": 7,
-          "correct": 6,
-          "incorrect": 1,
-          "value": 0.857143,
+          "correct": 5,
+          "incorrect": 2,
+          "value": 0.714286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.486872,
-            "upper": 0.97432,
+            "lower": 0.358934,
+            "upper": 0.917781,
             "defined": true
           }
         },
@@ -7533,15 +7531,15 @@
         },
         "repetition": {
           "n": 14,
-          "correct": 9,
-          "incorrect": 5,
-          "value": 0.642857,
+          "correct": 10,
+          "incorrect": 4,
+          "value": 0.714286,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.387644,
-            "upper": 0.836553,
+            "lower": 0.453509,
+            "upper": 0.882786,
             "defined": true
           }
         },
@@ -7884,15 +7882,15 @@
     "tfidf_logistic_regression": {
       "multi_turn": {
         "n": 26,
-        "correct": 19,
-        "incorrect": 7,
-        "value": 0.730769,
+        "correct": 18,
+        "incorrect": 8,
+        "value": 0.692308,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.53917,
-          "upper": 0.862956,
+          "lower": 0.500117,
+          "upper": 0.834987,
           "defined": true
         }
       },
@@ -7969,8 +7967,8 @@
       },
       "counts": {
         "fast": {
-          "fast": 112,
-          "balanced": 35,
+          "fast": 115,
+          "balanced": 32,
           "powerful": 2
         },
         "balanced": {
@@ -8054,14 +8052,14 @@
           "powerful": 2
         },
         "balanced": {
-          "fast": 21,
-          "balanced": 119,
+          "fast": 25,
+          "balanced": 115,
           "powerful": 10
         },
         "powerful": {
-          "fast": 8,
-          "balanced": 41,
-          "powerful": 43
+          "fast": 7,
+          "balanced": 37,
+          "powerful": 48
         }
       }
     },
@@ -8111,29 +8109,29 @@
       "confidence_level": 0.95,
       "overall": {
         "n": 391,
-        "correct": 207,
-        "incorrect": 184,
-        "value": 0.529412,
+        "correct": 210,
+        "incorrect": 181,
+        "value": 0.537084,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.479892,
-          "upper": 0.578359,
+          "lower": 0.48754,
+          "upper": 0.585907,
           "defined": true
         }
       },
       "clear": {
         "n": 277,
-        "correct": 153,
-        "incorrect": 124,
-        "value": 0.552347,
+        "correct": 156,
+        "incorrect": 121,
+        "value": 0.563177,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.49347,
-          "upper": 0.609791,
+          "lower": 0.504298,
+          "upper": 0.620328,
           "defined": true
         }
       },
@@ -8151,7 +8149,7 @@
           "defined": true
         }
       },
-      "macro_f1": 0.491889
+      "macro_f1": 0.497295
     },
     "majority_class": {
       "confidence_level": 0.95,
@@ -8203,47 +8201,47 @@
       "confidence_level": 0.95,
       "overall": {
         "n": 391,
-        "correct": 275,
-        "incorrect": 116,
-        "value": 0.703325,
+        "correct": 276,
+        "incorrect": 115,
+        "value": 0.705882,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.656247,
-          "upper": 0.746446,
+          "lower": 0.658892,
+          "upper": 0.748867,
           "defined": true
         }
       },
       "clear": {
         "n": 277,
-        "correct": 207,
-        "incorrect": 70,
-        "value": 0.747292,
+        "correct": 212,
+        "incorrect": 65,
+        "value": 0.765343,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.692973,
-          "upper": 0.794847,
+          "lower": 0.712017,
+          "upper": 0.81141,
           "defined": true
         }
       },
       "ambiguous": {
         "n": 114,
-        "correct": 68,
-        "incorrect": 46,
-        "value": 0.596491,
+        "correct": 64,
+        "incorrect": 50,
+        "value": 0.561404,
         "defined": true,
         "wilson_95": {
           "confidence": 0.95,
           "z": 1.959964,
-          "lower": 0.504712,
-          "upper": 0.68198,
+          "lower": 0.469787,
+          "upper": 0.649016,
           "defined": true
         }
       },
-      "macro_f1": 0.684509
+      "macro_f1": 0.694937
     },
     "tfidf_logistic_regression_holdout": {
       "confidence_level": 0.95,
@@ -8297,49 +8295,49 @@
       "paired": {
         "a": "heuristic",
         "b": "majority_class",
-        "both_correct": 80,
-        "a_only_correct": 118,
-        "b_only_correct": 61,
-        "both_wrong": 106,
-        "discordant": 179,
-        "p_value": 2.454e-05,
+        "both_correct": 81,
+        "a_only_correct": 120,
+        "b_only_correct": 60,
+        "both_wrong": 104,
+        "discordant": 180,
+        "p_value": 9.14e-06,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 118, majority_class wins 61 on 179 discordant cases: significant (p=0.0000)",
+      "paired_description": "heuristic wins 120, majority_class wins 60 on 180 discordant cases: significant (p=0.0000)",
       "paired_cases_compared": 365,
       "compared_over_full_dataset": false,
       "input_note": "restricted to cases where both systems received identical input; 26 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "majority_class",
-        "both_correct": 84,
-        "a_only_correct": 123,
-        "b_only_correct": 65,
-        "both_wrong": 119,
-        "discordant": 188,
-        "p_value": 2.812e-05,
+        "both_correct": 85,
+        "a_only_correct": 125,
+        "b_only_correct": 64,
+        "both_wrong": 117,
+        "discordant": 189,
+        "p_value": 1.08e-05,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 123, majority_class wins 65 on 188 discordant cases: significant (p=0.0000) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 125, majority_class wins 64 on 189 discordant cases: significant (p=0.0000) [input differed on some cases]",
       "clear_vs_clear": {
         "a": {
           "name": "heuristic.clear",
           "n": 277,
-          "correct": 153,
-          "incorrect": 124,
-          "value": 0.552347,
+          "correct": 156,
+          "incorrect": 121,
+          "value": 0.563177,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.49347,
-            "upper": 0.609791,
+            "lower": 0.504298,
+            "upper": 0.620328,
             "defined": true
           }
         },
@@ -8358,10 +8356,10 @@
             "defined": true
           }
         },
-        "difference": 0.212996,
-        "difference_ci_lower": 0.130618,
-        "difference_ci_upper": 0.291307,
-        "p_value": 4.6e-07,
+        "difference": 0.223827,
+        "difference_ci_lower": 0.141446,
+        "difference_ci_upper": 0.301922,
+        "p_value": 1.2e-07,
         "significant_at_95": true,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8410,71 +8408,71 @@
       "paired": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression",
-        "both_correct": 150,
-        "a_only_correct": 48,
-        "b_only_correct": 106,
-        "both_wrong": 61,
-        "discordant": 154,
-        "p_value": 3.39e-06,
+        "both_correct": 151,
+        "a_only_correct": 50,
+        "b_only_correct": 107,
+        "both_wrong": 57,
+        "discordant": 157,
+        "p_value": 6.29e-06,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 48, tfidf_logistic_regression wins 106 on 154 discordant cases: significant (p=0.0000)",
+      "paired_description": "heuristic wins 50, tfidf_logistic_regression wins 107 on 157 discordant cases: significant (p=0.0000)",
       "paired_cases_compared": 365,
       "compared_over_full_dataset": false,
       "input_note": "restricted to cases where both systems received identical input; 26 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression",
-        "both_correct": 157,
-        "a_only_correct": 50,
+        "both_correct": 158,
+        "a_only_correct": 52,
         "b_only_correct": 118,
-        "both_wrong": 66,
-        "discordant": 168,
-        "p_value": 1.6e-07,
+        "both_wrong": 63,
+        "discordant": 170,
+        "p_value": 4.5e-07,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 50, tfidf_logistic_regression wins 118 on 168 discordant cases: significant (p=0.0000) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 52, tfidf_logistic_regression wins 118 on 170 discordant cases: significant (p=0.0000) [input differed on some cases]",
       "clear_vs_clear": {
         "a": {
           "name": "heuristic.clear",
           "n": 277,
-          "correct": 153,
-          "incorrect": 124,
-          "value": 0.552347,
+          "correct": 156,
+          "incorrect": 121,
+          "value": 0.563177,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.49347,
-            "upper": 0.609791,
+            "lower": 0.504298,
+            "upper": 0.620328,
             "defined": true
           }
         },
         "b": {
           "name": "tfidf_logistic_regression.clear",
           "n": 277,
-          "correct": 207,
-          "incorrect": 70,
-          "value": 0.747292,
+          "correct": 212,
+          "incorrect": 65,
+          "value": 0.765343,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.692973,
-            "upper": 0.794847,
+            "lower": 0.712017,
+            "upper": 0.81141,
             "defined": true
           }
         },
-        "difference": -0.194946,
-        "difference_ci_lower": -0.270628,
-        "difference_ci_upper": -0.115886,
-        "p_value": 1.51e-06,
+        "difference": -0.202166,
+        "difference_ci_lower": -0.276925,
+        "difference_ci_upper": -0.124,
+        "p_value": 4.7e-07,
         "significant_at_95": true,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8498,22 +8496,22 @@
         "b": {
           "name": "tfidf_logistic_regression.ambiguous",
           "n": 114,
-          "correct": 68,
-          "incorrect": 46,
-          "value": 0.596491,
+          "correct": 64,
+          "incorrect": 50,
+          "value": 0.561404,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.504712,
-            "upper": 0.68198,
+            "lower": 0.469787,
+            "upper": 0.649016,
             "defined": true
           }
         },
-        "difference": -0.122807,
-        "difference_ci_lower": -0.246428,
-        "difference_ci_upper": 0.006447,
-        "p_value": 0.06303732,
+        "difference": -0.087719,
+        "difference_ci_lower": -0.212819,
+        "difference_ci_upper": 0.041419,
+        "p_value": 0.1850556,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
@@ -8523,36 +8521,36 @@
       "paired": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression_holdout",
-        "both_correct": 44,
+        "both_correct": 46,
         "a_only_correct": 8,
-        "b_only_correct": 28,
+        "b_only_correct": 26,
         "both_wrong": 11,
-        "discordant": 36,
-        "p_value": 0.00119324,
+        "discordant": 34,
+        "p_value": 0.00293506,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": true,
         "note": ""
       },
-      "paired_description": "heuristic wins 8, tfidf_logistic_regression_holdout wins 28 on 36 discordant cases: significant (p=0.0012)",
+      "paired_description": "heuristic wins 8, tfidf_logistic_regression_holdout wins 26 on 34 discordant cases: significant (p=0.0029)",
       "paired_cases_compared": 91,
       "compared_over_full_dataset": false,
       "input_note": "restricted to cases where both systems received identical input; 7 multi-turn case(s) are excluded because the heuristic reads the whole conversation and the learned baseline reads the last user turn only",
       "paired_all_cases": {
         "a": "heuristic",
         "b": "tfidf_logistic_regression_holdout",
-        "both_correct": 46,
+        "both_correct": 48,
         "a_only_correct": 9,
-        "b_only_correct": 30,
+        "b_only_correct": 28,
         "both_wrong": 13,
-        "discordant": 39,
-        "p_value": 0.00106502,
+        "discordant": 37,
+        "p_value": 0.00256321,
         "significant_at_95": true,
         "method": "exact binomial (McNemar)",
         "input_identical": false,
         "note": "the two systems did not receive identical input for every compared case; see dataset.messages in SCHEMA.md"
       },
-      "paired_all_cases_description": "heuristic wins 9, tfidf_logistic_regression_holdout wins 30 on 39 discordant cases: significant (p=0.0011) [input differed on some cases]",
+      "paired_all_cases_description": "heuristic wins 9, tfidf_logistic_regression_holdout wins 28 on 37 discordant cases: significant (p=0.0026) [input differed on some cases]",
       "proportion_comparisons_omitted": "tfidf_logistic_regression_holdout evaluates 98 of 391 cases, so its subsets are nested inside the heuristic's rather than independent. An unpaired proportion test on nested samples would overstate significance; the paired test above is the valid comparison."
     },
     "heuristic.clear_vs_ambiguous": {
@@ -8560,15 +8558,15 @@
         "a": {
           "name": "heuristic.clear",
           "n": 277,
-          "correct": 153,
-          "incorrect": 124,
-          "value": 0.552347,
+          "correct": 156,
+          "incorrect": 121,
+          "value": 0.563177,
           "defined": true,
           "wilson_95": {
             "confidence": 0.95,
             "z": 1.959964,
-            "lower": 0.49347,
-            "upper": 0.609791,
+            "lower": 0.504298,
+            "upper": 0.620328,
             "defined": true
           }
         },
@@ -8587,15 +8585,15 @@
             "defined": true
           }
         },
-        "difference": 0.078662,
-        "difference_ci_lower": -0.029733,
-        "difference_ci_upper": 0.18484,
-        "p_value": 0.15668929,
+        "difference": 0.089493,
+        "difference_ci_lower": -0.018905,
+        "difference_ci_upper": 0.195512,
+        "p_value": 0.10675667,
         "significant_at_95": false,
         "method": "Newcombe hybrid score interval + pooled two-proportion z-test",
         "note": ""
       },
-      "description": "heuristic.clear 55.2% vs heuristic.ambiguous 47.4%: difference +7.9% [-3.0%, +18.5%], not significant (p=0.1567)"
+      "description": "heuristic.clear 56.3% vs heuristic.ambiguous 47.4%: difference +8.9% [-1.9%, +19.6%], not significant (p=0.1068)"
     }
   },
   "gates": {

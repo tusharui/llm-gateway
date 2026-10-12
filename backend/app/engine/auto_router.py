@@ -78,7 +78,7 @@ def classify_complexity(messages: list) -> str:
         r"\bstory\b", r"\bcreativ\w*\b", r"\bnarrativ\w*\b", r"\bpoem\b",
         r"\brecommend\w*\b", r"\bmath\w*\b", r"\bequation\b", r"\bformula\w*\b",
         r"\bcalculat\w*\b", r"\bsolve\b", r"\bstrateg\w*\b", r"\broadmap\b",
-        r"\bplan\w*\b", r"\btips?\b", r"\badvice\b", r"\bimprove\w*\b",
+        r"\bplans?\b|\bplanning\b|\bplanned\b", r"\btips?\b", r"\badvice\b", r"\bimprove\w*\b",
         r"\bsuggest\w*\b",
     ]
     for pattern in complex_keywords:
