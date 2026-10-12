@@ -80,6 +80,10 @@ def classify_complexity(messages: list) -> str:
         r"\bcalculat\w*\b", r"\bsolve\b", r"\bstrateg\w*\b", r"\broadmap\b",
         r"\bplans?\b|\bplanning\b|\bplanned\b", r"\btips?\b", r"\badvice\b", r"\bimprove\w*\b",
         r"\bsuggest\w*\b",
+        # Real work verbs the list was missing. Failure mode 2 in
+        # evals/ERROR_ANALYSIS.md: 'howto' scored 0/8 because nothing here
+        # matched a request for instructions.
+        r"\bsummari[sz]\w*\b", r"\bcondens\w*\b", r"\bhow do i\b",
     ]
     for pattern in complex_keywords:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
