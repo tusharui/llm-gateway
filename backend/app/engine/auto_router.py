@@ -70,6 +70,34 @@ SIMPLE_PATTERNS = [
     r"^(1|2|3|4|5|6|7|8|9|10)\s*$",
 ]
 
+# Nouns that name a concrete thing to produce. `poem`, `story`, `essay` and
+# `article` are already standalone keywords above and are deliberately absent
+# here, so they cannot be counted twice.
+ARTIFACT_NOUNS = (
+    r"function|script|query|migration|endpoint|hook|component|class|module|"
+    r"tests?|program|algorithm|parser|implementation|lambda|regex|api|"
+    r"server|plugin|extension|worker|pipeline|schema|boilerplate|"
+    r"screenplay|scene"
+)
+
+# A request to produce a named artifact is decisive on its own, and is worth
+# more than any other single signal here. Evidence, not taste: with this
+# family weighted +2 it recovered 1 case, because "write a <artifact>" is a
+# ~70-character prompt scoring 1 from length alone and 1 + 2 = 3 is still
+# balanced. Weighted +4 it recovers 13 and breaks 0. Weights 5 and above are
+# worse: they push "Write the migration." -- genuinely under-specified -- into
+# powerful. The gap between +2 and +5 is the whole finding: the old score
+# demanded several independent signals, so no single decisive one could reach
+# the powerful threshold.
+#
+# `[^.?!]{0,40}?` lets modifiers sit between the article and the noun ("a
+# debounce function", "a Postgres migration", "a semver-aware release
+# script") without letting the match run across a sentence boundary.
+CONSTRUCTION_PATTERNS = [
+    rf"\b(?:write|build|create|draft|generate)\b[^.?!]{{0,40}}?\b(?:{ARTIFACT_NOUNS})\b",
+]
+CONSTRUCTION_WEIGHT = 4
+
 # Score at or above which a prompt goes to the most capable tier.
 POWERFUL_THRESHOLD = 5
 BALANCED_THRESHOLD = 2
@@ -133,6 +161,10 @@ def complexity_score(messages: list) -> int:
     for pattern in COMPLEX_PHRASES:
         if re.search(pattern, last_user_msg, re.IGNORECASE):
             score += 2
+
+    for pattern in CONSTRUCTION_PATTERNS:
+        if re.search(pattern, last_user_msg, re.IGNORECASE):
+            score += CONSTRUCTION_WEIGHT
 
     for pattern in SIMPLE_PATTERNS:
         if re.match(pattern, last_user_msg.strip(), re.IGNORECASE):
