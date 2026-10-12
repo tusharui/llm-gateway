@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-12T05:48:25.459113+00:00",
+  "generated_at": "2026-10-12T05:54:36.147272+00:00",
   "environment": {
     "python_version": "3.12.7",
     "python_implementation": "CPython",
     "platform": "windows",
     "executable_name": "python.exe",
-    "git_commit": "2337fcbb6dc4e3e59d128a6182813ee2d945ae21",
+    "git_commit": "e997eacd9b2aaf845a97d778b41c8a78f6744aee",
     "sklearn_version": "1.9.0"
   },
   "dataset": {
@@ -125,7 +125,9 @@
     "warning_count": 2
   },
   "configuration": {
-    "argv": [],
+    "argv": [
+      "--quiet"
+    ],
     "confidence": 0.95,
     "dataset": "evals/golden",
     "difficulties": [
