@@ -61,6 +61,8 @@ TABLES = (
     "chat_sessions",
     "cached_responses",
     "api_keys",
+    "users",
+    "auth_sessions",
 )
 
 

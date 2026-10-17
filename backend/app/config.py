@@ -79,6 +79,27 @@ class Settings(BaseSettings):
     )
     log_level: str = Field(default="info")
 
+    # Dashboard user accounts (/auth). Separate from the API-key auth in
+    # middleware/auth.py: a key authenticates a program, a session cookie
+    # authenticates a person in a browser.
+    #
+    # allow_registration defaults true for local development. On a public
+    # deployment set it false and create accounts with:
+    #     python -m scripts.create_user --email you@example.com --admin
+    # Self-service signup otherwise means anyone who finds the URL gets an
+    # account that can spend the owner's provider balance via the dashboard.
+    #
+    # trust_forwarded_for is off because X-Forwarded-For is attacker-
+    # controlled: trusting it unconditionally makes the per-IP login limiter
+    # free to bypass. Enable only behind a proxy that overwrites the header.
+    session_cookie_name: str = Field(default="gw_session")
+    session_ttl_seconds: int = Field(default=604800)
+    allow_registration: bool = Field(default=True)
+    password_hash_iterations: int = Field(default=600_000)
+    auth_rate_limit_max: int = Field(default=10)
+    auth_rate_limit_window_ms: int = Field(default=60000)
+    trust_forwarded_for: bool = Field(default=False)
+
     # CORS. The gateway authenticates with a bearer token, never a cookie, so
     # it has no business reflecting arbitrary origins with credentials
     # enabled. Starlette treats allow_origins=["*"] together with

@@ -10,6 +10,7 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) Â· [API docs](h
 - **Multi-provider failover** â€” circuit breakers + per-request failover chain, so a dead provider never breaks a request. Every `(provider, model)` pair in a chain is checked against that provider's configured model list, so failover never spends a round-trip on a guaranteed 404.
 - **Semantic + exact caching** â€” similar prompts return cached answers; cache savings are surfaced as dollars in analytics.
 - **Auth + rate limiting** â€” per-key rate limits and `Bearer sk-gateway-*` API keys enforced by middleware. Key management (`/api-keys`) and billing (`/analytics`) require the **operator** key specifically, not merely any valid key. Authentication **fails closed** when the key store is unreachable.
+- **Dashboard accounts** â€” email/password sign-in backed by the same Postgres, sessions in an `HttpOnly` cookie. Passwords are PBKDF2-HMAC-SHA256 (600k iterations, stdlib); session tokens are stored as SHA-256 digests, so a database leak yields no usable credential. Separate from the API-key auth: a key authenticates a program, a session authenticates a person, and neither stands in for the other. Analytics is admin-only (`is_admin`).
 - **Cost analytics** â€” per-model / per-provider usage, spend, cache savings, latency, and request history.
 - **Observability** â€” every request carries a correlatable `X-Request-ID` and structured JSON logs.
 - **One error envelope** â€” every failure, including validation, 404 and 405, returns `{"error": {...}}` in the OpenAI error shape.
@@ -31,11 +32,12 @@ Deployed live: [frontend](https://llm-gateway-ecru.vercel.app) Â· [API docs](h
 ```
 backend/
   app/
+    security.py   PBKDF2 password hashing, session tokens, auth dependencies
     middleware/   auth, rate limit, request-ID logging, error handler
     engine/       auto-router, failover, circuit breaker, retry
     cache/        exact + semantic caching
     providers/    Groq, Gemini, OpenRouter adapters
-    routes/       chat, embeddings, batch, analytics, chat history
+    routes/       chat, embeddings, batch, analytics, chat history, auth
   evals/
     golden/       391 labelled routing cases (clear / ambiguous, adversarial, multi-turn)
     dataset.py    schema, fail-loud validation, content fingerprint
@@ -90,6 +92,13 @@ Tables are **not** created by the app. Alembic owns the schema: run `python -m a
 | `CORS_ALLOW_ORIGINS` | *(empty)* | Comma-separated browser origins. Empty = CORS disabled, which is correct when the dashboard calls the API server-side |
 | `WS_MAX_MESSAGE_BYTES` | `65536` | Max inbound websocket frame; keep in sync with uvicorn `--ws-max-size` |
 | `WS_MAX_CONNECTIONS_PER_KEY` | `8` | Max simultaneous websocket connections per key |
+| `SESSION_COOKIE_NAME` | `gw_session` | Name of the dashboard session cookie |
+| `SESSION_TTL_SECONDS` | `604800` | Session lifetime. Set on both the cookie `Max-Age` and `auth_sessions.expires_at` |
+| `ALLOW_REGISTRATION` | `true` | Set `false` in production so accounts are created with `scripts/create_user` |
+| `PASSWORD_HASH_ITERATIONS` | `600000` | PBKDF2 cost. Stored inside each hash, so raising it rehashes on next login |
+| `AUTH_RATE_LIMIT_MAX` | `10` | Login/register attempts per IP per window |
+| `AUTH_RATE_LIMIT_WINDOW_MS` | `60000` | Window for the above |
+| `TRUST_FORWARDED_FOR` | `false` | Use `X-Forwarded-For` for the per-IP bucket. Enable only behind a proxy that overwrites the header |
 
 ### Frontend (`frontend/.env.local`)
 

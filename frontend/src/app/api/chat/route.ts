@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { newRequestId, proxyHeaders, responseHeaders, errorHeaders } from "../_proxy";
+import { requireUser } from "../_session";
 
 const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
 const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY || "sk-gateway-dev-key";
 
 export async function POST(request: NextRequest) {
+  const denied = await requireUser();
+  if (denied) return denied;
+
   const body = await request.json();
   const requestId = newRequestId();
 

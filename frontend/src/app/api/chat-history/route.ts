@@ -1,13 +1,17 @@
 import { forward } from "../_auth";
+import { requireUser } from "../_session";
 
-// `/chat-history` requires authentication on the gateway: conversation
-// transcripts are user data, not a public resource. The proxy injects the
-// operator key server-side so the browser never holds a credential.
 export async function GET(request: Request) {
+  const denied = await requireUser();
+  if (denied) return denied;
+
   return forward(request, "/chat-history/sessions");
 }
 
 export async function POST(request: Request) {
+  const denied = await requireUser();
+  if (denied) return denied;
+
   const body = await request.json().catch(() => ({}));
   return forward(request, "/chat-history/sessions", {
     method: "POST",

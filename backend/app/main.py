@@ -46,6 +46,7 @@ from app.routes.analytics import router as analytics_router
 from app.routes.websocket import router as ws_router
 from app.routes.chat_history import router as chat_history_router
 from app.routes.health import router as health_router
+from app.routes.auth import router as auth_router
 
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.INFO),
@@ -146,6 +147,12 @@ app.include_router(analytics_router)
 app.include_router(ws_router)
 app.include_router(chat_history_router)
 app.include_router(health_router)
+
+# Dashboard user auth (cookie sessions). Registered outside AUTH_PREFIXES in
+# middleware/auth.py on purpose: /auth/login cannot require a bearer token,
+# because the token is what it is trying to issue. That makes these the only
+# public routes in the app.
+app.include_router(auth_router)
 
 
 if __name__ == "__main__":

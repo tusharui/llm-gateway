@@ -9,7 +9,7 @@ venv/
 *.db
 .pytest_cache/
 .mypy_cache/
-
+.env.example
 # Redacted but unlabelled candidates derived from real production traffic.
 # Labelled cases go in evals/golden/ where they are reviewed like anything else.
 evals/production/*.staged.jsonl

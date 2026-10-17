@@ -4,19 +4,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { signOut } from "@/app/actions/auth";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: <DashboardIcon /> },
-  { href: "/chat", label: "Chat", icon: <ChatIcon /> },
-  { href: "/models", label: "Models", icon: <ModelsIcon /> },
-  { href: "/analytics", label: "Analytics", icon: <AnalyticsIcon /> },
-];
-
-export default function Sidebar() {
+export default function Sidebar({
+  email,
+  isAdmin,
+}: {
+  email: string;
+  isAdmin: boolean;
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
+
+  const navItems = [
+    { href: "/", label: "Dashboard", icon: <DashboardIcon /> },
+    { href: "/chat", label: "Chat", icon: <ChatIcon /> },
+    { href: "/models", label: "Models", icon: <ModelsIcon /> },
+    ...(isAdmin
+      ? [{ href: "/analytics", label: "Analytics", icon: <AnalyticsIcon /> }]
+      : []),
+  ];
 
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
@@ -29,6 +38,10 @@ export default function Sidebar() {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  function signOutUser() {
+    signOut();
+  }
 
   if (isMobile) {
     return (
@@ -57,7 +70,13 @@ export default function Sidebar() {
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 className="fixed left-0 top-0 h-full w-64 border-r border-white/10 bg-black z-50 flex flex-col"
               >
-                <SidebarContent pathname={pathname} onClose={() => setMobileOpen(false)} />
+                <SidebarContent
+                  pathname={pathname}
+                  navItems={navItems}
+                  email={email}
+                  onSignOut={signOutUser}
+                  onClose={() => setMobileOpen(false)}
+                />
               </motion.aside>
             </>
           )}
@@ -71,14 +90,33 @@ export default function Sidebar() {
       initial={{ x: -264 }}
       animate={{ x: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="fixed left-0 top-0 h-full w-64 border-r border-white/10 bg-black flex flex-col hidden md:flex"
+      className="fixed left-0 top-0 h-full w-64 border-r border-white/10 bg-black flex-col hidden md:flex"
     >
-      <SidebarContent pathname={pathname} />
+      <SidebarContent
+        pathname={pathname}
+        navItems={navItems}
+        email={email}
+        onSignOut={signOutUser}
+      />
     </motion.aside>
   );
 }
 
-function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {
+type NavItem = { href: string; label: string; icon: React.ReactNode };
+
+function SidebarContent({
+  pathname,
+  navItems,
+  email,
+  onSignOut,
+  onClose,
+}: {
+  pathname: string;
+  navItems: NavItem[];
+  email: string;
+  onSignOut: () => void;
+  onClose?: () => void;
+}) {
   return (
     <>
       <motion.div
@@ -135,17 +173,23 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
         })}
       </nav>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="p-4 border-t border-white/10"
-      >
-        <div className="flex items-center gap-3 px-4 py-3 text-sm text-zinc-500">
-          <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+      <div className="p-4 border-t border-white/10 space-y-3">
+        <div className="flex items-center gap-3 px-4 py-2 text-sm text-zinc-500">
+          <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
           System Online
         </div>
-      </motion.div>
+        <div className="px-4">
+          <p className="text-xs text-zinc-600 truncate" title={email}>
+            {email}
+          </p>
+          <button
+            onClick={onSignOut}
+            className="mt-2 px-3 py-1.5 border border-white/20 text-xs text-zinc-300 hover:bg-white hover:text-black transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
     </>
   );
 }

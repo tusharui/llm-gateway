@@ -1,8 +1,15 @@
-/**
- * Backend API contract (mirrors backend OpenAPI schema).
- * Source of truth: `backend/openapi.json` — regenerate with:
- *   cd backend && python -m scripts.export_openapi
- */
+export interface SessionUser {
+  id: string;
+  email: string;
+  is_active: boolean;
+  is_admin: boolean;
+  created_at: string | null;
+  last_login_at: string | null;
+}
+
+export interface AuthResponse {
+  user: SessionUser;
+}
 
 export interface AnalyticsSummary {
   total_requests: number;

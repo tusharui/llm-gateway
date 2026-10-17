@@ -7,7 +7,7 @@ import type {
   ModelUsageResponse,
   ProviderUsageResponse,
   RecentRequestRow,
-} from "../../types/backend";
+} from "@/types/backend";
 
 interface RecentRequest extends RecentRequestRow {
   status: string;
