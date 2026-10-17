@@ -85,7 +85,7 @@ def stub_stream(monkeypatch, chunks=None, boom=False):
         def model_dump(self):
             return {"content": self._text}
 
-    async def fake_stream(req):
+    async def fake_stream(req, preferred_provider=None, allow_unlisted_model=False):
         if boom:
             raise RuntimeError("provider exploded")
         for text in chunks or ["hello"]:
@@ -653,7 +653,7 @@ def test_logged_detail_is_redacted(monkeypatch, caplog):
 
     import app.routes.websocket as ws_module
 
-    async def failing_failover(req):
+    async def failing_failover(req, preferred_provider=None, allow_unlisted_model=False):
         raise RuntimeError("failed with https://x/?key=sk-abcdef0123456789abcdef")
 
     monkeypatch.setattr(ws_module, "route_with_failover", failing_failover)
@@ -680,7 +680,7 @@ def test_provider_failure_gives_the_client_a_generic_reason(monkeypatch):
 
     import app.routes.websocket as ws_module
 
-    async def failing_failover(req):
+    async def failing_failover(req, preferred_provider=None, allow_unlisted_model=False):
         raise RuntimeError("provider https://internal.example/?key=sk-abcdef0123456789abcdef")
 
     monkeypatch.setattr(ws_module, "route_with_failover", failing_failover)
@@ -707,7 +707,7 @@ def test_streaming_error_falls_back_to_failover(monkeypatch):
         def model_dump(self):
             return {"content": "from failover"}
 
-    async def fake_failover(req):
+    async def fake_failover(req, preferred_provider=None, allow_unlisted_model=False):
         return Result(), "groq"
 
     monkeypatch.setattr(ws_module, "route_with_failover", fake_failover)

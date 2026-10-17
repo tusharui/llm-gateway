@@ -42,7 +42,7 @@ def build_app() -> FastAPI:
 
 
 def test_stream_records_usage(recorded):
-    async def fake_stream(req, preferred_provider=None):
+    async def fake_stream(req, preferred_provider=None, allow_unlisted_model=False):
         yield _frame("Hel")
         yield _frame("lo")
         yield _frame("", Usage(prompt_tokens=11, completion_tokens=2, total_tokens=13))
@@ -71,7 +71,7 @@ def test_stream_records_usage(recorded):
 
 
 def test_stream_records_failure(recorded):
-    async def fake_stream(req, preferred_provider=None):
+    async def fake_stream(req, preferred_provider=None, allow_unlisted_model=False):
         yield _frame("partial")
         raise RuntimeError("provider exploded")
 
@@ -92,7 +92,7 @@ def test_auto_model_is_rewritten_before_dispatch(monkeypatch):
     """Providers receive a concrete model id, never the literal string "auto"."""
     seen: list[str] = []
 
-    async def fake_stream(req, preferred_provider=None):
+    async def fake_stream(req, preferred_provider=None, allow_unlisted_model=False):
         seen.append(req.model)
         yield _frame("ok", Usage(prompt_tokens=1, completion_tokens=1, total_tokens=2))
 

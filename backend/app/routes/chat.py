@@ -47,23 +47,49 @@ def _record_usage_async(api_key_id: str, data: dict) -> None:
     task.add_done_callback(_pending_writes.discard)
 
 
-def resolve_route(req: ChatRequest, available: list) -> tuple[str, str, str]:
+def resolve_route(req: ChatRequest, available: list) -> tuple[str, str, str, bool]:
+    """Resolve a request to (provider, model, reasoning, explicit).
+
+    `explicit` is True when the caller named the provider and that pair was
+    honoured, including for ids outside the configured routing list. The stream
+    and failover paths use it to let that provider serve the model rather than
+    dropping it from the chain for not being in cfg.models.
+    """
     cfg = settings.get_providers()
     requested = (req.model or "").strip()
 
     if requested.lower() not in ("auto", ""):
+        hint = (req.provider or "").strip()
+
+        if hint in cfg and requested in cfg[hint].models:
+            return hint, requested, f"Explicit model={requested} | provider={hint}", True
+
         for provider_name, provider_cfg in cfg.items():
             if requested in provider_cfg.models:
                 return (
                     provider_name,
                     requested,
                     f"Explicit model={requested} | provider={provider_name}",
+                    False,
                 )
+
+        # Not a configured routing id, so it used to be discarded and
+        # auto-routed instead. The dashboard's picker lists every model each
+        # provider serves, so a pick outside cfg.models is a real request for
+        # that provider -- honour it rather than silently answering with a
+        # different model.
+        if hint in {p.name for p in available}:
+            return (
+                hint,
+                requested,
+                f"Explicit model={requested} | provider={hint} | from provider catalog",
+                True,
+            )
 
     provider_name, model_id, reasoning = auto_route(req, available)
     if requested.lower() not in ("auto", ""):
         reasoning = f"Unknown model '{requested}' -> {reasoning}"
-    return provider_name, model_id, reasoning
+    return provider_name, model_id, reasoning, False
 
 
 async def track_usage(api_key_id: str, data: dict):
@@ -103,7 +129,9 @@ async def chat_endpoint(req: ChatRequest, request: Request):
 
     # --- Auto-route: classify complexity and pick optimal model ---
     available = get_available_providers()
-    chosen_provider, chosen_model, routing_reasoning = resolve_route(req, available)
+    chosen_provider, chosen_model, routing_reasoning, explicit_request = resolve_route(
+        req, available
+    )
 
     effective_model = chosen_model
     effective_provider_name = chosen_provider
@@ -173,7 +201,9 @@ async def chat_endpoint(req: ChatRequest, request: Request):
             model_used = effective_model
             try:
                 async for chunk in route_chat_stream(
-                    req, preferred_provider=effective_provider_name
+                    req,
+                    preferred_provider=effective_provider_name,
+                    allow_unlisted_model=explicit_request,
                 ):
                     token_counter += 1
                     provider_used = chunk.provider
@@ -220,7 +250,9 @@ async def chat_endpoint(req: ChatRequest, request: Request):
         )
     except Exception:
         result, provider_used = await route_with_failover(
-            req, preferred_provider=effective_provider_name
+            req,
+            preferred_provider=effective_provider_name,
+            allow_unlisted_model=explicit_request,
         )
 
     duration = int((time.perf_counter() - start) * 1000)

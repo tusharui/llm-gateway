@@ -438,16 +438,23 @@ async def _handle_turn(websocket: WebSocket, raw: str) -> None:
     # helper the HTTP path calls, so the two transports cannot disagree about
     # which model a prompt gets.
     routing_reasoning: str | None = None
+    explicit_request = False
     try:
         available = get_available_providers()
-        provider_name, model_id, routing_reasoning = resolve_route(req, available)
+        provider_name, model_id, routing_reasoning, explicit_request = resolve_route(
+            req, available
+        )
         req.model = model_id
     except Exception as exc:  # noqa: BLE001 - reported to the client, not swallowed
         await websocket.send_json(_validation_error("Cannot route request", exc))
         return
 
     try:
-        async for chunk in route_chat_stream(req):
+        async for chunk in route_chat_stream(
+            req,
+            preferred_provider=provider_name,
+            allow_unlisted_model=explicit_request,
+        ):
             await websocket.send_json(chunk.model_dump())
     except Exception as exc:  # noqa: BLE001 - the stream fails, then failover runs
         logger.warning("stream failed, attempting failover: %s", redact_error(exc))

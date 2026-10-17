@@ -16,6 +16,7 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     model: str = Field(min_length=1)
+    provider: Optional[str] = None
     messages: List[ChatMessage] = Field(min_length=1)
     stream: bool = False
     temperature: Optional[float] = Field(None, ge=0, le=2)

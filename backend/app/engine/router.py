@@ -57,7 +57,9 @@ def pick_provider(model: str, preferred_provider: str | None = None) -> AIProvid
 
 
 def failover_chain(
-    model: str, preferred_provider: str | None = None
+    model: str,
+    preferred_provider: str | None = None,
+    allow_unlisted_model: bool = False,
 ) -> list[tuple[AIProvider, str]]:
     """Ordered (provider, model) attempts: routed provider first, then substitutes."""
     available = get_available_providers()
@@ -79,7 +81,13 @@ def failover_chain(
             # that named a provider which does not serve the model got a chain
             # that opened with a guaranteed 404 and burned the first failover
             # attempt before reaching anyone who could have answered.
-            if model in cfg[p.name].models:
+            #
+            # allow_unlisted_model is the caller vouching for the pairing: the
+            # model came out of that provider's own GET /models catalogue, which
+            # is far larger than the routing list in config. Without it a client
+            # that picked one of those models got a chain that omitted the
+            # provider it had explicitly asked for.
+            if allow_unlisted_model or model in cfg[p.name].models:
                 plan.append((p, model))
             continue
 
@@ -137,9 +145,11 @@ async def route_chat(
 
 
 async def route_chat_stream(
-    req: ChatRequest, preferred_provider: str | None = None
+    req: ChatRequest,
+    preferred_provider: str | None = None,
+    allow_unlisted_model: bool = False,
 ) -> AsyncGenerator[StreamChunk, None]:
-    chain = failover_chain(req.model, preferred_provider)
+    chain = failover_chain(req.model, preferred_provider, allow_unlisted_model)
     if not chain:
         raise Exception("All providers are in cooldown")
 

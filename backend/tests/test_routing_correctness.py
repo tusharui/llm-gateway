@@ -27,7 +27,7 @@ from fastapi.testclient import TestClient
 
 from app.config import settings
 from app.engine import circuit_breaker as cb
-from app.engine.auto_router import alternate_model, tier_for_model
+from app.engine.auto_router import alternate_model, auto_route, tier_for_model
 from app.engine.retry import with_retry
 from app.middleware.auth import rate_limit_store
 from app.providers.interface import AIProvider
@@ -229,6 +229,73 @@ def test_unknown_model_falls_back_to_providers_serving_it_verbatim(registry):
         assert model in cfg[provider.name].models
 
 
+def test_explicit_provider_is_honoured_for_a_catalog_model(registry):
+    """A (provider, model) pair from GET /models routes as asked.
+
+    The dashboard's picker lists every model each provider serves -- several
+    hundred on OpenRouter -- while cfg.models holds a dozen routing ids. A pick
+    outside that list used to be discarded and auto-routed somewhere else, so
+    the picker appeared to do nothing.
+    """
+    from app.engine.router import failover_chain
+    from app.routes.chat import resolve_route
+
+    install(registry, **{name: Recording(name) for name in ALL_PROVIDERS})
+    available = [Recording(name) for name in ALL_PROVIDERS]
+    catalog_only = "someorg/some-model-only-in-the-live-catalog"
+
+    req = ChatRequest(
+        model=catalog_only,
+        provider="openrouter",
+        messages=[{"role": "user", "content": "hi"}],
+    )
+    provider, model, _reasoning, explicit = resolve_route(req, available)
+    assert (provider, model) == ("openrouter", catalog_only)
+    assert explicit is True
+
+    chain = failover_chain(model, provider, allow_unlisted_model=True)
+    assert chain, "explicit pair produced an empty chain"
+    assert (chain[0][0].name, chain[0][1]) == ("openrouter", catalog_only)
+
+
+def test_explicit_provider_is_ignored_when_the_pair_is_unknown(registry):
+    """A provider that is not registered must not be trusted with the request."""
+    from app.routes.chat import resolve_route
+
+    install(registry, **{name: Recording(name) for name in ALL_PROVIDERS})
+    available = [Recording(name) for name in ALL_PROVIDERS]
+
+    req = ChatRequest(
+        model="some/model-nobody-hosts",
+        provider="not-a-provider",
+        messages=[{"role": "user", "content": "hi"}],
+    )
+    provider, model, reasoning, explicit = resolve_route(req, available)
+
+    assert provider in ALL_PROVIDERS
+    assert model in settings.get_providers()[provider].models
+    assert reasoning.startswith("Unknown model")
+    assert explicit is False
+
+
+def test_explicit_provider_does_not_change_auto(registry):
+    """model=auto still auto-routes, even with a provider attached."""
+    from app.routes.chat import resolve_route
+
+    install(registry, **{name: Recording(name) for name in ALL_PROVIDERS})
+    available = [Recording(name) for name in ALL_PROVIDERS]
+
+    req = ChatRequest(
+        model="auto",
+        provider="openrouter",
+        messages=[{"role": "user", "content": "hi"}],
+    )
+    provider, model, _reasoning, explicit = resolve_route(req, available)
+
+    assert (provider, model) == auto_route(req, available)[:2]
+    assert explicit is False
+
+
 # --- F4: one client request is one breaker failure ---------------------------
 
 
@@ -418,7 +485,7 @@ def test_websocket_never_sends_the_literal_auto(registry, monkeypatch):
     install(registry, **{name: Recording(name) for name in ALL_PROVIDERS})
     seen: list[str] = []
 
-    async def fake_stream(req, preferred_provider=None):
+    async def fake_stream(req, preferred_provider=None, allow_unlisted_model=False):
         seen.append(req.model)
         from app.schemas import StreamChunk
 
@@ -457,7 +524,7 @@ def test_websocket_routes_a_long_proof_to_a_stronger_model(registry, monkeypatch
     install(registry, **{name: Recording(name) for name in ALL_PROVIDERS})
     seen: list[str] = []
 
-    async def fake_stream(req, preferred_provider=None):
+    async def fake_stream(req, preferred_provider=None, allow_unlisted_model=False):
         seen.append(req.model)
         from app.schemas import StreamChunk
 

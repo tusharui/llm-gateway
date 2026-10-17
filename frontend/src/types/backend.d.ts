@@ -91,6 +91,13 @@ export interface ChatSession {
   updated_at: string | null;
 }
 
+export interface ChatRequestBody {
+  model: string;
+  provider?: string;
+  messages: ChatMessage[];
+  stream?: boolean;
+}
+
 export interface ChatSessionListResponse {
   sessions: ChatSession[];
 }

@@ -39,7 +39,7 @@ export default function ChatPage() {
   const [allModels, setAllModels] = useState<ModelItem[]>([]);
   const [modelSearch, setModelSearch] = useState("");
   const [showModelDropdown, setShowModelDropdown] = useState(false);
-  const [autoRoute, setAutoRoute] = useState(true);
+  const [autoRoute, setAutoRoute] = useState(false);
   const [liveTokenCount, setLiveTokenCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modelDropdownRef = useRef<HTMLDivElement>(null);
@@ -173,12 +173,14 @@ export default function ChatPage() {
     if (session) {
       setProvider(session.provider || "groq");
       setModel(session.model || "openai/gpt-oss-120b");
+      setAutoRoute(false);
     }
   };
 
   const selectModel = (m: ModelItem) => {
     setModel(m.id);
     setProvider(m.provider);
+    setAutoRoute(false);
     setShowModelDropdown(false);
     setModelSearch("");
   };
@@ -289,6 +291,7 @@ export default function ChatPage() {
         headers,
         body: JSON.stringify({
           model: autoRoute ? "auto" : model,
+          provider: autoRoute ? undefined : provider,
           messages: allMessages,
           stream: true,
         }),
@@ -513,62 +516,87 @@ export default function ChatPage() {
               >
                 EXPORT
               </button>
-              <button
-                onClick={() => setAutoRoute(!autoRoute)}
-                className={`text-[10px] sm:text-xs px-2 py-1 border transition-colors ${
-                  autoRoute ? "border-white/40 text-white bg-white/10" : "border-white/10 text-zinc-500"
-                }`}
-              >
-                {autoRoute ? "AUTO" : "MANUAL"}
-              </button>
               <div className="relative" ref={modelDropdownRef}>
                 <button
                   onClick={() => setShowModelDropdown(!showModelDropdown)}
-                  disabled={autoRoute}
-                  className={`bg-black border px-2 sm:px-3 py-1.5 text-sm focus:outline-none focus:border-white/50 text-left min-w-0 sm:min-w-[280px] flex items-center justify-between gap-2 transition-colors ${
-                    autoRoute ? "border-white/5 text-zinc-600 cursor-not-allowed" : "border-white/20"
-                  }`}
+                  className="bg-black border border-white/20 px-2 sm:px-3 py-1.5 text-sm focus:outline-none focus:border-white/50 text-left min-w-0 sm:min-w-[280px] flex items-center justify-between gap-2 transition-colors"
                 >
                   <span className="truncate font-mono text-xs">
-                    <span className="text-zinc-500">{provider}/</span>{model}
+                    {autoRoute ? (
+                      <span className="text-white">auto</span>
+                    ) : (
+                      <>
+                        <span className="text-zinc-500">{provider}/</span>
+                        {model}
+                      </>
+                    )}
                   </span>
-                  <span className="text-zinc-600 text-xs">â–¼</span>
+                  <span className="text-zinc-600 text-xs">▼</span>
                 </button>
                 <AnimatePresence>
-                  {showModelDropdown && !autoRoute && (
+                  {showModelDropdown && (
                     <motion.div
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-1 w-[90vw] sm:w-[400px] max-w-[400px] bg-black border border-white/20 z-50 max-h-[60vh] sm:max-h-[400px] flex flex-col"
+                      className="absolute right-0 top-full mt-1 w-[90vw] sm:w-[420px] max-w-[420px] bg-black border border-white/20 z-50 max-h-[70vh] sm:max-h-[480px] flex flex-col shadow-2xl"
                     >
                       <div className="p-2 border-b border-white/10">
                         <input
                           type="text"
-                          placeholder="Search models..."
+                          placeholder={`Search ${allModels.length} models...`}
                           value={modelSearch}
                           onChange={(e) => setModelSearch(e.target.value)}
                           className="w-full bg-transparent border border-white/10 px-3 py-1.5 text-sm focus:outline-none focus:border-white/50"
                           autoFocus
                         />
                       </div>
+                      <div className="px-3 py-1.5 border-b border-white/10 text-[10px] text-zinc-600 flex items-center justify-between">
+                        <span>{filteredModels.length} models</span>
+                        {modelSearch && (
+                          <button
+                            onClick={() => setModelSearch("")}
+                            className="hover:text-white transition-colors"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
                       <div className="overflow-y-auto flex-1">
+                        <button
+                          onClick={() => {
+                            setAutoRoute(true);
+                            setShowModelDropdown(false);
+                            setModelSearch("");
+                          }}
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors flex items-center justify-between ${
+                            autoRoute ? "bg-white/10" : ""
+                          }`}
+                        >
+                          <span className="text-xs font-mono">auto</span>
+                          <span className="text-[10px] text-zinc-500 ml-2 shrink-0 uppercase">
+                            smart routing
+                          </span>
+                        </button>
                         {filteredModels.length === 0 ? (
                           <div className="p-3 text-sm text-zinc-600 text-center">No models found</div>
                         ) : (
                           filteredModels.map((m) => (
-                            <motion.button
+                            <button
                               key={`${m.provider}/${m.id}`}
-                              whileHover={{ x: 4 }}
                               onClick={() => selectModel(m)}
-                              className={`w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors flex items-center justify-between ${
-                                model === m.id && provider === m.provider ? "bg-white/10" : ""
+                              className={`w-full text-left px-3 py-1.5 text-sm hover:bg-white/10 transition-colors flex items-center justify-between gap-2 ${
+                                !autoRoute && model === m.id && provider === m.provider
+                                  ? "bg-white/10"
+                                  : ""
                               }`}
                             >
                               <span className="font-mono text-xs truncate">{m.id}</span>
-                              <span className="text-xs text-zinc-500 ml-2 shrink-0">{m.provider}</span>
-                            </motion.button>
+                              <span className="text-[10px] text-zinc-500 shrink-0 uppercase">
+                                {m.provider}
+                              </span>
+                            </button>
                           ))
                         )}
                       </div>

@@ -10,7 +10,9 @@ from app.schemas import ChatRequest, ChatResponse
 
 
 async def route_with_failover(
-    req: ChatRequest, preferred_provider: str | None = None
+    req: ChatRequest,
+    preferred_provider: str | None = None,
+    allow_unlisted_model: bool = False,
 ) -> tuple[ChatResponse, str]:
     providers = get_available_providers()
     if not providers:
@@ -31,7 +33,7 @@ async def route_with_failover(
 
         provider_cfg = settings.get_providers()[provider.name]
         if provider.name == preferred_provider:
-            if original_model in provider_cfg.models:
+            if allow_unlisted_model or original_model in provider_cfg.models:
                 req.model = original_model
             else:
                 # The preferred provider does not serve this model. Asking it
